@@ -1,58 +1,41 @@
 import 'package:flutter/material.dart';
 
-/// App color palette
+/// App color palette based on the style guide
 class AppColors {
-  // Primary Colors
-  static const Color primary = Color(0xFF2C3E50);
-  static const Color primaryLight = Color(0xFF34495E);
-  static const Color primaryDark = Color(0xFF1A2530);
+  // Light theme colors
+  static const Color primary = Color(0xFFB87333);
+  static const Color secondary = Color(0xFFFFD700);
+  static const Color backgroundLight = Color(0xFFFAFAE6);
+  static const Color backgroundDark = Color(0xFFFFFDD0);
+  static const Color textPrimary = Color(0xFF2E2E2E);
+  static const Color textSecondary = Color(0xFF708090);
+  static const Color error = Color(0xFFE53E3E);
+  static const Color success = Color(0xFF38A169);
   
-  // Accent Colors
-  static const Color accent = Color(0xFF3498DB);
-  static const Color accentLight = Color(0xFF5DADE2);
-  static const Color accentDark = Color(0xFF2980B9);
+  // Dark theme colors
+  static const Color darkBackground = Color(0xFF1A202C);
+  static const Color darkCard = Color(0xFF2D3748);
+  static const Color darkTextPrimary = Color(0xFFEDF2F7);
   
-  // Secondary Colors
-  static const Color secondary = Color(0xFF27AE60);
-  static const Color secondaryLight = Color(0xFF2ECC71);
-  static const Color secondaryDark = Color(0xFF219653);
+  // Additional UI colors
+  static const Color white = Colors.white;
+  static const Color black = Colors.black;
+  static const Color grey = Color(0xFFE0E0E0);
+  static const Color lightGrey = Color(0xFFF5F5F5);
+  static const Color darkGrey = Color(0xFF757575);
+  static const Color transparent = Colors.transparent;
   
-  // Neutrals
-  static const Color background = Color(0xFFF5F5F5);
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color textPrimary = Color(0xFF2C3E50);
-  static const Color textSecondary = Color(0xFF7F8C8D);
-  static const Color divider = Color(0xFFBDC3C7);
+  // Status colors
+  static const Color warning = Color(0xFFF9A825);
+  static const Color info = Color(0xFF2196F3);
   
-  // Dark Mode
-  static const Color darkBackground = Color(0xFF121212);
-  static const Color darkSurface = Color(0xFF1E1E1E);
-  static const Color darkTextPrimary = Color(0xFFECF0F1);
-  static const Color darkTextSecondary = Color(0xFFBDC3C7);
-  static const Color darkDivider = Color(0xFF2C3E50);
-  
-  // Status Colors
-  static const Color success = Color(0xFF27AE60);
-  static const Color warning = Color(0xFFF39C12);
-  static const Color error = Color(0xFFE74C3C);
-  static const Color info = Color(0xFF3498DB);
-
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, primaryLight],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-  );
-  
-  static const LinearGradient accentGradient = LinearGradient(
-    colors: [accent, accentLight],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-  
-  static const LinearGradient successGradient = LinearGradient(
-    colors: [secondary, secondaryLight],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFFB87333),
+      Color(0xFFD4AF37),
+    ],
   );
 }

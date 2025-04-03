@@ -1,69 +1,66 @@
-/// Application-wide constants
+/// App constants
 class AppConstants {
-  // API URLs
-  static const String baseApiUrl = 'https://api.example.com';
-  static const String aiEndpoint = '$baseApiUrl/ai';
-  
-  // App Info
+  /// App name
   static const String appName = 'GBC CoachIA';
+  
+  /// App version
   static const String appVersion = '1.0.0';
-  static const String appDescription = 'Your AI business coach for entrepreneurs and freelancers';
   
-  // Feature Constants
-  static const int maxConversations = 10; // Max number of conversations for free tier
-  static const int maxTasksPerDay = 10; // Max tasks per day for free tier
-  static const int maxDocumentsPerMonth = 5; // Max documents for free tier
+  /// API URL
+  static const String apiUrl = 'https://api.gbccoachia.com';
   
-  // Error Messages
-  static const String generalErrorMessage = 'Something went wrong. Please try again.';
-  static const String networkErrorMessage = 'Network error. Please check your internet connection.';
-  static const String authErrorMessage = 'Authentication error. Please log in again.';
+  /// Shared preferences keys
+  static const String prefThemeMode = 'theme_mode';
+  static const String prefAuthToken = 'auth_token';
+  static const String prefUserId = 'user_id';
+  static const String prefUserName = 'user_name';
+  static const String prefUserEmail = 'user_email';
+  static const String prefUserAvatar = 'user_avatar';
+  static const String prefOnboardingCompleted = 'onboarding_completed';
   
-  // Shared Preferences Keys
-  static const String userTokenKey = 'user_token';
-  static const String userDataKey = 'user_data';
-  static const String themeModeKey = 'theme_mode';
-  static const String onboardingCompletedKey = 'onboarding_completed';
+  /// Hive box names
+  static const String boxSettings = 'settings';
+  static const String boxUser = 'user';
+  static const String boxConversations = 'conversations';
+  static const String boxTasks = 'tasks';
+  static const String boxTransactions = 'transactions';
+  static const String boxAccounts = 'accounts';
+  static const String boxCategories = 'categories';
   
-  // Animations
-  static const int animationDurationShort = 200; // milliseconds
-  static const int animationDurationMedium = 350; // milliseconds
-  static const int animationDurationLong = 500; // milliseconds
+  /// Default spacing
+  static const double spacingXXS = 4.0;
+  static const double spacingXS = 8.0;
+  static const double spacingS = 12.0;
+  static const double spacingM = 16.0;
+  static const double spacingL = 24.0;
+  static const double spacingXL = 32.0;
+  static const double spacingXXL = 48.0;
   
-  // UI Constants
-  static const double defaultPadding = 16.0;
-  static const double smallPadding = 8.0;
-  static const double largePadding = 24.0;
-  static const double defaultBorderRadius = 8.0;
-  static const double cardBorderRadius = 12.0;
-  static const double buttonBorderRadius = 8.0;
+  /// Default radius
+  static const double radiusXS = 4.0;
+  static const double radiusS = 8.0;
+  static const double radiusM = 12.0;
+  static const double radiusL = 16.0;
+  static const double radiusXL = 24.0;
+  static const double radiusXXL = 32.0;
   
-  // Feature Flags
-  static const bool enableOfflineMode = true;
-  static const bool enableAIFeatures = true;
-  static const bool enableAnalytics = true;
-  static const bool enableFinanceFeatures = true;
-  static const bool enableNotifications = true;
+  /// Default elevation
+  static const double elevationXS = 1.0;
+  static const double elevationS = 2.0;
+  static const double elevationM = 4.0;
+  static const double elevationL = 8.0;
+  static const double elevationXL = 16.0;
   
-  // Default configuration
-  static const List<String> defaultCategories = [
-    'Business',
-    'Marketing',
-    'Finance',
-    'Legal',
-    'Operations',
-    'Strategy',
-    'Sales',
-    'Other',
-  ];
+  /// Default duration
+  static const Duration durationXS = Duration(milliseconds: 100);
+  static const Duration durationS = Duration(milliseconds: 200);
+  static const Duration durationM = Duration(milliseconds: 300);
+  static const Duration durationL = Duration(milliseconds: 500);
+  static const Duration durationXL = Duration(milliseconds: 800);
   
-  static const Map<String, String> documentTypes = {
-    'business_plan': 'Business Plan',
-    'marketing_plan': 'Marketing Plan',
-    'financial_projection': 'Financial Projection',
-    'pitch_deck': 'Pitch Deck',
-    'sales_proposal': 'Sales Proposal',
-    'invoice': 'Invoice',
-    'contract': 'Contract',
-  };
+  /// Default animation curve
+  static const Curve curveDefault = Curves.easeInOut;
+  static const Curve curveFast = Curves.fastOutSlowIn;
+  static const Curve curveElastic = Curves.elasticInOut;
+  static const Curve curveBounce = Curves.bounceInOut;
 }

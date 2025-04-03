@@ -1,19 +1,30 @@
 part of 'auth_bloc.dart';
 
+/// Authentication event
 abstract class AuthEvent extends Equatable {
+  /// Creates an AuthEvent
   const AuthEvent();
 
   @override
   List<Object> get props => [];
 }
 
-class CheckAuthStatus extends AuthEvent {}
+/// Event to check if user is authenticated
+class AuthCheckRequested extends AuthEvent {
+  /// Creates an AuthCheckRequested event
+  const AuthCheckRequested();
+}
 
-class Login extends AuthEvent {
+/// Event to login user
+class AuthLoginRequested extends AuthEvent {
+  /// Email
   final String email;
+  
+  /// Password
   final String password;
 
-  const Login({
+  /// Creates an AuthLoginRequested event
+  const AuthLoginRequested({
     required this.email,
     required this.password,
   });
@@ -22,37 +33,30 @@ class Login extends AuthEvent {
   List<Object> get props => [email, password];
 }
 
-class Register extends AuthEvent {
-  final String name;
+/// Event to signup user
+class AuthSignupRequested extends AuthEvent {
+  /// Email
   final String email;
+  
+  /// Password
   final String password;
+  
+  /// Name
+  final String name;
 
-  const Register({
-    required this.name,
+  /// Creates an AuthSignupRequested event
+  const AuthSignupRequested({
     required this.email,
     required this.password,
+    required this.name,
   });
 
   @override
-  List<Object> get props => [name, email, password];
+  List<Object> get props => [email, password, name];
 }
 
-class Logout extends AuthEvent {}
-
-class UpdateProfile extends AuthEvent {
-  final Map<String, dynamic> userData;
-
-  const UpdateProfile({required this.userData});
-
-  @override
-  List<Object> get props => [userData];
-}
-
-class ResetPassword extends AuthEvent {
-  final String email;
-
-  const ResetPassword({required this.email});
-
-  @override
-  List<Object> get props => [email];
+/// Event to logout user
+class AuthLogoutRequested extends AuthEvent {
+  /// Creates an AuthLogoutRequested event
+  const AuthLogoutRequested();
 }

@@ -1,142 +1,89 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/repositories/auth_repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
 
+/// Authentication bloc
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
-  
-  AuthBloc({required this.authRepository}) : super(AuthInitial()) {
-    on<CheckAuthStatus>(_onCheckAuthStatus);
-    on<Login>(_onLogin);
-    on<Register>(_onRegister);
-    on<Logout>(_onLogout);
-    on<UpdateProfile>(_onUpdateProfile);
-    on<ResetPassword>(_onResetPassword);
+  final AuthRepository _authRepository;
+
+  /// Creates an AuthBloc
+  AuthBloc(this._authRepository) : super(const AuthInitial()) {
+    on<AuthCheckRequested>(_onAuthCheckRequested);
+    on<AuthLoginRequested>(_onAuthLoginRequested);
+    on<AuthSignupRequested>(_onAuthSignupRequested);
+    on<AuthLogoutRequested>(_onAuthLogoutRequested);
   }
-  
-  Future<void> _onCheckAuthStatus(
-    CheckAuthStatus event,
+
+  Future<void> _onAuthCheckRequested(
+    AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      final bool isAuthenticated = await authRepository.isAuthenticated();
+      final isAuthenticated = await _authRepository.isAuthenticated();
+      
       if (isAuthenticated) {
-        final userData = await authRepository.getCurrentUser();
-        emit(Authenticated(userData: userData ?? {}));
+        final userId = await _authRepository.getUserId();
+        emit(Authenticated(userId: userId!));
       } else {
-        emit(Unauthenticated());
+        emit(const Unauthenticated());
       }
     } catch (e) {
-      emit(AuthError('Failed to check authentication status'));
+      emit(AuthError(message: e.toString()));
     }
   }
-  
-  Future<void> _onLogin(
-    Login event,
+
+  Future<void> _onAuthLoginRequested(
+    AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      final success = await authRepository.login(
-        email: event.email,
-        password: event.password,
+      final token = await _authRepository.signInWithEmailAndPassword(
+        event.email,
+        event.password,
       );
       
-      if (success) {
-        final userData = await authRepository.getCurrentUser();
-        emit(Authenticated(userData: userData ?? {}));
-      } else {
-        emit(AuthError('Invalid credentials'));
-      }
+      final userId = await _authRepository.getUserId();
+      emit(Authenticated(userId: userId!));
     } catch (e) {
-      emit(AuthError('Login failed. Please try again.'));
+      emit(AuthError(message: e.toString()));
     }
   }
-  
-  Future<void> _onRegister(
-    Register event,
+
+  Future<void> _onAuthSignupRequested(
+    AuthSignupRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      final success = await authRepository.register(
-        name: event.name,
-        email: event.email,
-        password: event.password,
+      final token = await _authRepository.signUpWithEmailAndPassword(
+        event.email,
+        event.password,
+        event.name,
       );
       
-      if (success) {
-        final userData = await authRepository.getCurrentUser();
-        emit(Authenticated(userData: userData ?? {}));
-      } else {
-        emit(AuthError('Registration failed. Please try again.'));
-      }
+      final userId = await _authRepository.getUserId();
+      emit(Authenticated(userId: userId!));
     } catch (e) {
-      emit(AuthError('Registration failed. Please try again.'));
+      emit(AuthError(message: e.toString()));
     }
   }
-  
-  Future<void> _onLogout(
-    Logout event,
+
+  Future<void> _onAuthLogoutRequested(
+    AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      await authRepository.logout();
-      emit(Unauthenticated());
+      await _authRepository.signOut();
+      emit(const Unauthenticated());
     } catch (e) {
-      emit(AuthError('Logout failed. Please try again.'));
-    }
-  }
-  
-  Future<void> _onUpdateProfile(
-    UpdateProfile event,
-    Emitter<AuthState> emit,
-  ) async {
-    final currentState = state;
-    if (currentState is Authenticated) {
-      emit(AuthLoading());
-      try {
-        final success = await authRepository.updateProfile(
-          userData: event.userData,
-        );
-        
-        if (success) {
-          final updatedUserData = await authRepository.getCurrentUser();
-          emit(Authenticated(userData: updatedUserData ?? {}));
-        } else {
-          emit(AuthError('Failed to update profile'));
-          emit(currentState);
-        }
-      } catch (e) {
-        emit(AuthError('Failed to update profile'));
-        emit(currentState);
-      }
-    }
-  }
-  
-  Future<void> _onResetPassword(
-    ResetPassword event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading());
-    try {
-      final success = await authRepository.resetPassword(
-        email: event.email,
-      );
-      
-      if (success) {
-        emit(PasswordResetSent());
-      } else {
-        emit(AuthError('Failed to send password reset'));
-      }
-    } catch (e) {
-      emit(AuthError('Failed to send password reset'));
+      emit(AuthError(message: e.toString()));
     }
   }
 }

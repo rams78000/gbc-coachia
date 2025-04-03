@@ -1,44 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gbc_coachia/config/router/app_router.dart';
+import 'package:gbc_coachia/config/theme/app_theme.dart';
+import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:gbc_coachia/features/theme/presentation/bloc/theme_bloc.dart';
+import 'package:get_it/get_it.dart';
 
-import 'config/di/service_locator.dart';
-import 'config/router/app_router.dart';
-import 'config/theme/app_theme.dart';
-import 'core/constants/app_constants.dart';
-import 'features/chatbot/presentation/bloc/chatbot_bloc.dart';
-import 'features/documents/presentation/bloc/documents_bloc.dart';
-import 'features/finance/presentation/bloc/finance_bloc.dart';
-import 'features/planner/presentation/bloc/planner_bloc.dart';
-
-/// Main app widget
-class App extends StatelessWidget {
-  const App({super.key});
+/// The main app widget
+class GBCCoachIAApp extends StatelessWidget {
+  const GBCCoachIAApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<ChatbotBloc>(
-          create: (context) => serviceLocator<ChatbotBloc>(),
+        BlocProvider<ThemeBloc>(
+          create: (context) => GetIt.I<ThemeBloc>()..add(ThemeInitialized()),
         ),
-        BlocProvider<PlannerBloc>(
-          create: (context) => PlannerBloc(),
-        ),
-        BlocProvider<FinanceBloc>(
-          create: (context) => FinanceBloc(),
-        ),
-        BlocProvider<DocumentsBloc>(
-          create: (context) => DocumentsBloc(),
+        BlocProvider<AuthBloc>(
+          create: (context) => GetIt.I<AuthBloc>()..add(AuthCheckRequested()),
         ),
       ],
-      child: MaterialApp(
-        title: AppConstants.appName,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        debugShowCheckedModeBanner: false,
-        onGenerateRoute: AppRouter.generateRoute,
-        initialRoute: AppRoutes.splash,
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp.router(
+            title: 'GBC CoachIA',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: state.themeMode,
+            routerConfig: AppRouter.router,
+          );
+        },
       ),
     );
   }

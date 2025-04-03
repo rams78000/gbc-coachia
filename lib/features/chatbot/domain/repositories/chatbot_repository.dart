@@ -1,28 +1,38 @@
-/// Interface for the Chatbot Repository
+import '../entities/conversation.dart';
+import '../entities/message.dart';
+
+/// Chatbot repository interface
 abstract class ChatbotRepository {
-  /// Send a message to the chatbot and get a response
-  Future<Map<String, dynamic>> sendMessage({
-    required String message,
-    required String conversationId,
-  });
+  /// Get all conversations
+  Future<List<Conversation>> getConversations();
   
-  /// Get conversation history
-  Future<List<Map<String, dynamic>>> getConversationHistory({
-    required String conversationId,
-  });
+  /// Get conversation by ID
+  Future<Conversation?> getConversationById(String id);
   
   /// Create a new conversation
-  Future<String> createConversation({String? title});
+  Future<Conversation> createConversation(String title);
   
-  /// Get all conversations
-  Future<List<Map<String, dynamic>>> getConversations();
+  /// Update conversation
+  Future<Conversation> updateConversation(Conversation conversation);
   
-  /// Delete a conversation
-  Future<bool> deleteConversation({required String conversationId});
+  /// Delete conversation
+  Future<bool> deleteConversation(String id);
   
-  /// Update conversation title
-  Future<bool> updateConversationTitle({
-    required String conversationId,
-    required String title,
-  });
+  /// Get messages for a conversation
+  Future<List<Message>> getMessages(String conversationId);
+  
+  /// Send a message to the chatbot
+  Future<Message> sendMessage(String conversationId, String content, List<String> attachments);
+  
+  /// Generate response from AI
+  Future<Message> generateResponse(String conversationId, Message userMessage);
+  
+  /// Get suggested prompts for a conversation
+  Future<List<String>> getSuggestedPrompts(String conversationId);
+  
+  /// Save message
+  Future<Message> saveMessage(String conversationId, Message message);
+  
+  /// Mark messages as read
+  Future<bool> markMessagesAsRead(String conversationId);
 }

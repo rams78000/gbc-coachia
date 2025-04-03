@@ -1,0 +1,192 @@
+{
+  "projectSettings": {
+    "name": "GBC CoachIA",
+    "type": "flutter",
+    "targetPlatforms": ["ios", "android", "web"],
+    "styleGuide": {
+      "colors": {
+        "primary": "0xFFB87333", // Format Flutter (ARGB)
+        "secondary": "0xFFFFD700",
+        "backgroundLight": "0xFFFAFAE6",
+        "backgroundDark": "0xFFFFFDD0",
+        "textPrimary": "0xFF2E2E2E",
+        "textSecondary": "0xFF708090",
+        "error": "0xFFE53E3E",
+        "success": "0xFF38A169"
+      },
+      "darkMode": {
+        "background": "0xFF1A202C",
+        "card": "0xFF2D3748",
+        "textPrimary": "0xFFEDF2F7"
+      },
+      "typography": {
+        "fontFamily": "Inter",
+        "fontSizes": {
+          "small": 12,
+          "medium": 16,
+          "large": 24
+        }
+      },
+      "spacing": {
+        "base": 8.0, // Flutter utilise des doubles
+        "multipliers": [1, 2, 3, 4, 6]
+      }
+    }
+  },
+  "aiAssistance": {
+    "codeGeneration": {
+      "preferredComponents": "Material 3 + Custom Widgets",
+      "routing": "go_router",
+      "stateManagement": "flutter_bloc",
+      "apiClient": "dio",
+      "dependencyInjection": "get_it"
+    },
+    "linting": {
+      "enabled": true,
+      "rules": ["prefer_const_declarations", "avoid_print"]
+    }
+  },
+  "featureTemplates": {
+    "onboarding": {
+      "requirements": [
+        "3-step animated slides",
+        "Social login (Google/Apple)",
+        "Email verification",
+        "Profile setup wizard"
+      ],
+      "techStack": ["lottie", "firebase_auth"]
+    },
+    "aiChatbot": {
+      "requirements": [
+        "Voice input (speech_to_text)",
+        "GPT-4 integration",
+        "Conversation history",
+        "Prompt suggestions"
+      ],
+      "techStack": ["chat_ui", "openai_dart"]
+    },
+    "smartPlanner": {
+      "requirements": [
+        "Week/Month views",
+        "Google Calendar sync",
+        "Recurring tasks",
+        "Location reminders"
+      ],
+      "techStack": ["syncfusion_flutter_calendar", "googleapis"]
+    },
+    "financeModule": {
+      "requirements": [
+        "Expense categorization",
+        "Bank API connections",
+        "PDF reports",
+        "Tax estimations"
+      ],
+      "techStack": ["fl_chart", "plaid_flutter"]
+    },
+    "documentGenerator": {
+      "requirements": [
+        "Templates system",
+        "E-signature pad",
+        "Cloud sync",
+        "Version history"
+      ],
+      "techStack": ["pdf", "flutter_signature_pad", "aws_s3"]
+    }
+  },
+  "widgetStyles": {
+    "buttons": {
+      "primary": {
+        "backgroundColor": "primary",
+        "textColor": "0xFFFFFFFF",
+        "borderRadius": 12.0,
+        "height": 48.0,
+        "elevation": 2.0
+      },
+      "secondary": {
+        "backgroundColor": "secondary",
+        "textColor": "textPrimary",
+        "borderWidth": 1.0,
+        "borderColor": "primary"
+      }
+    },
+    "cards": {
+      "default": {
+        "backgroundColor": "backgroundDark",
+        "borderRadius": 16.0,
+        "elevation": 2.0,
+        "padding": 16.0
+      }
+    },
+    "textFields": {
+      "default": {
+        "backgroundColor": "backgroundLight",
+        "borderColor": "textSecondary",
+        "hintColor": "0xFF708090AA"
+      }
+    }
+  },
+  "themeImplementation": {
+    "strategy": "ThemeExtension",
+    "colorSchemeDetection": "adaptive_theme",
+    "dynamicWidgets": ["AppBar", "Card", "FloatingActionButton"]
+  },
+  "qualityStandards": {
+    "performance": {
+      "targetFPS": 60,
+      "jankWarningThreshold": "16ms/frame",
+      "appSizeWarning": "10MB"
+    },
+    "testing": {
+      "unitTest": "flutter_test",
+      "e2eTest": "integration_test",
+      "testCoverage": 80
+    },
+    "security": {
+      "encryption": "AES-256 (PointyCastle)",
+      "biometricAuth": "local_auth",
+      "dataMasking": ["financial", "personal"]
+    }
+  },
+  "integrationRequirements": {
+    "mustInclude": [
+      "notion_sdk",
+      "slack_api",
+      "plaid_flutter",
+      "googleapis"
+    ],
+    "niceToHave": [
+      "zoom_sdk",
+      "stripe_sdk",
+      "quickbooks_connect"
+    ]
+  },
+  "uiSpecifications": {
+    "animations": {
+      "minimumStandard": "flutter_animate",
+      "complexEffects": ["Rive animations", "shimmer effects"]
+    },
+    "theming": {
+      "required": ["dark/light mode", "Material 3"],
+      "dynamicColors": true
+    },
+    "accessibility": {
+      "screenReader": "Semantics widget",
+      "fontScaling": 2.0,
+      "colorContrast": "AA+"
+    }
+  },
+  "devOps": {
+    "environments": {
+      "staging": "firebase_app_distribution",
+      "production": "flutter_distribute"
+    },
+    "monitoring": {
+      "crashReports": "firebase_crashlytics",
+      "analytics": "firebase_analytics"
+    }
+  },
+  "documentation": {
+    "required": ["widget-api", "bloc-diagrams", "error-handling"],
+    "autoGenerate": ["dartdoc", "widgetbook"]
+  }
+}

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'app.dart';
-import 'config/di/service_locator.dart';
+import 'package:gbc_coachia/app.dart';
+import 'package:gbc_coachia/config/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

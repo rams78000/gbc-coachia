@@ -1,121 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
 
-/// Login screen
-class LoginScreen extends StatefulWidget {
-  /// Creates a LoginScreen
-  const LoginScreen({super.key});
+import '../../../../config/constants/route_constants.dart';
+import '../bloc/auth_bloc.dart';
+import '../widgets/login_form.dart';
 
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
+/// Écran de connexion
+class LoginScreen extends StatelessWidget {
+  /// Constructeur
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<AuthBloc, AuthState>(
+      appBar: AppBar(
+        title: const Text('Connexion'),
+      ),
+      body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            context.go('/dashboard');
+          if (state is Authenticated) {
+            context.go(RouteConstants.dashboard);
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
             );
           }
         },
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
+        builder: (context, state) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'Connexion',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const SizedBox(height: 40),
+                  
+                  // Logo ou image
+                  Icon(
+                    Icons.business_center,
+                    size: 80,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Titre
+                  Text(
+                    'Bienvenue dans GBC CoachIA',
+                    style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer votre email';
-                      }
-                      return null;
-                    },
+                  
+                  const SizedBox(height: 8),
+                  
+                  // Sous-titre
+                  Text(
+                    'Connectez-vous pour accéder à votre espace personnel',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Mot de passe',
-                      prefixIcon: Icon(Icons.lock),
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Veuillez entrer votre mot de passe';
-                      }
-                      return null;
-                    },
-                  ),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // Formulaire de connexion
+                  if (state is AuthLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else
+                    const LoginForm(),
+                  
                   const SizedBox(height: 24),
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      return ElevatedButton(
-                        onPressed: state is AuthLoading
-                            ? null
-                            : () {
-                                if (_formKey.currentState!.validate()) {
-                                  context.read<AuthBloc>().add(
-                                        AuthLoginRequested(
-                                          email: _emailController.text,
-                                          password: _passwordController.text,
-                                        ),
-                                      );
-                                }
-                              },
-                        child: state is AuthLoading
-                            ? const CircularProgressIndicator()
-                            : const Text('Se connecter'),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () => context.go('/register'),
-                    child: const Text("Pas encore inscrit ? S'inscrire"),
+                  
+                  // Lien vers l'inscription
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Pas encore de compte ?',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.go(RouteConstants.register);
+                        },
+                        child: const Text('Créer un compte'),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

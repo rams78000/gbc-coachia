@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../config/theme/app_colors.dart';
+import '../../../../core/widgets/app_button.dart';
+
 /// Onboarding screen
 class OnboardingScreen extends StatefulWidget {
-  /// Creates an OnboardingScreen
-  const OnboardingScreen({super.key});
+  /// Constructor
+  const OnboardingScreen({Key? key}) : super(key: key);
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -17,27 +20,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<OnboardingPage> _pages = [
     const OnboardingPage(
       title: 'Bienvenue sur GBC CoachIA',
-      description:
-          'Votre assistant intelligent pour la gestion de votre activité',
-      icon: Icons.analytics_outlined,
+      description: 'Votre assistant personnel pour optimiser votre entreprise et booster votre productivité.',
+      image: 'assets/images/onboarding1.png',
+      icon: Icons.lightbulb_outline,
     ),
     const OnboardingPage(
-      title: 'Assistant IA',
-      description:
-          'Obtenez des conseils personnalisés et des réponses à vos questions',
-      icon: Icons.chat_bubble_outline,
+      title: 'Planification Intelligente',
+      description: 'Organisez vos tâches, planifiez vos rendez-vous et atteignez vos objectifs professionnels avec notre assistant IA.',
+      image: 'assets/images/onboarding2.png',
+      icon: Icons.calendar_today,
     ),
     const OnboardingPage(
-      title: 'Planificateur',
-      description:
-          'Organisez votre temps et vos projets de manière efficace',
-      icon: Icons.calendar_today_outlined,
+      title: 'Gestion Financière',
+      description: 'Suivez vos finances, analysez vos revenus et dépenses, et prenez des décisions éclairées pour votre entreprise.',
+      image: 'assets/images/onboarding3.png',
+      icon: Icons.account_balance_wallet,
     ),
     const OnboardingPage(
-      title: 'Finances',
-      description:
-          'Suivez vos revenus, dépenses et optimisez votre rentabilité',
-      icon: Icons.monetization_on_outlined,
+      title: 'Coach IA Personnalisé',
+      description: 'Obtenez des conseils personnalisés, des réponses à vos questions et un accompagnement sur mesure pour votre activité.',
+      image: 'assets/images/onboarding4.png',
+      icon: Icons.psychology,
     ),
   ];
 
@@ -47,6 +50,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
+  void _onPageChanged(int page) {
+    setState(() {
+      _currentPage = page;
+    });
+  }
+
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
@@ -54,14 +63,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      context.go('/login');
+      _finishOnboarding();
     }
   }
 
-  void _onPageChanged(int page) {
-    setState(() {
-      _currentPage = page;
-    });
+  void _finishOnboarding() {
+    // Navigate to login screen
+    context.go('/login');
   }
 
   @override
@@ -70,55 +78,59 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Skip button
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextButton(
+                  onPressed: _finishOnboarding,
+                  child: Text(
+                    'Passer',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Page content
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: _pages.length,
                 onPageChanged: _onPageChanged,
+                itemCount: _pages.length,
                 itemBuilder: (context, index) {
                   return _pages[index];
                 },
               ),
             ),
+
+            // Page indicator
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Page indicators
-                  Row(
-                    children: List.generate(
-                      _pages.length,
-                      (index) => Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        height: 10,
-                        width: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _currentPage == index
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey.shade300,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Next button
-                  ElevatedButton(
-                    onPressed: _nextPage,
-                    child: Text(
-                      _currentPage == _pages.length - 1
-                          ? 'Commencer'
-                          : 'Suivant',
-                    ),
-                  ),
-                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _pages.length,
+                  (index) => _buildDotIndicator(index),
+                ),
               ),
             ),
+
+            // Next/Finish button
             Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: TextButton(
-                onPressed: () => context.go('/login'),
-                child: const Text('Passer'),
+              padding: const EdgeInsets.all(24.0),
+              child: AppButton(
+                label: _currentPage == _pages.length - 1 ? 'Commencer' : 'Suivant',
+                onPressed: _nextPage,
+                icon: _currentPage == _pages.length - 1
+                    ? Icons.check_circle_outline
+                    : Icons.arrow_forward,
+                iconPosition: IconPosition.right,
+                fullWidth: true,
               ),
             ),
           ],
@@ -126,25 +138,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
+
+  Widget _buildDotIndicator(int index) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      width: 10.0,
+      height: 10.0,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _currentPage == index
+            ? AppColors.primary
+            : AppColors.primaryLight,
+      ),
+    );
+  }
 }
 
-/// Onboarding page
+/// Onboarding page model
 class OnboardingPage extends StatelessWidget {
-  /// Creates an OnboardingPage
+  /// Constructor
   const OnboardingPage({
-    super.key,
+    Key? key,
     required this.title,
     required this.description,
+    required this.image,
     required this.icon,
-  });
+  }) : super(key: key);
 
-  /// Title
+  /// Page title
   final String title;
 
-  /// Description
+  /// Page description
   final String description;
 
-  /// Icon
+  /// Page image asset path
+  final String image;
+
+  /// Page icon
   final IconData icon;
 
   @override
@@ -154,25 +184,31 @@ class OnboardingPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Image or Icon
           Icon(
             icon,
-            size: 100,
-            color: Theme.of(context).primaryColor,
+            size: 120,
+            color: AppColors.primary,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 40),
+
+          // Title
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 24,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
+
+          // Description
           Text(
             description,
-            style: const TextStyle(
-              fontSize: 16,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.5,
             ),
             textAlign: TextAlign.center,
           ),

@@ -1,39 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get_it/get_it.dart';
-import 'package:gbc_coachia/config/router/app_router.dart';
-import 'package:gbc_coachia/config/theme/app_theme.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:gbc_coachia/features/theme/presentation/bloc/theme_bloc.dart';
 
-/// Main application widget
+import 'config/router/app_router.dart';
+import 'config/theme/app_theme.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+
+/// Application principale
 class GBCCoachIAApp extends StatelessWidget {
-  /// Create a GBCCoachIAApp
-  const GBCCoachIAApp({super.key});
+  /// Constructeur
+  const GBCCoachIAApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final router = GetIt.I<AppRouter>().router;
+    
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>(
-          create: (_) => GetIt.instance<AuthBloc>()
-            ..add(const AuthCheckRequested()),
-        ),
-        BlocProvider<ThemeBloc>(
-          create: (_) => GetIt.instance<ThemeBloc>(),
+          create: (_) => GetIt.I<AuthBloc>()..add(CheckAuthStatus()),
         ),
       ],
-      child: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) {
-          return MaterialApp.router(
-            title: 'GBC CoachIA',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: state.themeMode,
-            routerConfig: AppRouter.getRouter(),
-            debugShowCheckedModeBanner: false,
-          );
-        },
+      child: MaterialApp.router(
+        title: 'GBC CoachIA',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('fr'),
+          Locale('en'),
+        ],
+        routerConfig: router,
       ),
     );
   }

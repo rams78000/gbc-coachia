@@ -1,56 +1,43 @@
 part of 'auth_bloc.dart';
 
-/// Authentication state
+/// États pour le bloc d'authentification
 abstract class AuthState extends Equatable {
-  /// Creates an AuthState
+  /// Constructeur
   const AuthState();
   
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-/// Initial authentication state
-class AuthInitial extends AuthState {
-  /// Creates an AuthInitial state
-  const AuthInitial();
-}
+/// État initial
+class AuthInitial extends AuthState {}
 
-/// Loading authentication state
-class AuthLoading extends AuthState {
-  /// Creates an AuthLoading state
-  const AuthLoading();
-}
+/// État de chargement
+class AuthLoading extends AuthState {}
 
-/// Authenticated state
+/// État authentifié
 class Authenticated extends AuthState {
-  /// User ID
-  final String userId;
+  /// Constructeur
+  const Authenticated({required this.user});
 
-  /// Creates an Authenticated state
-  const Authenticated({
-    required this.userId,
-  });
+  /// Utilisateur authentifié
+  final User user;
 
   @override
-  List<Object?> get props => [userId];
+  List<Object> get props => [user];
 }
 
-/// Unauthenticated state
-class Unauthenticated extends AuthState {
-  /// Creates an Unauthenticated state
-  const Unauthenticated();
-}
+/// État non authentifié
+class Unauthenticated extends AuthState {}
 
-/// Error authentication state
+/// État d'erreur
 class AuthError extends AuthState {
-  /// Error message
+  /// Constructeur
+  const AuthError({required this.message});
+
+  /// Message d'erreur
   final String message;
 
-  /// Creates an AuthError state
-  const AuthError({
-    required this.message,
-  });
-
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message];
 }

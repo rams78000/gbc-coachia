@@ -1,62 +1,56 @@
 part of 'auth_bloc.dart';
 
-/// Authentication event
+/// Événements pour le bloc d'authentification
 abstract class AuthEvent extends Equatable {
-  /// Creates an AuthEvent
+  /// Constructeur
   const AuthEvent();
 
   @override
   List<Object> get props => [];
 }
 
-/// Event to check if user is authenticated
-class AuthCheckRequested extends AuthEvent {
-  /// Creates an AuthCheckRequested event
-  const AuthCheckRequested();
-}
+/// Événement pour vérifier le statut d'authentification
+class CheckAuthStatus extends AuthEvent {}
 
-/// Event to login user
-class AuthLoginRequested extends AuthEvent {
-  /// Email
-  final String email;
-  
-  /// Password
-  final String password;
-
-  /// Creates an AuthLoginRequested event
-  const AuthLoginRequested({
+/// Événement pour la connexion
+class LoginRequested extends AuthEvent {
+  /// Constructeur
+  const LoginRequested({
     required this.email,
     required this.password,
   });
+
+  /// Email
+  final String email;
+  
+  /// Mot de passe
+  final String password;
 
   @override
   List<Object> get props => [email, password];
 }
 
-/// Event to signup user
-class AuthSignupRequested extends AuthEvent {
+/// Événement pour l'inscription
+class RegisterRequested extends AuthEvent {
+  /// Constructeur
+  const RegisterRequested({
+    required this.name,
+    required this.email,
+    required this.password,
+  });
+
+  /// Nom
+  final String name;
+  
   /// Email
   final String email;
   
-  /// Password
+  /// Mot de passe
   final String password;
-  
-  /// Name
-  final String name;
-
-  /// Creates an AuthSignupRequested event
-  const AuthSignupRequested({
-    required this.email,
-    required this.password,
-    required this.name,
-  });
 
   @override
-  List<Object> get props => [email, password, name];
+  List<Object> get props => [name, email, password];
 }
 
-/// Event to logout user
-class AuthLogoutRequested extends AuthEvent {
-  /// Creates an AuthLogoutRequested event
-  const AuthLogoutRequested();
-}
+/// Événement pour la déconnexion
+class LogoutRequested extends AuthEvent {}

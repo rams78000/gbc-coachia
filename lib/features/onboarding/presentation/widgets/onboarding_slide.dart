@@ -1,71 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../config/theme/app_colors.dart';
-import '../../../../config/theme/app_theme.dart';
-
+/// Onboarding slide widget
 class OnboardingSlide extends StatelessWidget {
-  final String title;
-  final String description;
-  final String icon;
-
+  /// Constructor
   const OnboardingSlide({
     Key? key,
     required this.title,
     required this.description,
-    required this.icon,
+    required this.image,
+    this.imageWidget,
+    this.icon,
+    this.iconColor,
   }) : super(key: key);
 
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'briefcase':
-        return FeatherIcons.briefcase;
-      case 'message-circle':
-        return FeatherIcons.messageCircle;
-      case 'file-text':
-        return FeatherIcons.fileText;
-      case 'calendar':
-        return FeatherIcons.calendar;
-      case 'dollar-sign':
-        return FeatherIcons.dollarSign;
-      default:
-        return FeatherIcons.star;
-    }
-  }
+  /// Slide title
+  final String title;
+  
+  /// Slide description
+  final String description;
+  
+  /// Image path
+  final String image;
+  
+  /// Custom image widget
+  final Widget? imageWidget;
+  
+  /// Icon
+  final IconData? icon;
+  
+  /// Icon color
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    final IconData iconData = _getIconData(icon);
-    
     return Padding(
-      padding: EdgeInsets.all(AppTheme.spacing(4)),
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 160,
-            height: 160,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
+          // Image or icon
+          if (imageWidget != null)
+            SizedBox(
+              height: 220,
+              child: imageWidget!,
+            )
+          else if (image.isNotEmpty)
+            SizedBox(
+              height: 220,
+              child: Image.asset(
+                image,
+                fit: BoxFit.contain,
+              ),
+            )
+          else if (icon != null)
+            Icon(
+              icon,
+              size: 100,
+              color: iconColor ?? Theme.of(context).primaryColor,
             ),
-            child: Icon(
-              iconData,
-              size: 80,
-              color: AppColors.primary,
-            ),
-          ),
-          SizedBox(height: AppTheme.spacing(6)),
+          const SizedBox(height: 40),
+          
+          // Title
           Text(
             title,
-            style: Theme.of(context).textTheme.displaySmall,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: AppTheme.spacing(2)),
+          const SizedBox(height: 20),
+          
+          // Description
           Text(
             description,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  height: 1.5,
+                ),
             textAlign: TextAlign.center,
           ),
         ],

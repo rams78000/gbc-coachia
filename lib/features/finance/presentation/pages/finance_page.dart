@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../config/theme/app_colors.dart';
 import '../../../../config/theme/app_theme.dart';
-import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../bloc/finance_bloc.dart';
+import '../../../../core/widgets/app_button.dart';
 
+/// Finance page
 class FinancePage extends StatefulWidget {
+  /// Constructor
   const FinancePage({Key? key}) : super(key: key);
 
   @override
@@ -19,12 +17,141 @@ class FinancePage extends StatefulWidget {
 
 class _FinancePageState extends State<FinancePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final currencyFormatter = NumberFormat.currency(symbol: '\$');
+
+  // Demo data for UI
+  final List<Map<String, dynamic>> _transactions = [
+    {
+      'title': 'Paiement client ABC',
+      'amount': 1250.0,
+      'date': DateTime.now().subtract(const Duration(days: 2)),
+      'type': 'income',
+      'category': 'Services',
+    },
+    {
+      'title': 'Abonnement logiciel',
+      'amount': 49.99,
+      'date': DateTime.now().subtract(const Duration(days: 3)),
+      'type': 'expense',
+      'category': 'Logiciels',
+    },
+    {
+      'title': 'Matériel informatique',
+      'amount': 799.99,
+      'date': DateTime.now().subtract(const Duration(days: 5)),
+      'type': 'expense',
+      'category': 'Équipement',
+    },
+    {
+      'title': 'Consultation client XYZ',
+      'amount': 850.0,
+      'date': DateTime.now().subtract(const Duration(days: 7)),
+      'type': 'income',
+      'category': 'Services',
+    },
+    {
+      'title': 'Facture internet',
+      'amount': 59.90,
+      'date': DateTime.now().subtract(const Duration(days: 10)),
+      'type': 'expense',
+      'category': 'Télécommunications',
+    },
+    {
+      'title': 'Fournitures de bureau',
+      'amount': 120.50,
+      'date': DateTime.now().subtract(const Duration(days: 12)),
+      'type': 'expense',
+      'category': 'Fournitures',
+    },
+    {
+      'title': 'Paiement client DEF',
+      'amount': 1800.0,
+      'date': DateTime.now().subtract(const Duration(days: 15)),
+      'type': 'income',
+      'category': 'Services',
+    },
+  ];
+
+  final List<Map<String, dynamic>> _invoices = [
+    {
+      'client': 'ABC Company',
+      'amount': 1250.0,
+      'date': DateTime.now().subtract(const Duration(days: 2)),
+      'status': 'Payée',
+      'invoiceNumber': 'INV-2023-001',
+    },
+    {
+      'client': 'XYZ Corporation',
+      'amount': 850.0,
+      'date': DateTime.now().subtract(const Duration(days: 7)),
+      'status': 'Payée',
+      'invoiceNumber': 'INV-2023-002',
+    },
+    {
+      'client': 'DEF Industries',
+      'amount': 1800.0,
+      'date': DateTime.now().subtract(const Duration(days: 15)),
+      'status': 'Payée',
+      'invoiceNumber': 'INV-2023-003',
+    },
+    {
+      'client': 'GHI Services',
+      'amount': 950.0,
+      'date': DateTime.now().subtract(const Duration(days: 1)),
+      'status': 'En attente',
+      'invoiceNumber': 'INV-2023-004',
+    },
+    {
+      'client': 'JKL Consulting',
+      'amount': 2200.0,
+      'date': DateTime.now(),
+      'status': 'En attente',
+      'invoiceNumber': 'INV-2023-005',
+    },
+  ];
+
+  final List<Map<String, dynamic>> _budgetCategories = [
+    {
+      'name': 'Services',
+      'budgeted': 5000.0,
+      'actual': 3900.0,
+      'color': Colors.blue,
+    },
+    {
+      'name': 'Logiciels & Abonnements',
+      'budgeted': 300.0,
+      'actual': 280.0,
+      'color': Colors.purple,
+    },
+    {
+      'name': 'Équipement',
+      'budgeted': 1000.0,
+      'actual': 799.99,
+      'color': Colors.orange,
+    },
+    {
+      'name': 'Marketing',
+      'budgeted': 800.0,
+      'actual': 650.0,
+      'color': Colors.green,
+    },
+    {
+      'name': 'Fournitures',
+      'budgeted': 200.0,
+      'actual': 120.50,
+      'color': Colors.red,
+    },
+    {
+      'name': 'Télécommunications',
+      'budgeted': 150.0,
+      'actual': 130.0,
+      'color': Colors.teal,
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -33,1220 +160,571 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
     super.dispose();
   }
 
+  double get _totalIncome {
+    return _transactions
+        .where((t) => t['type'] == 'income')
+        .fold(0.0, (sum, transaction) => sum + transaction['amount']);
+  }
+
+  double get _totalExpenses {
+    return _transactions
+        .where((t) => t['type'] == 'expense')
+        .fold(0.0, (sum, transaction) => sum + transaction['amount']);
+  }
+
+  double get _balance {
+    return _totalIncome - _totalExpenses;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Finance Tracker'),
+        title: const Text('Finances'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Overview'),
+            Tab(text: 'Aperçu'),
             Tab(text: 'Transactions'),
+            Tab(text: 'Factures'),
           ],
         ),
-        actions: [
-          PopupMenuButton<DatePeriod>(
-            icon: const Icon(Icons.calendar_today_outlined),
-            tooltip: 'Select Period',
-            onSelected: (period) {
-              context.read<FinanceBloc>().add(ChangePeriod(period));
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Show add transaction/invoice dialog
+          final currentTab = _tabController.index;
+          if (currentTab == 1) {
+            _showAddTransactionDialog();
+          } else if (currentTab == 2) {
+            _showAddInvoiceDialog();
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // Overview tab
+          _buildOverviewTab(),
+
+          // Transactions tab
+          ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _transactions.length,
+            itemBuilder: (context, index) {
+              final transaction = _transactions[index];
+              return _buildTransactionCard(transaction);
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: DatePeriod.day,
-                child: Text('Today'),
+          ),
+
+          // Invoices tab
+          ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _invoices.length,
+            itemBuilder: (context, index) {
+              final invoice = _invoices[index];
+              return _buildInvoiceCard(invoice);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOverviewTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Financial summary
+          AppCard(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Résumé Financier',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildSummaryItem(
+                        title: 'Revenus',
+                        amount: _totalIncome,
+                        color: Colors.green,
+                        icon: Icons.arrow_upward,
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildSummaryItem(
+                        title: 'Dépenses',
+                        amount: _totalExpenses,
+                        color: Colors.red,
+                        icon: Icons.arrow_downward,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Solde',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${_balance.toStringAsFixed(2)} €',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: _balance >= 0 ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Budget overview
+          Text(
+            'Budget Mensuel',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _budgetCategories.length,
+            itemBuilder: (context, index) {
+              final category = _budgetCategories[index];
+              return _buildBudgetItem(category);
+            },
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Recent transactions
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Transactions Récentes',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const PopupMenuItem(
-                value: DatePeriod.week,
-                child: Text('This Week'),
+              TextButton(
+                onPressed: () {
+                  _tabController.animateTo(1);
+                },
+                child: const Text('Voir tout'),
               ),
-              const PopupMenuItem(
-                value: DatePeriod.month,
-                child: Text('This Month'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _transactions.length < 3 ? _transactions.length : 3,
+            itemBuilder: (context, index) {
+              final transaction = _transactions[index];
+              return _buildTransactionCard(transaction);
+            },
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Action buttons
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: 'Exporter le rapport',
+                  icon: Icons.download,
+                  variant: AppButtonVariant.outline,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Rapport exporté')),
+                    );
+                  },
+                ),
               ),
-              const PopupMenuItem(
-                value: DatePeriod.year,
-                child: Text('This Year'),
-              ),
-              const PopupMenuItem(
-                value: DatePeriod.all,
-                child: Text('All Time'),
+              const SizedBox(width: 16),
+              Expanded(
+                child: AppButton(
+                  label: 'Analyser les finances',
+                  icon: Icons.analytics,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Analyse en cours...')),
+                    );
+                  },
+                ),
               ),
             ],
           ),
         ],
       ),
-      body: BlocConsumer<FinanceBloc, FinanceState>(
-        listener: (context, state) {
-          if (state is FinanceError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is FinanceInitial || state is FinanceLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is FinanceLoaded) {
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOverviewTab(context, state),
-                _buildTransactionsTab(context, state),
-              ],
-            );
-          }
-          
-          return const Center(
-            child: Text('Something went wrong'),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddTransactionDialog(context),
-        child: const Icon(Icons.add),
-        tooltip: 'Add Transaction',
-      ),
     );
   }
 
-  Widget _buildOverviewTab(BuildContext context, FinanceLoaded state) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(AppTheme.spacing(2)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Financial summary cards
-          _buildSummaryCards(context, state),
-          
-          SizedBox(height: AppTheme.spacing(3)),
-          
-          // Income vs Expense chart
-          AppCard(
-            child: Padding(
-              padding: EdgeInsets.all(AppTheme.spacing(2)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Income vs Expense',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  SizedBox(height: AppTheme.spacing(3)),
-                  SizedBox(
-                    height: 200,
-                    child: _buildIncomeExpenseChart(context, state),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          SizedBox(height: AppTheme.spacing(3)),
-          
-          // Recent transactions
-          AppCard(
-            child: Padding(
-              padding: EdgeInsets.all(AppTheme.spacing(2)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Recent Transactions',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          _tabController.animateTo(1);
-                        },
-                        child: const Text('View All'),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  _buildRecentTransactions(context, state),
-                ],
-              ),
-            ),
-          ),
-          
-          SizedBox(height: AppTheme.spacing(3)),
-          
-          // Category breakdown
-          AppCard(
-            child: Padding(
-              padding: EdgeInsets.all(AppTheme.spacing(2)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Expense by Category',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  SizedBox(height: AppTheme.spacing(3)),
-                  SizedBox(
-                    height: 200,
-                    child: _buildExpensePieChart(context, state),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          SizedBox(height: AppTheme.spacing(4)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryCards(BuildContext context, FinanceLoaded state) {
-    final String periodName = _getPeriodName(state.currentPeriod);
-    
+  Widget _buildSummaryItem({
+    required String title,
+    required double amount,
+    required Color color,
+    required IconData icon,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: AppTheme.spacing(1)),
-          child: Text(
-            periodName,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 20,
+              ),
             ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${amount.toStringAsFixed(2)} €',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: AppCard(
-                child: Padding(
-                  padding: EdgeInsets.all(AppTheme.spacing(2)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Balance',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      SizedBox(height: AppTheme.spacing(1)),
-                      Text(
-                        currencyFormatter.format(state.balance),
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: state.balance >= 0 ? AppColors.success : AppColors.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: AppTheme.spacing(2)),
-        Row(
-          children: [
-            Expanded(
-              child: AppCard(
-                backgroundColor: Colors.green.withOpacity(0.1),
-                child: Padding(
-                  padding: EdgeInsets.all(AppTheme.spacing(2)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.arrow_downward, color: Colors.green, size: 16),
-                          SizedBox(width: 4),
-                          Text('Income', style: TextStyle(color: Colors.green)),
-                        ],
-                      ),
-                      SizedBox(height: AppTheme.spacing(1)),
-                      Text(
-                        currencyFormatter.format(state.totalIncome),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: AppTheme.spacing(2)),
-            Expanded(
-              child: AppCard(
-                backgroundColor: Colors.red.withOpacity(0.1),
-                child: Padding(
-                  padding: EdgeInsets.all(AppTheme.spacing(2)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.arrow_upward, color: Colors.red, size: 16),
-                          SizedBox(width: 4),
-                          Text('Expense', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                      SizedBox(height: AppTheme.spacing(1)),
-                      Text(
-                        currencyFormatter.format(state.totalExpense),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ],
     );
   }
 
-  Widget _buildIncomeExpenseChart(BuildContext context, FinanceLoaded state) {
-    // Group transactions by date
-    final Map<String, double> incomeByDate = {};
-    final Map<String, double> expenseByDate = {};
-    
-    // Get transactions for the period
-    final periodTransactions = state.transactions.where((t) {
-      return t.date.isAfter(state.periodStart) && t.date.isBefore(state.periodEnd);
-    }).toList();
-    
-    // Determine the date format based on the period
-    String dateFormat;
-    switch (state.currentPeriod) {
-      case DatePeriod.day:
-        dateFormat = 'HH:00';
-        break;
-      case DatePeriod.week:
-        dateFormat = 'EEE';
-        break;
-      case DatePeriod.month:
-        dateFormat = 'dd';
-        break;
-      case DatePeriod.year:
-        dateFormat = 'MMM';
-        break;
-      case DatePeriod.all:
-        dateFormat = 'yyyy';
-        break;
-    }
-    
-    // Group transactions
-    for (final transaction in periodTransactions) {
-      final dateKey = DateFormat(dateFormat).format(transaction.date);
-      
-      if (transaction.type == TransactionType.income) {
-        incomeByDate[dateKey] = (incomeByDate[dateKey] ?? 0) + transaction.amount;
-      } else {
-        expenseByDate[dateKey] = (expenseByDate[dateKey] ?? 0) + transaction.amount;
-      }
-    }
-    
-    // Get all date keys
-    final allDates = {...incomeByDate.keys, ...expenseByDate.keys}.toList()..sort();
-    
-    if (allDates.isEmpty) {
-      return const Center(
-        child: Text('No transactions in this period'),
-      );
-    }
-    
-    // Create bar groups for chart
-    final List<BarChartGroupData> barGroups = [];
-    
-    for (int i = 0; i < allDates.length; i++) {
-      final date = allDates[i];
-      final incomeValue = incomeByDate[date] ?? 0;
-      final expenseValue = expenseByDate[date] ?? 0;
-      
-      barGroups.add(
-        BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: incomeValue,
-              color: Colors.green,
-              width: 12,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(4),
-                topRight: Radius.circular(4),
-              ),
-            ),
-            BarChartRodData(
-              toY: expenseValue,
-              color: Colors.red,
-              width: 12,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(4),
-                topRight: Radius.circular(4),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    
-    return BarChart(
-      BarChartData(
-        alignment: BarChartAlignment.spaceAround,
-        maxY: _getMaxValue(incomeByDate, expenseByDate) * 1.2,
-        barGroups: barGroups,
-        titlesData: FlTitlesData(
-          show: true,
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                if (value.toInt() >= 0 && value.toInt() < allDates.length) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      allDates[value.toInt()],
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox();
-              },
-            ),
-          ),
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 60,
-              getTitlesWidget: (value, meta) {
-                return Text(
-                  currencyFormatter.format(value),
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: AppColors.textSecondary,
-                  ),
-                );
-              },
-            ),
-          ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-        ),
-        gridData: FlGridData(
-          show: true,
-          horizontalInterval: _getMaxValue(incomeByDate, expenseByDate) / 5,
-          drawVerticalLine: false,
-          getDrawingHorizontalLine: (value) {
-            return FlLine(
-              color: AppColors.textSecondary.withOpacity(0.2),
-              strokeWidth: 1,
-              dashArray: [5, 5],
-            );
-          },
-        ),
-        borderData: FlBorderData(
-          show: false,
-        ),
-      ),
-    );
-  }
-
-  double _getMaxValue(Map<String, double> incomeByDate, Map<String, double> expenseByDate) {
-    double maxIncome = 0;
-    double maxExpense = 0;
-    
-    if (incomeByDate.isNotEmpty) {
-      maxIncome = incomeByDate.values.reduce((a, b) => a > b ? a : b);
-    }
-    
-    if (expenseByDate.isNotEmpty) {
-      maxExpense = expenseByDate.values.reduce((a, b) => a > b ? a : b);
-    }
-    
-    return maxIncome > maxExpense ? maxIncome : maxExpense;
-  }
-
-  Widget _buildExpensePieChart(BuildContext context, FinanceLoaded state) {
-    // Group expenses by category
-    final Map<String, double> expensesByCategory = {};
-    
-    // Get transactions for the period
-    final periodTransactions = state.transactions.where((t) {
-      return t.date.isAfter(state.periodStart) && 
-             t.date.isBefore(state.periodEnd) &&
-             t.type == TransactionType.expense;
-    }).toList();
-    
-    // Group transactions
-    for (final transaction in periodTransactions) {
-      expensesByCategory[transaction.category] = 
-          (expensesByCategory[transaction.category] ?? 0) + transaction.amount;
-    }
-    
-    if (expensesByCategory.isEmpty) {
-      return const Center(
-        child: Text('No expenses in this period'),
-      );
-    }
-    
-    // Sort categories by amount (descending)
-    final sortedCategories = expensesByCategory.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    
-    // Generate colors for pie sections
-    final List<Color> colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      Colors.red,
-      Colors.green,
-      Colors.blue,
-      Colors.purple,
-      Colors.orange,
-      Colors.teal,
-    ];
-    
-    // Create sections for pie chart
-    final List<PieChartSectionData> sections = [];
-    
-    for (int i = 0; i < sortedCategories.length; i++) {
-      final category = sortedCategories[i];
-      final color = colors[i % colors.length];
-      
-      sections.add(
-        PieChartSectionData(
-          value: category.value,
-          title: '${category.key}\n${currencyFormatter.format(category.value)}',
-          color: color,
-          radius: 80,
-          titleStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-    
-    return PieChart(
-      PieChartData(
-        sections: sections,
-        centerSpaceRadius: 0,
-        sectionsSpace: 2,
-      ),
-    );
-  }
-
-  Widget _buildRecentTransactions(BuildContext context, FinanceLoaded state) {
-    // Get transactions for the period
-    final periodTransactions = state.transactions.where((t) {
-      return t.date.isAfter(state.periodStart) && t.date.isBefore(state.periodEnd);
-    }).toList();
-    
-    // Sort by date (most recent first)
-    periodTransactions.sort((a, b) => b.date.compareTo(a.date));
-    
-    if (periodTransactions.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(
-          child: Text('No transactions in this period'),
-        ),
-      );
-    }
-    
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: periodTransactions.length > 5 ? 5 : periodTransactions.length,
-      itemBuilder: (context, index) {
-        final transaction = periodTransactions[index];
-        return _buildTransactionItem(context, transaction);
-      },
-    );
-  }
-
-  Widget _buildTransactionsTab(BuildContext context, FinanceLoaded state) {
-    // Get transactions for the period
-    final periodTransactions = state.transactions.where((t) {
-      return t.date.isAfter(state.periodStart) && t.date.isBefore(state.periodEnd);
-    }).toList();
-    
-    // Sort by date (most recent first)
-    periodTransactions.sort((a, b) => b.date.compareTo(a.date));
-    
-    if (periodTransactions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.account_balance_wallet_outlined,
-              size: 64,
-              color: AppColors.textSecondary,
-            ),
-            SizedBox(height: AppTheme.spacing(2)),
-            Text(
-              'No transactions in this period',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            SizedBox(height: AppTheme.spacing(2)),
-            AppButton(
-              text: 'Add Transaction',
-              onPressed: () => _showAddTransactionDialog(context),
-              fullWidth: false,
-              icon: Icons.add,
-            ),
-          ],
-        ),
-      );
-    }
-    
-    return ListView.builder(
-      padding: EdgeInsets.all(AppTheme.spacing(2)),
-      itemCount: periodTransactions.length,
-      itemBuilder: (context, index) {
-        final transaction = periodTransactions[index];
-        
-        // Add date header if this is a new day
-        if (index == 0 || !_isSameDay(transaction.date, periodTransactions[index - 1].date)) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (index > 0) SizedBox(height: AppTheme.spacing(2)),
-              _buildDateHeader(context, transaction.date),
-              SizedBox(height: AppTheme.spacing(1)),
-              _buildTransactionItem(context, transaction),
-            ],
-          );
-        }
-        
-        return _buildTransactionItem(context, transaction);
-      },
-    );
-  }
-
-  Widget _buildDateHeader(BuildContext context, DateTime date) {
-    final now = DateTime.now();
-    
-    String headerText;
-    if (_isSameDay(date, now)) {
-      headerText = 'Today';
-    } else if (_isSameDay(date, now.subtract(const Duration(days: 1)))) {
-      headerText = 'Yesterday';
-    } else {
-      headerText = DateFormat('MMMM d, yyyy').format(date);
-    }
+  Widget _buildBudgetItem(Map<String, dynamic> category) {
+    final progress = category['actual'] / category['budgeted'];
+    final color = category['color'] as Color;
     
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppTheme.spacing(1)),
-      child: Text(
-        headerText,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTransactionItem(BuildContext context, Transaction transaction) {
-    final bool isIncome = transaction.type == TransactionType.income;
-    final Color amountColor = isIncome ? Colors.green : Colors.red;
-    final IconData amountIcon = isIncome ? Icons.arrow_downward : Icons.arrow_upward;
-    
-    return InkWell(
-      onTap: () => _showTransactionDetailsDialog(context, transaction),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: AppTheme.spacing(1)),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: amountColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                amountIcon,
-                color: amountColor,
-                size: 20,
-              ),
-            ),
-            SizedBox(width: AppTheme.spacing(2)),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  Text(
-                    transaction.title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        transaction.category,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        DateFormat('HH:mm').format(transaction.date),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              (isIncome ? '+ ' : '- ') + currencyFormatter.format(transaction.amount),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: amountColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showAddTransactionDialog(BuildContext context) {
-    final titleController = TextEditingController();
-    final amountController = TextEditingController();
-    final noteController = TextEditingController();
-    
-    TransactionType selectedType = TransactionType.expense;
-    String? selectedCategory = 'Other';
-    DateTime selectedDate = DateTime.now();
-    
-    // Define categories
-    final List<String> incomeCategories = [
-      'Salary',
-      'Freelance',
-      'Investments',
-      'Consulting',
-      'Other Income',
-    ];
-    
-    final List<String> expenseCategories = [
-      'Rent',
-      'Utilities',
-      'Software',
-      'Supplies',
-      'Meals',
-      'Travel',
-      'Taxes',
-      'Marketing',
-      'Other',
-    ];
-    
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text(
-              selectedType == TransactionType.income
-                  ? 'Add Income'
-                  : 'Add Expense',
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Transaction type selector
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('Expense'),
-                          selected: selectedType == TransactionType.expense,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = TransactionType.expense;
-                                selectedCategory = 'Other';
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(width: AppTheme.spacing(2)),
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('Income'),
-                          selected: selectedType == TransactionType.income,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = TransactionType.income;
-                                selectedCategory = 'Other Income';
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  AppTextField(
-                    controller: titleController,
-                    label: 'Title',
-                    hint: 'Enter transaction title',
-                    autofocus: true,
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  AppTextField(
-                    controller: amountController,
-                    label: 'Amount',
-                    hint: 'Enter amount',
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    prefixIcon: const Icon(Icons.attach_money),
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  Text(
-                    'Category',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(height: AppTheme.spacing(1)),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    width: 12,
+                    height: 12,
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.textSecondary.withOpacity(0.5)),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DropdownButton<String>(
-                      value: selectedCategory,
-                      isExpanded: true,
-                      underline: const SizedBox(), // Remove the default underline
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategory = value;
-                        });
-                      },
-                      items: (selectedType == TransactionType.income
-                              ? incomeCategories
-                              : expenseCategories)
-                          .map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
-                        );
-                      }).toList(),
+                      color: color,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  SizedBox(height: AppTheme.spacing(2)),
+                  const SizedBox(width: 8),
                   Text(
-                    'Date',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    category['name'],
+                    style: const TextStyle(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: AppTheme.spacing(1)),
-                  InkWell(
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                        lastDate: DateTime.now().add(const Duration(days: 30)),
-                      );
-                      if (date != null) {
-                        setState(() {
-                          selectedDate = date;
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.textSecondary.withOpacity(0.5)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today, size: 18),
-                          const SizedBox(width: 8),
-                          Text(DateFormat('MMM dd, yyyy').format(selectedDate)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  AppTextField(
-                    controller: noteController,
-                    label: 'Note (Optional)',
-                    hint: 'Enter additional details',
-                    maxLines: 3,
-                  ),
                 ],
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              AppButton(
-                text: 'Save',
-                type: AppButtonType.primary,
-                fullWidth: false,
-                onPressed: () {
-                  if (titleController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a title')),
-                    );
-                    return;
-                  }
-                  
-                  if (amountController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter an amount')),
-                    );
-                    return;
-                  }
-                  
-                  final double? amount = double.tryParse(amountController.text.trim());
-                  if (amount == null || amount <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a valid amount')),
-                    );
-                    return;
-                  }
-
-                  context.read<FinanceBloc>().add(AddTransaction(
-                    title: titleController.text.trim(),
-                    amount: amount,
-                    type: selectedType,
-                    category: selectedCategory,
-                    date: selectedDate,
-                    note: noteController.text.trim().isNotEmpty
-                        ? noteController.text.trim()
-                        : null,
-                  ));
-
-                  Navigator.pop(context);
-                },
+              Text(
+                '${category['actual'].toStringAsFixed(2)} € / ${category['budgeted'].toStringAsFixed(2)} €',
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
               ),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress > 1.0 ? 1.0 : progress,
+            backgroundColor: Colors.grey.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              progress > 1.0 ? Colors.red : color,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
       ),
     );
   }
 
-  void _showTransactionDetailsDialog(BuildContext context, Transaction transaction) {
-    final titleController = TextEditingController(text: transaction.title);
-    final amountController = TextEditingController(text: transaction.amount.toString());
-    final noteController = TextEditingController(text: transaction.note ?? '');
+  Widget _buildTransactionCard(Map<String, dynamic> transaction) {
+    final isIncome = transaction['type'] == 'income';
+    final dateFormat = DateFormat('dd MMM yyyy');
+    final formattedDate = dateFormat.format(transaction['date']);
     
-    TransactionType selectedType = transaction.type;
-    String selectedCategory = transaction.category;
-    DateTime selectedDate = transaction.date;
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isIncome ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isIncome ? Icons.arrow_upward : Icons.arrow_downward,
+              color: isIncome ? Colors.green : Colors.red,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction['title'],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      transaction['category'],
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.circle,
+                      size: 4,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${isIncome ? '+' : '-'} ${transaction['amount'].toStringAsFixed(2)} €',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: isIncome ? Colors.green : Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInvoiceCard(Map<String, dynamic> invoice) {
+    final dateFormat = DateFormat('dd MMM yyyy');
+    final formattedDate = dateFormat.format(invoice['date']);
+    final isPaid = invoice['status'] == 'Payée';
     
-    // Define categories
-    final List<String> incomeCategories = [
-      'Salary',
-      'Freelance',
-      'Investments',
-      'Consulting',
-      'Other Income',
-    ];
-    
-    final List<String> expenseCategories = [
-      'Rent',
-      'Utilities',
-      'Software',
-      'Supplies',
-      'Meals',
-      'Travel',
-      'Taxes',
-      'Marketing',
-      'Other',
-    ];
-    
-    // Add the transaction's category if it's not in the list
-    if (transaction.type == TransactionType.income && 
-        !incomeCategories.contains(selectedCategory)) {
-      incomeCategories.add(selectedCategory);
-    } else if (transaction.type == TransactionType.expense && 
-               !expenseCategories.contains(selectedCategory)) {
-      expenseCategories.add(selectedCategory);
-    }
-    
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Transaction Details'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Transaction type selector
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('Expense'),
-                          selected: selectedType == TransactionType.expense,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = TransactionType.expense;
-                                selectedCategory = expenseCategories.contains(selectedCategory)
-                                    ? selectedCategory
-                                    : 'Other';
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(width: AppTheme.spacing(2)),
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('Income'),
-                          selected: selectedType == TransactionType.income,
-                          onSelected: (selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedType = TransactionType.income;
-                                selectedCategory = incomeCategories.contains(selectedCategory)
-                                    ? selectedCategory
-                                    : 'Other Income';
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  AppTextField(
-                    controller: titleController,
-                    label: 'Title',
-                    hint: 'Enter transaction title',
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  AppTextField(
-                    controller: amountController,
-                    label: 'Amount',
-                    hint: 'Enter amount',
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    prefixIcon: const Icon(Icons.attach_money),
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
                   Text(
-                    'Category',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
+                    invoice['client'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
                     ),
                   ),
-                  SizedBox(height: AppTheme.spacing(1)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.textSecondary.withOpacity(0.5)),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DropdownButton<String>(
-                      value: selectedCategory,
-                      isExpanded: true,
-                      underline: const SizedBox(), // Remove the default underline
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategory = value!;
-                        });
-                      },
-                      items: (selectedType == TransactionType.income
-                              ? incomeCategories
-                              : expenseCategories)
-                          .map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
+                  const SizedBox(height: 4),
                   Text(
-                    'Date',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
+                    invoice['invoiceNumber'],
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
                     ),
-                  ),
-                  SizedBox(height: AppTheme.spacing(1)),
-                  InkWell(
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                        lastDate: DateTime.now().add(const Duration(days: 30)),
-                      );
-                      if (date != null) {
-                        setState(() {
-                          selectedDate = date;
-                        });
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.textSecondary.withOpacity(0.5)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today, size: 18),
-                          const SizedBox(width: 8),
-                          Text(DateFormat('MMM dd, yyyy').format(selectedDate)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: AppTheme.spacing(2)),
-                  AppTextField(
-                    controller: noteController,
-                    label: 'Note (Optional)',
-                    hint: 'Enter additional details',
-                    maxLines: 3,
                   ),
                 ],
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Delete Transaction'),
-                      content: const Text('Are you sure you want to delete this transaction?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            context.read<FinanceBloc>().add(DeleteTransaction(transaction.id));
-                            Navigator.pop(context); // Close delete dialog
-                            Navigator.pop(context); // Close details dialog
-                          },
-                          style: TextButton.styleFrom(foregroundColor: Colors.red),
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Delete'),
-              ),
-              AppButton(
-                text: 'Save',
-                type: AppButtonType.primary,
-                fullWidth: false,
-                onPressed: () {
-                  if (titleController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a title')),
-                    );
-                    return;
-                  }
-                  
-                  if (amountController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter an amount')),
-                    );
-                    return;
-                  }
-                  
-                  final double? amount = double.tryParse(amountController.text.trim());
-                  if (amount == null || amount <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a valid amount')),
-                    );
-                    return;
-                  }
-
-                  final updatedTransaction = transaction.copyWith(
-                    title: titleController.text.trim(),
-                    amount: amount,
-                    type: selectedType,
-                    category: selectedCategory,
-                    date: selectedDate,
-                    note: noteController.text.trim().isNotEmpty
-                        ? noteController.text.trim()
-                        : null,
-                  );
-
-                  context.read<FinanceBloc>().add(UpdateTransaction(updatedTransaction));
-                  Navigator.pop(context);
-                },
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isPaid ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  invoice['status'],
+                  style: TextStyle(
+                    color: isPaid ? Colors.green : Colors.orange,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                ),
               ),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 16),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Date: $formattedDate',
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                '${invoice['amount'].toStringAsFixed(2)} €',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (!isPaid)
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: 'Rappel',
+                    icon: Icons.send,
+                    variant: AppButtonVariant.outline,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Rappel envoyé au client')),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppButton(
+                    label: 'Marquer comme payée',
+                    icon: Icons.check_circle,
+                    onPressed: () {
+                      setState(() {
+                        invoice['status'] = 'Payée';
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Facture marquée comme payée')),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }
 
-  String _getPeriodName(DatePeriod period) {
-    switch (period) {
-      case DatePeriod.day:
-        return 'Today\'s Summary';
-      case DatePeriod.week:
-        return 'This Week\'s Summary';
-      case DatePeriod.month:
-        return 'This Month\'s Summary';
-      case DatePeriod.year:
-        return 'This Year\'s Summary';
-      case DatePeriod.all:
-        return 'All Time Summary';
-    }
+  void _showAddTransactionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ajouter une transaction'),
+        content: const SizedBox(
+          height: 300,
+          child: Text('Formulaire d\'ajout de transaction (à implémenter)'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Transaction ajoutée')),
+              );
+            },
+            child: const Text('Ajouter'),
+          ),
+        ],
+      ),
+    );
   }
 
-  bool _isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year && 
-           date1.month == date2.month && 
-           date1.day == date2.day;
+  void _showAddInvoiceDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ajouter une facture'),
+        content: const SizedBox(
+          height: 300,
+          child: Text('Formulaire d\'ajout de facture (à implémenter)'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Facture ajoutée')),
+              );
+            },
+            child: const Text('Ajouter'),
+          ),
+        ],
+      ),
+    );
   }
 }

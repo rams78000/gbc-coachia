@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Theme event
+/// Theme Event
 abstract class ThemeEvent extends Equatable {
   /// Constructor
   const ThemeEvent();
@@ -11,7 +12,7 @@ abstract class ThemeEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Theme change event
+/// Change theme event
 class ThemeChanged extends ThemeEvent {
   /// Constructor
   const ThemeChanged(this.themeMode);
@@ -23,7 +24,13 @@ class ThemeChanged extends ThemeEvent {
   List<Object> get props => [themeMode];
 }
 
-/// Theme state
+/// Load theme event
+class ThemeLoaded extends ThemeEvent {
+  /// Constructor
+  const ThemeLoaded();
+}
+
+/// Theme State
 class ThemeState extends Equatable {
   /// Constructor
   const ThemeState({required this.themeMode});
@@ -31,30 +38,49 @@ class ThemeState extends Equatable {
   /// Theme mode
   final ThemeMode themeMode;
 
-  @override
-  List<Object> get props => [themeMode];
+  /// Initial state
+  factory ThemeState.initial() => const ThemeState(themeMode: ThemeMode.system);
 
   /// Copy with
-  ThemeState copyWith({
-    ThemeMode? themeMode,
-  }) {
+  ThemeState copyWith({ThemeMode? themeMode}) {
     return ThemeState(
       themeMode: themeMode ?? this.themeMode,
     );
   }
+
+  @override
+  List<Object> get props => [themeMode];
 }
 
-/// Theme bloc
+/// Theme Bloc
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   /// Constructor
-  ThemeBloc() : super(const ThemeState(themeMode: ThemeMode.light)) {
+  ThemeBloc() : super(ThemeState.initial()) {
     on<ThemeChanged>(_onThemeChanged);
+    on<ThemeLoaded>(_onThemeLoaded);
   }
 
-  void _onThemeChanged(
+  /// Theme storage key
+  static const String themeKey = 'app_theme_mode';
+
+  Future<void> _onThemeChanged(
     ThemeChanged event,
     Emitter<ThemeState> emit,
-  ) {
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(themeKey, event.themeMode.index);
     emit(state.copyWith(themeMode: event.themeMode));
+  }
+
+  Future<void> _onThemeLoaded(
+    ThemeLoaded event,
+    Emitter<ThemeState> emit,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeIndex = prefs.getInt(themeKey);
+    if (themeIndex != null) {
+      final themeMode = ThemeMode.values[themeIndex];
+      emit(state.copyWith(themeMode: themeMode));
+    }
   }
 }

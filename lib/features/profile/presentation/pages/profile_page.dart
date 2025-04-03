@@ -99,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              context.read<AuthBloc>().add(SignOutRequested());
+              context.read<AuthBloc>().add(const SignOutRequested());
             },
             child: const Text('Sign Out'),
           ),
@@ -109,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _handleVerifyEmail() {
-    context.read<AuthBloc>().add(SendEmailVerificationRequested());
+    context.read<AuthBloc>().add(const SendEmailVerificationRequested());
   }
 
   @override
@@ -170,9 +170,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 radius: 60,
                                 backgroundColor: AppColors.primary,
                                 foregroundImage: selectedImage != null
-                                    ? FileImage(File(selectedImage!))
+                                    ? FileImage(File(selectedImage!)) as ImageProvider<Object>
                                     : user.photoURL != null
-                                        ? NetworkImage(user.photoURL!)
+                                        ? NetworkImage(user.photoURL!) as ImageProvider<Object>
                                         : null,
                                 child: user.photoURL == null && selectedImage == null
                                     ? Text(
@@ -419,18 +419,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
-                      _buildDivider(),
-                      _buildSettingsItem(
-                        context,
-                        'Privacy Policy',
-                        Icons.privacy_tip,
-                        () {
-                          // View privacy policy
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Privacy policy would open here')),
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),
@@ -438,14 +426,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(height: AppTheme.spacing(4)),
 
                 // Sign Out Button
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    text: 'Sign Out',
-                    type: AppButtonType.secondary,
-                    onPressed: _handleSignOut,
-                    icon: Icons.logout,
-                  ),
+                AppButton(
+                  label: 'Sign Out',
+                  onPressed: _handleSignOut,
+                  variant: AppButtonVariant.outline,
+                  icon: Icons.logout_rounded,
+                  fullWidth: true,
                 ),
 
                 SizedBox(height: AppTheme.spacing(4)),
@@ -473,9 +459,12 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              backgroundColor: AppColors.primary.withOpacity(0.1),
-              radius: 20,
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Icon(
                 icon,
                 color: AppColors.primary,
@@ -486,13 +475,16 @@ class _ProfilePageState extends State<ProfilePage> {
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             trailing ??
                 const Icon(
-                  Icons.arrow_forward_ios,
+                  Icons.arrow_forward_ios_rounded,
                   size: 16,
+                  color: Colors.grey,
                 ),
           ],
         ),
@@ -501,9 +493,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildDivider() {
-    return const Divider(
-      height: 1,
-      indent: 56,
-    );
+    return const Divider(height: 1, thickness: 1);
   }
 }

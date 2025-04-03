@@ -1,14 +1,26 @@
-/// Authentication repository interface
+import '../entities/user.dart';
+
+/// Interface pour le repository d'authentification
 abstract class AuthRepository {
-  /// Check if user is authenticated
-  Future<bool> isAuthenticated();
-  
-  /// Authenticate user
-  Future<void> login(String email, String password);
-  
-  /// Register new user
-  Future<void> register(String email, String password);
-  
-  /// Logout user
+  /// Vérifie si l'utilisateur est connecté
+  Future<bool> isLoggedIn();
+
+  /// Récupère l'utilisateur actuellement connecté
+  Future<User?> getCurrentUser();
+
+  /// Connecte un utilisateur avec email et mot de passe
+  Future<User> loginWithEmailAndPassword({
+    required String email,
+    required String password,
+  });
+
+  /// Inscrit un nouvel utilisateur avec email et mot de passe
+  Future<User> registerWithEmailAndPassword({
+    required String name,
+    required String email,
+    required String password,
+  });
+
+  /// Déconnecte l'utilisateur
   Future<void> logout();
 }

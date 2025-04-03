@@ -1,57 +1,85 @@
 import 'package:flutter/material.dart';
-import '../../config/theme/app_theme.dart';
 
+/// Custom app card widget
 class AppCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final Color? backgroundColor;
-  final double? elevation;
-  final double? borderRadius;
-  final bool fullWidth;
-  final VoidCallback? onTap;
-
+  /// Constructor
   const AppCard({
     Key? key,
     required this.child,
-    this.padding,
-    this.backgroundColor,
-    this.elevation,
-    this.borderRadius,
-    this.fullWidth = true,
     this.onTap,
+    this.padding,
+    this.margin,
+    this.color,
+    this.borderRadius,
+    this.elevation,
+    this.width,
+    this.height,
+    this.borderColor,
   }) : super(key: key);
+
+  /// Card content
+  final Widget child;
+
+  /// Optional tap handler
+  final VoidCallback? onTap;
+  
+  /// Card padding
+  final EdgeInsetsGeometry? padding;
+  
+  /// Card margin
+  final EdgeInsetsGeometry? margin;
+  
+  /// Card background color
+  final Color? color;
+  
+  /// Card border radius
+  final BorderRadius? borderRadius;
+  
+  /// Card elevation
+  final double? elevation;
+  
+  /// Card width
+  final double? width;
+  
+  /// Card height
+  final double? height;
+  
+  /// Card border color
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
-    final CardTheme cardTheme = Theme.of(context).cardTheme;
-    final double radius = borderRadius ?? AppTheme.cardBorderRadius;
+    final effectiveRadius = borderRadius ?? BorderRadius.circular(16);
     
-    Widget card = Card(
-      elevation: elevation ?? cardTheme.elevation ?? AppTheme.cardElevation,
-      color: backgroundColor ?? cardTheme.color,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: padding ?? EdgeInsets.all(AppTheme.spacing(2)),
-        child: child,
-      ),
+    Widget cardContent = Padding(
+      padding: padding ?? const EdgeInsets.all(16),
+      child: child,
     );
-
-    if (onTap != null) {
-      card = InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(radius),
-        child: card,
+    
+    if (width != null || height != null) {
+      cardContent = SizedBox(
+        width: width,
+        height: height,
+        child: cardContent,
       );
     }
-
-    if (!fullWidth) {
-      return IntrinsicWidth(child: card);
-    }
-
-    return card;
+    
+    return Card(
+      margin: margin ?? const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: effectiveRadius,
+        side: borderColor != null 
+            ? BorderSide(color: borderColor!)
+            : BorderSide.none,
+      ),
+      color: color,
+      elevation: elevation,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: effectiveRadius,
+        child: cardContent,
+      ),
+    );
   }
 }

@@ -1,30 +1,30 @@
 import 'package:gbc_coachia/features/auth/domain/entities/user.dart';
 
-/// Interface pour le repository d'authentification
+/// Interface du repository d'authentification
 abstract class AuthRepository {
-  /// Récupérer l'utilisateur actuellement connecté
+  /// Vérifie si l'utilisateur est connecté
+  Future<bool> isLoggedIn();
+
+  /// Connecte un utilisateur
+  Future<User> login({
+    required String email,
+    required String password,
+  });
+
+  /// Inscrit un nouvel utilisateur
+  Future<User> register({
+    required String email,
+    required String password,
+    String? nom,
+    String? prenom,
+  });
+
+  /// Récupère l'utilisateur courant
   Future<User?> getCurrentUser();
-  
-  /// Connecter un utilisateur avec email et mot de passe
-  Future<User> signIn({
-    required String email,
-    required String password,
-  });
-  
-  /// Créer un nouvel utilisateur
-  Future<User> signUp({
-    required String email,
-    required String password,
-    required String username,
-    String? fullName,
-  });
-  
-  /// Déconnecter l'utilisateur
-  Future<void> signOut();
-  
-  /// Vérifier si l'utilisateur a déjà vu l'onboarding
-  Future<bool> hasSeenOnboarding();
-  
-  /// Marquer l'onboarding comme vu
-  Future<void> setOnboardingSeen();
+
+  /// Déconnecte l'utilisateur
+  Future<void> logout();
+
+  /// Réinitialise le mot de passe d'un utilisateur
+  Future<void> resetPassword({required String email});
 }

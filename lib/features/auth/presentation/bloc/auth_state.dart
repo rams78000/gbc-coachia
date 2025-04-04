@@ -1,80 +1,48 @@
-import 'package:gbc_coachia/features/auth/domain/entities/user.dart';
+part of 'auth_bloc.dart';
 
-/// État d'authentification
-abstract class AuthState {
-  /// Constructeur par défaut
+/// États d'authentification
+abstract class AuthState extends Equatable {
   const AuthState();
+
+  @override
+  List<Object?> get props => [];
 }
 
 /// État initial
-class AuthInitialState extends AuthState {
-  /// Constructeur
-  const AuthInitialState();
-}
+class AuthInitial extends AuthState {}
 
-/// État de chargement
-class AuthLoadingState extends AuthState {
-  /// Constructeur
-  const AuthLoadingState();
-}
+/// Chargement en cours
+class AuthLoading extends AuthState {}
 
-/// État authentifié
-class AuthAuthenticatedState extends AuthState {
-  /// Utilisateur connecté
+/// Utilisateur authentifié
+class Authenticated extends AuthState {
   final User user;
-  
-  /// Indique si l'utilisateur a déjà vu l'onboarding
-  final bool hasSeenOnboarding;
-  
-  /// Constructeur
-  const AuthAuthenticatedState({
-    required this.user,
-    this.hasSeenOnboarding = false,
-  });
-  
-  /// Créer une copie de l'état avec des modifications
-  AuthAuthenticatedState copyWith({
-    User? user,
-    bool? hasSeenOnboarding,
-  }) {
-    return AuthAuthenticatedState(
-      user: user ?? this.user,
-      hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
-    );
-  }
+
+  const Authenticated(this.user);
+
+  @override
+  List<Object?> get props => [user];
 }
 
-/// État non authentifié
-class AuthUnauthenticatedState extends AuthState {
-  /// Indique si l'utilisateur a déjà vu l'onboarding
-  final bool hasSeenOnboarding;
-  
-  /// Constructeur
-  const AuthUnauthenticatedState({
-    this.hasSeenOnboarding = false,
-  });
-  
-  /// Créer une copie de l'état avec des modifications
-  AuthUnauthenticatedState copyWith({
-    bool? hasSeenOnboarding,
-  }) {
-    return AuthUnauthenticatedState(
-      hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
-    );
-  }
-}
+/// Utilisateur non authentifié
+class Unauthenticated extends AuthState {}
 
-/// État d'erreur
-class AuthErrorState extends AuthState {
-  /// Message d'erreur
+/// Erreur d'authentification
+class AuthError extends AuthState {
   final String message;
-  
-  /// Code d'erreur
-  final String? code;
-  
-  /// Constructeur
-  const AuthErrorState({
-    required this.message,
-    this.code,
-  });
+
+  const AuthError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+/// Réinitialisation de mot de passe réussie
+class ResetPasswordSuccess extends AuthState {
+  final String message;
+
+  const ResetPasswordSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

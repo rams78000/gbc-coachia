@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gbc_coachia/config/router/app_router.dart';
+import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/core/widgets/app_button.dart';
 import 'package:gbc_coachia/core/widgets/app_text_field.dart';
 import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_event.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_state.dart';
-import 'package:gbc_coachia/features/auth/presentation/pages/register_page.dart';
 
 /// Page de connexion
 class LoginPage extends StatefulWidget {
-  /// Nom de la route
-  static const routeName = '/login';
-  
-  /// Constructeur
   const LoginPage({super.key});
 
   @override
@@ -24,47 +19,52 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-  
+  bool _isLoading = false;
+  String? _errorMessage;
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
-  
-  /// Soumettre le formulaire
-  void _submitForm() {
-    if (_formKey.currentState?.validate() ?? false) {
+
+  void _handleLogin() {
+    if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-        AuthSignInEvent(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        ),
-      );
+            LoginUser(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+            ),
+          );
     }
   }
-  
-  /// Basculer la visibilité du mot de passe
-  void _togglePasswordVisibility() {
-    setState(() {
-      _obscurePassword = !_obscurePassword;
-    });
-  }
-  
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthErrorState) {
-            // Afficher un message d'erreur
+          if (state is AuthLoading) {
+            setState(() {
+              _isLoading = true;
+              _errorMessage = null;
+            });
+          } else if (state is Authenticated) {
+            setState(() {
+              _isLoading = false;
+              _errorMessage = null;
+            });
+            context.go(AppRoutes.dashboard);
+          } else if (state is AuthError) {
+            setState(() {
+              _isLoading = false;
+              _errorMessage = state.message;
+            });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: colorScheme.error,
+                backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
           }
@@ -73,71 +73,82 @@ class _LoginPageState extends State<LoginPage> {
           return SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppTheme.spacing * 2),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Logo
-                      Icon(
-                        Icons.tips_and_updates, // Remplacer par le logo réel
+                      // Logo ou titre
+                      const Icon(
+                        Icons.psychology_alt,
                         size: 80,
-                        color: colorScheme.primary,
+                        color: AppTheme.primaryColor,
                       ),
-                      const SizedBox(height: 32),
-                      
-                      // Titre
+                      const SizedBox(height: AppTheme.spacing),
                       Text(
-                        'Connexion',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        'GBC CoachIA',
+                        style: Theme.of(context).textTheme.headlineMedium,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 8),
-                      
-                      // Sous-titre
+                      const SizedBox(height: AppTheme.smallSpacing),
                       Text(
-                        'Accédez à votre espace coach entrepreneurial',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                        'Connectez-vous pour continuer',
+                        style: Theme.of(context).textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 32),
-                      
-                      // Champ Email
+                      const SizedBox(height: AppTheme.spacing * 2),
+
+                      // Affichage des erreurs s'il y en a
+                      if (_errorMessage != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(AppTheme.spacing),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .error
+                                .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(
+                                AppTheme.smallBorderRadius),
+                          ),
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: AppTheme.spacing),
+                      ],
+
+                      // Champs de formulaire
                       AppTextField(
-                        controller: _emailController,
-                        labelText: 'Email',
+                        label: 'Email',
                         hintText: 'Entrez votre adresse email',
-                        prefixIcon: Icons.email_outlined,
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
+                        prefixIcon: Icons.email_outlined,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez entrer votre email';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                              .hasMatch(value)) {
                             return 'Veuillez entrer un email valide';
                           }
                           return null;
                         },
+                        textInputAction: TextInputAction.next,
                       ),
-                      const SizedBox(height: 16),
-                      
-                      // Champ Mot de passe
+                      const SizedBox(height: AppTheme.spacing),
                       AppTextField(
-                        controller: _passwordController,
-                        labelText: 'Mot de passe',
+                        label: 'Mot de passe',
                         hintText: 'Entrez votre mot de passe',
+                        controller: _passwordController,
+                        obscureText: true,
                         prefixIcon: Icons.lock_outline,
-                        obscureText: _obscurePassword,
-                        suffixIcon: _obscurePassword 
-                          ? Icons.visibility_outlined 
-                          : Icons.visibility_off_outlined,
-                        onSuffixIconPressed: _togglePasswordVisibility,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez entrer votre mot de passe';
@@ -147,42 +158,48 @@ class _LoginPageState extends State<LoginPage> {
                           }
                           return null;
                         },
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _handleLogin(),
                       ),
-                      const SizedBox(height: 8),
-                      
-                      // Lien Mot de passe oublié
+                      const SizedBox(height: AppTheme.smallSpacing),
+
+                      // Lien pour mot de passe oublié
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {
-                            // TODO: Implémenter la récupération de mot de passe
-                          },
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  // TODO: Implémenter la réinitialisation du mot de passe
+                                },
                           child: const Text('Mot de passe oublié ?'),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      
-                      // Bouton Se connecter
+                      const SizedBox(height: AppTheme.spacing),
+
+                      // Bouton de connexion
                       AppButton(
-                        text: 'Se connecter',
-                        onPressed: _submitForm,
-                        isLoading: state is AuthLoadingState,
-                        width: double.infinity,
+                        label: 'Se connecter',
+                        isLoading: _isLoading,
+                        isFullWidth: true,
+                        onPressed: _isLoading ? null : _handleLogin,
                       ),
-                      const SizedBox(height: 16),
-                      
-                      // Lien vers l'inscription
+                      const SizedBox(height: AppTheme.largeSpacing),
+
+                      // Lien pour s'inscrire
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Pas encore de compte ?',
+                            'Vous n\'avez pas de compte ?',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           TextButton(
-                            onPressed: () {
-                              context.go(RegisterPage.routeName);
-                            },
+                            onPressed: _isLoading
+                                ? null
+                                : () {
+                                    context.push(AppRoutes.register);
+                                  },
                             child: const Text('S\'inscrire'),
                           ),
                         ],

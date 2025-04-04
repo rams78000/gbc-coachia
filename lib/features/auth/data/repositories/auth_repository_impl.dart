@@ -1,129 +1,131 @@
+import 'dart:convert';
+import 'dart:math';
 import 'package:gbc_coachia/features/auth/domain/entities/user.dart';
+import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Implémentation du repository d'authentification
-class AuthRepositoryImpl {
-  /// Clé pour stocker l'état de l'onboarding
-  static const String _onboardingKey = 'hasSeenOnboarding';
-  
-  /// Clé pour stocker l'utilisateur courant
-  static const String _currentUserKey = 'currentUser';
-  
-  /// Utilisateur factice pour la démo
-  static final User _mockUser = User(
-    id: 'user-123',
-    email: 'utilisateur@example.com',
-    username: 'utilisateur',
-    fullName: 'Utilisateur Test',
-    photoUrl: null,
-    createdAt: DateTime.now().subtract(const Duration(days: 30)),
-    updatedAt: DateTime.now(),
-  );
-  
-  /// Constructeur
-  const AuthRepositoryImpl();
-  
-  /// Obtenir l'utilisateur courant
+/// 
+/// Cette implémentation est un mock pour le MVP. Dans une version ultérieure,
+/// elle sera remplacée par une implémentation qui utilise une API réelle.
+class AuthRepositoryImpl implements AuthRepository {
+  final SharedPreferences sharedPreferences;
+  static const String _userKey = 'current_user';
+
+  AuthRepositoryImpl({required this.sharedPreferences});
+
+  @override
   Future<User?> getCurrentUser() async {
-    // Simuler une attente pour l'API
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    // Pour le moment, simuler un utilisateur non connecté
-    return null;
+    final userJson = sharedPreferences.getString(_userKey);
+    if (userJson == null) {
+      return null;
+    }
+
+    try {
+      return User.fromJson(userJson);
+    } catch (e) {
+      await sharedPreferences.remove(_userKey);
+      return null;
+    }
   }
-  
-  /// Vérifier si l'onboarding a été vu
-  Future<bool> hasSeenOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_onboardingKey) ?? false;
+
+  @override
+  Future<bool> isLoggedIn() async {
+    final user = await getCurrentUser();
+    return user != null;
   }
-  
-  /// Marquer l'onboarding comme vu
-  Future<void> setOnboardingSeen(bool seen) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_onboardingKey, seen);
-  }
-  
-  /// Connecter un utilisateur
-  Future<User> signIn({
+
+  @override
+  Future<User> login({
     required String email,
     required String password,
   }) async {
-    // Simuler une attente pour l'API
+    // Simuler une connexion réseau
     await Future.delayed(const Duration(seconds: 1));
-    
-    // Valider les identifiants (simulation)
-    if (email.toLowerCase() != _mockUser.email && password != 'password123') {
-      throw Exception('Identifiants invalides');
+
+    // Vérification simple du format d'email
+    if (!email.contains('@')) {
+      throw Exception('Adresse email invalide');
     }
-    
-    // Retourner l'utilisateur simulé
-    final now = DateTime.now();
-    return _mockUser.copyWith(
-      updatedAt: now,
+
+    // Vérification simple du mot de passe
+    if (password.length < 6) {
+      throw Exception('Le mot de passe doit contenir au moins 6 caractères');
+    }
+
+    // Simuler une authentification réussie
+    final user = User(
+      id: _generateId(),
+      email: email,
+      nom: email.split('@').first.split('.').last,
+      prenom: email.split('@').first.split('.').first,
+      dateCreation: DateTime.now(),
     );
+
+    // Sauvegarder l'utilisateur dans les préférences partagées
+    await sharedPreferences.setString(_userKey, user.toJson());
+
+    return user;
   }
-  
-  /// Inscrire un nouvel utilisateur
-  Future<User> signUp({
+
+  @override
+  Future<void> logout() async {
+    await sharedPreferences.remove(_userKey);
+  }
+
+  @override
+  Future<User> register({
     required String email,
     required String password,
-    required String username,
-    String? fullName,
+    String? nom,
+    String? prenom,
   }) async {
-    // Simuler une attente pour l'API
+    // Simuler une connexion réseau
     await Future.delayed(const Duration(seconds: 1));
-    
-    // Vérifier si l'email est déjà utilisé (simulation)
-    if (email.toLowerCase() == _mockUser.email) {
-      throw Exception('Cet email est déjà utilisé');
+
+    // Vérification simple du format d'email
+    if (!email.contains('@')) {
+      throw Exception('Adresse email invalide');
     }
-    
-    // Simuler la création d'un nouvel utilisateur
-    final now = DateTime.now();
-    return User(
-      id: 'user-${now.millisecondsSinceEpoch}',
-      email: email,
-      username: username,
-      fullName: fullName,
-      photoUrl: null,
-      createdAt: now,
-      updatedAt: now,
-    );
-  }
-  
-  /// Déconnecter l'utilisateur
-  Future<void> signOut() async {
-    // Simuler une attente pour l'API
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    // Nettoyer les données de session (à implémenter)
-  }
-  
-  /// Mettre à jour le profil utilisateur
-  Future<User> updateProfile({
-    required String userId,
-    String? username,
-    String? fullName,
-    String? email,
-    String? photoUrl,
-  }) async {
-    // Simuler une attente pour l'API
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    // Récupérer l'utilisateur actuel (simulation)
-    final currentUser = await getCurrentUser();
-    if (currentUser == null) {
-      throw Exception('Utilisateur non connecté');
+
+    // Vérification simple du mot de passe
+    if (password.length < 6) {
+      throw Exception('Le mot de passe doit contenir au moins 6 caractères');
     }
-    
-    // Simuler la mise à jour
-    return currentUser.copyWith(
-      username: username,
-      fullName: fullName,
+
+    // Simuler un enregistrement réussi
+    final user = User(
+      id: _generateId(),
       email: email,
-      photoUrl: photoUrl,
-      updatedAt: DateTime.now(),
+      nom: nom,
+      prenom: prenom,
+      dateCreation: DateTime.now(),
     );
+
+    // Sauvegarder l'utilisateur dans les préférences partagées
+    await sharedPreferences.setString(_userKey, user.toJson());
+
+    return user;
+  }
+
+  @override
+  Future<void> resetPassword({required String email}) async {
+    // Simuler une connexion réseau
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Vérification simple du format d'email
+    if (!email.contains('@')) {
+      throw Exception('Adresse email invalide');
+    }
+
+    // Dans une implémentation réelle, cette méthode enverrait un email
+    // avec un lien pour réinitialiser le mot de passe
+  }
+
+  /// Génère un identifiant unique pour l'utilisateur
+  String _generateId() {
+    final random = Random.secure();
+    final values = List<int>.generate(16, (i) => random.nextInt(256));
+    return base64Url.encode(values);
   }
 }

@@ -1,25 +1,21 @@
 import 'package:get_it/get_it.dart';
 import 'package:gbc_coachia/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:gbc_coachia/config/router/app_router.dart';
+import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Instance globale du localisateur de services
-final getIt = GetIt.instance;
+/// Service locator pour l'injection de dépendances
+final serviceLocator = GetIt.instance;
 
-/// Initialiser le localisateur de services
-void setupServiceLocator() {
+/// Initialise les dépendances de l'application
+Future<void> initDependencies() async {
+  // Services externes
+  final sharedPreferences = await SharedPreferences.getInstance();
+  serviceLocator.registerSingleton<SharedPreferences>(sharedPreferences);
+
   // Repositories
-  getIt.registerLazySingleton<AuthRepositoryImpl>(
-    () => const AuthRepositoryImpl(),
+  serviceLocator.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(sharedPreferences: serviceLocator()),
   );
-  
-  // BLoCs
-  getIt.registerLazySingleton<AuthBloc>(
-    () => AuthBloc(authRepository: getIt<AuthRepositoryImpl>()),
-  );
-  
-  // Router
-  getIt.registerLazySingleton<AppRouter>(
-    () => AppRouter(authBloc: getIt<AuthBloc>()),
-  );
+
+  // TODO: Ajouter d'autres dépendances au fur et à mesure de l'implémentation
 }

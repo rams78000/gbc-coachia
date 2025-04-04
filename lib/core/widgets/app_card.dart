@@ -1,84 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:gbc_coachia/config/theme/app_theme.dart';
 
-/// Custom app card widget
+/// Carte personnalisée pour l'application
 class AppCard extends StatelessWidget {
-  /// Constructor
+  final Widget child;
+  final VoidCallback? onTap;
+  final Color? color;
+  final EdgeInsetsGeometry? padding;
+  final EdgeInsetsGeometry? margin;
+  final double? elevation;
+  final BorderRadius? borderRadius;
+  final bool hasShadow;
+
   const AppCard({
     Key? key,
     required this.child,
     this.onTap,
+    this.color,
     this.padding,
     this.margin,
-    this.color,
-    this.borderRadius,
     this.elevation,
-    this.width,
-    this.height,
-    this.borderColor,
+    this.borderRadius,
+    this.hasShadow = true,
   }) : super(key: key);
-
-  /// Card content
-  final Widget child;
-
-  /// Optional tap handler
-  final VoidCallback? onTap;
-  
-  /// Card padding
-  final EdgeInsetsGeometry? padding;
-  
-  /// Card margin
-  final EdgeInsetsGeometry? margin;
-  
-  /// Card background color
-  final Color? color;
-  
-  /// Card border radius
-  final BorderRadius? borderRadius;
-  
-  /// Card elevation
-  final double? elevation;
-  
-  /// Card width
-  final double? width;
-  
-  /// Card height
-  final double? height;
-  
-  /// Card border color
-  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveRadius = borderRadius ?? BorderRadius.circular(16);
-    
-    Widget cardContent = Padding(
-      padding: padding ?? const EdgeInsets.all(16),
-      child: child,
-    );
-    
-    if (width != null || height != null) {
-      cardContent = SizedBox(
-        width: width,
-        height: height,
-        child: cardContent,
+    final theme = Theme.of(context);
+    final cardRadius = borderRadius ?? BorderRadius.circular(AppTheme.borderRadius);
+    final cardColor = color ?? theme.cardColor;
+    final cardPadding = padding ?? const EdgeInsets.all(AppTheme.spacing);
+    final cardMargin = margin ?? const EdgeInsets.all(0);
+    final cardElevation = elevation ?? (hasShadow ? 1.0 : 0.0);
+
+    if (onTap != null) {
+      return Card(
+        color: cardColor,
+        elevation: cardElevation,
+        margin: cardMargin,
+        shape: RoundedRectangleBorder(
+          borderRadius: cardRadius,
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: cardRadius,
+          child: Padding(
+            padding: cardPadding,
+            child: child,
+          ),
+        ),
       );
     }
-    
+
     return Card(
-      margin: margin ?? const EdgeInsets.symmetric(vertical: 8),
+      color: cardColor,
+      elevation: cardElevation,
+      margin: cardMargin,
       shape: RoundedRectangleBorder(
-        borderRadius: effectiveRadius,
-        side: borderColor != null 
-            ? BorderSide(color: borderColor!)
-            : BorderSide.none,
+        borderRadius: cardRadius,
       ),
-      color: color,
-      elevation: elevation,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: effectiveRadius,
-        child: cardContent,
+      child: Padding(
+        padding: cardPadding,
+        child: child,
       ),
     );
   }

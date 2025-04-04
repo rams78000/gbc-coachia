@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gbc_coachia/config/router/app_router.dart';
+import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_state.dart';
-import 'package:gbc_coachia/features/auth/presentation/pages/login_page.dart';
-import 'package:gbc_coachia/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:gbc_coachia/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Page de démarrage
+/// Page de démarrage de l'application
 class SplashPage extends StatefulWidget {
-  /// Nom de la route
-  static const routeName = '/';
-  
-  /// Constructeur
   const SplashPage({super.key});
 
   @override
@@ -20,153 +15,147 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
   late Animation<double> _scaleAnimation;
   
+  static const String _onboardingCompletedKey = 'onboarding_completed';
+
   @override
   void initState() {
     super.initState();
     
-    _animationController = AnimationController(
+    // Configurer les animations
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
-      duration: const Duration(seconds: 2),
     );
     
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+        parent: _controller,
+        curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
       ),
     );
     
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+        parent: _controller,
+        curve: const Interval(0.0, 0.65, curve: Curves.easeOutBack),
       ),
     );
     
-    _animationController.forward();
+    // Démarrer l'animation
+    _controller.forward();
     
-    // Attendre un peu avant de rediriger
-    Future.delayed(const Duration(seconds: 3), () {
-      _redirectBasedOnAuthState();
-    });
+    // Initialiser la navigation
+    _navigateToNextScreen();
   }
-  
+
   @override
   void dispose() {
-    _animationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
-  
-  /// Rediriger en fonction de l'état d'authentification
-  void _redirectBasedOnAuthState() {
+
+  Future<void> _navigateToNextScreen() async {
+    // Attendre que l'animation se termine
+    await Future.delayed(const Duration(milliseconds: 2000));
+    
+    if (!mounted) return;
+    
+    // Vérifier si l'onboarding a déjà été complété
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool(_onboardingCompletedKey) ?? false;
+    
+    if (!mounted) return;
+    
+    // Vérifier si l'utilisateur est déjà connecté
+    context.read<AuthBloc>().add(CheckAuthStatus());
+    
+    // Attendre le résultat de la vérification d'authentification
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    if (!mounted) return;
+    
+    // Déterminer où naviguer ensuite
     final authState = context.read<AuthBloc>().state;
     
-    if (authState is AuthAuthenticatedState) {
-      if (!authState.hasSeenOnboarding) {
-        context.go(OnboardingPage.routeName);
-      } else {
-        context.go(DashboardPage.routeName);
-      }
-    } else if (authState is AuthUnauthenticatedState) {
-      if (!authState.hasSeenOnboarding) {
-        context.go(OnboardingPage.routeName);
-      } else {
-        context.go(LoginPage.routeName);
-      }
+    if (authState is Authenticated) {
+      // Si l'utilisateur est authentifié, aller au tableau de bord
+      context.go(AppRoutes.dashboard);
     } else {
-      // Par défaut, aller à la page de connexion
-      context.go(LoginPage.routeName);
+      // Sinon, vérifier si l'onboarding doit être affiché
+      if (onboardingCompleted) {
+        context.go(AppRoutes.login);
+      } else {
+        context.go(AppRoutes.onboarding);
+      }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primary,
-              colorScheme.primaryContainer,
-            ],
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: child,
-                  ),
-                );
-              },
-              child: Column(
-                children: [
-                  // Logo
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: colorScheme.onPrimary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+      backgroundColor: AppTheme.primaryColor,
+      body: Center(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Opacity(
+              opacity: _opacityAnimation.value,
+              child: Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo de l'application
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.psychology_alt,
+                          size: 80,
+                          color: AppTheme.primaryColor,
                         ),
-                      ],
+                      ),
                     ),
-                    child: Icon(
-                      Icons.tips_and_updates, // Remplacer par le logo réel
-                      size: 70,
-                      color: colorScheme.primary,
+                    const SizedBox(height: AppTheme.spacing),
+                    const Text(
+                      'GBC CoachIA',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Titre de l'application
-                  Text(
-                    'GBC CoachIA',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: AppTheme.smallSpacing),
+                    const Text(
+                      'Votre assistant personnel d\'entreprise',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  // Slogan
-                  Text(
-                    'Votre coach entrepreneurial intelligent',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onPrimary.withOpacity(0.9),
+                    const SizedBox(height: AppTheme.spacing * 3),
+                    const SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 3,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 64),
-            
-            // Indicateur de chargement
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

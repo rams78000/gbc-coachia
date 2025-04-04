@@ -1,208 +1,159 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gbc_coachia/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:equatable/equatable.dart';
 import 'package:gbc_coachia/features/auth/domain/entities/user.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_event.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_state.dart';
+import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
 
-/// Bloc d'authentification pour gérer l'état d'authentification de l'application
+// Événements
+abstract class AuthEvent extends Equatable {
+  const AuthEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class CheckAuthStatus extends AuthEvent {}
+
+class LoginUser extends AuthEvent {
+  final String email;
+  final String password;
+
+  const LoginUser({
+    required this.email,
+    required this.password,
+  });
+
+  @override
+  List<Object?> get props => [email, password];
+}
+
+class RegisterUser extends AuthEvent {
+  final String email;
+  final String password;
+  final String? nom;
+  final String? prenom;
+
+  const RegisterUser({
+    required this.email,
+    required this.password,
+    this.nom,
+    this.prenom,
+  });
+
+  @override
+  List<Object?> get props => [email, password, nom, prenom];
+}
+
+class LogoutUser extends AuthEvent {}
+
+// États
+abstract class AuthState extends Equatable {
+  const AuthState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class AuthInitial extends AuthState {}
+
+class AuthLoading extends AuthState {}
+
+class Authenticated extends AuthState {
+  final User user;
+
+  const Authenticated(this.user);
+
+  @override
+  List<Object?> get props => [user];
+}
+
+class Unauthenticated extends AuthState {}
+
+class AuthError extends AuthState {
+  final String message;
+
+  const AuthError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+// Bloc
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  /// Repository d'authentification
-  final AuthRepositoryImpl _authRepository;
-  
-  /// Constructeur
-  AuthBloc({required AuthRepositoryImpl authRepository})
-      : _authRepository = authRepository,
-        super(const AuthInitialState()) {
-    // Enregistrement des gestionnaires d'événements
-    on<AuthCheckStatusEvent>(_onCheckStatus);
-    on<AuthSignInEvent>(_onSignIn);
-    on<AuthSignUpEvent>(_onSignUp);
-    on<AuthSignOutEvent>(_onSignOut);
-    on<AuthSetOnboardingSeenEvent>(_onSetOnboardingSeen);
-    on<AuthUpdateProfileEvent>(_onUpdateProfile);
+  final AuthRepository authRepository;
+
+  AuthBloc({required this.authRepository}) : super(AuthInitial()) {
+    on<CheckAuthStatus>(_onCheckAuthStatus);
+    on<LoginUser>(_onLoginUser);
+    on<RegisterUser>(_onRegisterUser);
+    on<LogoutUser>(_onLogoutUser);
   }
-  
-  /// Vérifier l'état d'authentification actuel
-  Future<void> _onCheckStatus(
-    AuthCheckStatusEvent event,
+
+  Future<void> _onCheckAuthStatus(
+    CheckAuthStatus event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoadingState());
-    
+    emit(AuthLoading());
     try {
-      // Vérifier si l'utilisateur est connecté
-      final user = await _authRepository.getCurrentUser();
-      final hasSeenOnboarding = await _authRepository.hasSeenOnboarding();
-      
-      if (user != null) {
-        emit(AuthAuthenticatedState(
-          user: user,
-          hasSeenOnboarding: hasSeenOnboarding,
-        ));
+      final isLoggedIn = await authRepository.isLoggedIn();
+      if (isLoggedIn) {
+        final user = await authRepository.getCurrentUser();
+        if (user != null) {
+          emit(Authenticated(user));
+        } else {
+          emit(Unauthenticated());
+        }
       } else {
-        emit(AuthUnauthenticatedState(
-          hasSeenOnboarding: hasSeenOnboarding,
-        ));
+        emit(Unauthenticated());
       }
     } catch (e) {
-      emit(AuthErrorState(message: e.toString()));
-      emit(const AuthUnauthenticatedState());
+      emit(AuthError(e.toString()));
     }
   }
-  
-  /// Se connecter avec email et mot de passe
-  Future<void> _onSignIn(
-    AuthSignInEvent event,
+
+  Future<void> _onLoginUser(
+    LoginUser event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoadingState());
-    
+    emit(AuthLoading());
     try {
-      // Se connecter avec les identifiants
-      final user = await _authRepository.signIn(
+      final user = await authRepository.login(
         email: event.email,
         password: event.password,
       );
-      
-      final hasSeenOnboarding = await _authRepository.hasSeenOnboarding();
-      
-      emit(AuthAuthenticatedState(
-        user: user,
-        hasSeenOnboarding: hasSeenOnboarding,
-      ));
+      emit(Authenticated(user));
     } catch (e) {
-      emit(AuthErrorState(message: e.toString()));
-      
-      // Revenir à l'état non authentifié
-      final hasSeenOnboarding = await _authRepository.hasSeenOnboarding();
-      emit(AuthUnauthenticatedState(
-        hasSeenOnboarding: hasSeenOnboarding,
-      ));
+      emit(AuthError(e.toString()));
     }
   }
-  
-  /// S'inscrire avec email et mot de passe
-  Future<void> _onSignUp(
-    AuthSignUpEvent event,
+
+  Future<void> _onRegisterUser(
+    RegisterUser event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoadingState());
-    
+    emit(AuthLoading());
     try {
-      // Créer un nouvel utilisateur
-      final user = await _authRepository.signUp(
+      final user = await authRepository.register(
         email: event.email,
         password: event.password,
-        username: event.username,
-        fullName: event.fullName,
+        nom: event.nom,
+        prenom: event.prenom,
       );
-      
-      final hasSeenOnboarding = await _authRepository.hasSeenOnboarding();
-      
-      emit(AuthAuthenticatedState(
-        user: user,
-        hasSeenOnboarding: hasSeenOnboarding,
-      ));
+      emit(Authenticated(user));
     } catch (e) {
-      emit(AuthErrorState(message: e.toString()));
-      
-      // Revenir à l'état non authentifié
-      final hasSeenOnboarding = await _authRepository.hasSeenOnboarding();
-      emit(AuthUnauthenticatedState(
-        hasSeenOnboarding: hasSeenOnboarding,
-      ));
+      emit(AuthError(e.toString()));
     }
   }
-  
-  /// Se déconnecter
-  Future<void> _onSignOut(
-    AuthSignOutEvent event,
+
+  Future<void> _onLogoutUser(
+    LogoutUser event,
     Emitter<AuthState> emit,
   ) async {
-    emit(const AuthLoadingState());
-    
+    emit(AuthLoading());
     try {
-      // Déconnecter l'utilisateur
-      await _authRepository.signOut();
-      
-      final hasSeenOnboarding = await _authRepository.hasSeenOnboarding();
-      
-      emit(AuthUnauthenticatedState(
-        hasSeenOnboarding: hasSeenOnboarding,
-      ));
+      await authRepository.logout();
+      emit(Unauthenticated());
     } catch (e) {
-      emit(AuthErrorState(message: e.toString()));
-      
-      // En cas d'erreur, vérifier l'état actuel
-      final user = await _authRepository.getCurrentUser();
-      final hasSeenOnboarding = await _authRepository.hasSeenOnboarding();
-      
-      if (user != null) {
-        emit(AuthAuthenticatedState(
-          user: user,
-          hasSeenOnboarding: hasSeenOnboarding,
-        ));
-      } else {
-        emit(AuthUnauthenticatedState(
-          hasSeenOnboarding: hasSeenOnboarding,
-        ));
-      }
-    }
-  }
-  
-  /// Marquer l'onboarding comme vu
-  Future<void> _onSetOnboardingSeen(
-    AuthSetOnboardingSeenEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      // Marquer l'onboarding comme vu
-      await _authRepository.setOnboardingSeen(true);
-      
-      // Mettre à jour l'état
-      if (state is AuthAuthenticatedState) {
-        final authState = state as AuthAuthenticatedState;
-        emit(authState.copyWith(hasSeenOnboarding: true));
-      } else if (state is AuthUnauthenticatedState) {
-        final authState = state as AuthUnauthenticatedState;
-        emit(authState.copyWith(hasSeenOnboarding: true));
-      }
-    } catch (e) {
-      emit(AuthErrorState(message: e.toString()));
-      
-      // Rétablir l'état précédent
-      emit(state);
-    }
-  }
-  
-  /// Mettre à jour le profil utilisateur
-  Future<void> _onUpdateProfile(
-    AuthUpdateProfileEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    if (state is! AuthAuthenticatedState) {
-      return;
-    }
-    
-    final currentState = state as AuthAuthenticatedState;
-    emit(const AuthLoadingState());
-    
-    try {
-      // Mettre à jour le profil
-      final updatedUser = await _authRepository.updateProfile(
-        userId: currentState.user.id,
-        username: event.username,
-        fullName: event.fullName,
-        email: event.email,
-        photoUrl: event.photoUrl,
-      );
-      
-      emit(currentState.copyWith(user: updatedUser));
-    } catch (e) {
-      emit(AuthErrorState(message: e.toString()));
-      
-      // Rétablir l'état précédent
-      emit(currentState);
+      emit(AuthError(e.toString()));
     }
   }
 }

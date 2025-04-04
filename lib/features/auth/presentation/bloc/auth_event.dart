@@ -1,84 +1,67 @@
+part of 'auth_bloc.dart';
+
 /// Événements d'authentification
-abstract class AuthEvent {
-  /// Constructeur par défaut
+abstract class AuthEvent extends Equatable {
   const AuthEvent();
+
+  @override
+  List<Object?> get props => [];
 }
 
-/// Événement de chargement initial de l'état d'authentification
-class AuthCheckStatusEvent extends AuthEvent {
-  /// Constructeur
-  const AuthCheckStatusEvent();
-}
+/// Vérifier le statut d'authentification
+class CheckAuthStatus extends AuthEvent {}
 
-/// Événement de connexion
-class AuthSignInEvent extends AuthEvent {
-  /// Email pour la connexion
+/// Connexion utilisateur
+class LoginUser extends AuthEvent {
   final String email;
-  
-  /// Mot de passe pour la connexion
   final String password;
-  
-  /// Constructeur
-  const AuthSignInEvent({
+
+  const LoginUser({
     required this.email,
     required this.password,
   });
+
+  @override
+  List<Object?> get props => [email, password];
 }
 
-/// Événement d'inscription
-class AuthSignUpEvent extends AuthEvent {
-  /// Email pour l'inscription
+/// Inscription utilisateur
+class RegisterUser extends AuthEvent {
   final String email;
-  
-  /// Mot de passe pour l'inscription
   final String password;
-  
-  /// Nom d'utilisateur pour l'inscription
-  final String username;
-  
-  /// Nom complet pour l'inscription (optionnel)
-  final String? fullName;
-  
-  /// Constructeur
-  const AuthSignUpEvent({
+  final String nom;
+  final String? prenom;
+
+  const RegisterUser({
     required this.email,
     required this.password,
-    required this.username,
-    this.fullName,
+    required this.nom,
+    this.prenom,
   });
+
+  @override
+  List<Object?> get props => [email, password, nom, prenom];
 }
 
-/// Événement de déconnexion
-class AuthSignOutEvent extends AuthEvent {
-  /// Constructeur
-  const AuthSignOutEvent();
+/// Déconnexion utilisateur
+class LogoutUser extends AuthEvent {}
+
+/// Réinitialisation du mot de passe
+class ResetPassword extends AuthEvent {
+  final String email;
+
+  const ResetPassword({required this.email});
+
+  @override
+  List<Object?> get props => [email];
 }
 
-/// Événement pour marquer l'onboarding comme vu
-class AuthSetOnboardingSeenEvent extends AuthEvent {
-  /// Constructeur
-  const AuthSetOnboardingSeenEvent();
-}
+/// Mise à jour du profil utilisateur
+class UpdateUserProfile extends AuthEvent {
+  final User user;
 
-/// Événement pour mettre à jour le profil utilisateur
-class AuthUpdateProfileEvent extends AuthEvent {
-  /// Nouveau nom d'utilisateur
-  final String? username;
-  
-  /// Nouveau nom complet
-  final String? fullName;
-  
-  /// Nouvel email
-  final String? email;
-  
-  /// Nouvelle photo de profil
-  final String? photoUrl;
-  
-  /// Constructeur
-  const AuthUpdateProfileEvent({
-    this.username,
-    this.fullName,
-    this.email,
-    this.photoUrl,
-  });
+  const UpdateUserProfile({required this.user});
+
+  @override
+  List<Object?> get props => [user];
 }

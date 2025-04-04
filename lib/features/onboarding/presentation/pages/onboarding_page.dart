@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gbc_coachia/config/router/app_router.dart';
+import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/core/widgets/app_button.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_event.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_state.dart';
-import 'package:gbc_coachia/features/auth/presentation/pages/login_page.dart';
-import 'package:gbc_coachia/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:gbc_coachia/features/onboarding/presentation/widgets/page_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Page d'onboarding
 class OnboardingPage extends StatefulWidget {
-  /// Nom de la route
-  static const routeName = '/onboarding';
-  
-  /// Constructeur
   const OnboardingPage({super.key});
 
   @override
@@ -23,149 +17,106 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  
-  final List<OnboardingItem> _items = [
-    const OnboardingItem(
-      title: 'Bienvenue sur GBC CoachIA',
-      description: 'Votre assistant intelligent pour gérer et développer votre activité entrepreneuriale.',
-      icon: Icons.auto_awesome,
-    ),
-    const OnboardingItem(
-      title: 'Assistant IA Personnalisé',
-      description: 'Posez vos questions business et obtenez des conseils pertinents et personnalisés.',
-      icon: Icons.psychology,
-    ),
-    const OnboardingItem(
-      title: 'Planifiez Efficacement',
-      description: 'Organisez votre temps, vos tâches et vos projets avec nos outils de planification.',
-      icon: Icons.calendar_today,
-    ),
-    const OnboardingItem(
-      title: 'Gestion Financière Simplifiée',
-      description: 'Suivez vos revenus, dépenses et prévisions pour une meilleure gestion financière.',
-      icon: Icons.attach_money,
-    ),
-  ];
-  
+  final int _numPages = 3;
+  static const String _onboardingCompletedKey = 'onboarding_completed';
+
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
-  
-  /// Marquer l'onboarding comme vu
-  void _completeOnboarding() {
-    final authBloc = context.read<AuthBloc>();
-    authBloc.add(AuthSetOnboardingSeenEvent());
-    
-    // Rediriger en fonction de l'état d'authentification
-    if (authBloc.state is AuthAuthenticatedState) {
-      context.go(DashboardPage.routeName);
-    } else {
-      context.go(LoginPage.routeName);
-    }
+
+  Future<void> _completeOnboarding() async {
+    // Marquer l'onboarding comme terminé
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingCompletedKey, true);
+    if (!mounted) return;
+    context.go(AppRoutes.login);
   }
-  
-  /// Passer à la page suivante
+
+  void _onPageChanged(int page) {
+    setState(() {
+      _currentPage = page;
+    });
+  }
+
   void _nextPage() {
-    if (_currentPage < _items.length - 1) {
+    if (_currentPage < _numPages - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        curve: Curves.easeIn,
       );
     } else {
       _completeOnboarding();
     }
   }
-  
-  /// Passer à la page précédente
-  void _previousPage() {
-    if (_currentPage > 0) {
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-  
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Bouton "Ignorer"
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextButton(
-                  onPressed: _completeOnboarding,
-                  child: const Text('Ignorer'),
-                ),
-              ),
-            ),
-            
-            // Contenu principal
             Expanded(
-              child: PageView.builder(
+              child: PageView(
                 controller: _pageController,
-                itemCount: _items.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  return _buildPage(_items[index]);
-                },
-              ),
-            ),
-            
-            // Indicateurs de page
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _items.length,
-                (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentPage == index
-                        ? colorScheme.primary
-                        : colorScheme.primary.withOpacity(0.3),
+                onPageChanged: _onPageChanged,
+                children: const [
+                  _OnboardingPageContent(
+                    title: 'Bienvenue sur GBC CoachIA',
+                    description:
+                        'Votre assistant personnel pour vous accompagner dans le développement de votre entreprise ou activité freelance.',
+                    icon: Icons.psychology_alt,
+                    color: AppTheme.primaryColor,
                   ),
-                ),
+                  _OnboardingPageContent(
+                    title: 'Planifiez et Organisez',
+                    description:
+                        'Gérez efficacement votre temps, vos projets et vos rendez-vous grâce à notre planificateur intelligent.',
+                    icon: Icons.calendar_today,
+                    color: AppTheme.accentColor,
+                  ),
+                  _OnboardingPageContent(
+                    title: 'Gérez vos Finances',
+                    description:
+                        'Suivez vos revenus, dépenses et créez facilement des factures et devis professionnels.',
+                    icon: Icons.account_balance_wallet,
+                    color: AppTheme.secondaryColor,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 32),
-            
-            // Boutons de navigation
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.all(AppTheme.spacing * 2),
+              child: Column(
                 children: [
-                  // Bouton précédent
-                  _currentPage > 0
-                      ? AppButton(
-                          text: 'Précédent',
-                          type: AppButtonType.secondary,
-                          icon: Icons.arrow_back,
-                          onPressed: _previousPage,
-                        )
-                      : const SizedBox(width: 100),
-                  
-                  // Bouton suivant ou terminer
-                  AppButton(
-                    text: _currentPage < _items.length - 1 ? 'Suivant' : 'Commencer',
-                    icon: _currentPage < _items.length - 1 ? Icons.arrow_forward : Icons.check,
-                    iconOnRight: true,
-                    onPressed: _nextPage,
+                  PageIndicator(
+                    count: _numPages,
+                    currentIndex: _currentPage,
+                  ),
+                  const SizedBox(height: AppTheme.spacing * 2),
+                  Row(
+                    children: [
+                      if (_currentPage < _numPages - 1) ...[
+                        TextButton(
+                          onPressed: _completeOnboarding,
+                          child: const Text('Passer'),
+                        ),
+                        const Spacer(),
+                        AppButton(
+                          label: 'Suivant',
+                          onPressed: _nextPage,
+                          icon: Icons.arrow_forward,
+                        ),
+                      ] else ...[
+                        const Spacer(),
+                        AppButton(
+                          label: 'Commencer',
+                          onPressed: _completeOnboarding,
+                          isFullWidth: true,
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -175,45 +126,53 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
     );
   }
-  
-  /// Construire une page d'onboarding
-  Widget _buildPage(OnboardingItem item) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
+}
+
+/// Contenu d'une page d'onboarding
+class _OnboardingPageContent extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+
+  const _OnboardingPageContent({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(AppTheme.spacing * 2),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Icône
           Container(
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
+              color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
-              item.icon,
+              icon,
               size: 60,
-              color: colorScheme.primary,
+              color: color,
             ),
           ),
-          const SizedBox(height: 40),
-          
-          // Titre
+          const SizedBox(height: AppTheme.spacing * 2),
           Text(
-            item.title,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            title,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
-          
-          // Description
+          const SizedBox(height: AppTheme.spacing),
           Text(
-            item.description,
+            description,
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
@@ -221,23 +180,4 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
     );
   }
-}
-
-/// Item pour une page d'onboarding
-class OnboardingItem {
-  /// Titre de la page
-  final String title;
-  
-  /// Description de la page
-  final String description;
-  
-  /// Icône à afficher
-  final IconData icon;
-  
-  /// Constructeur
-  const OnboardingItem({
-    required this.title,
-    required this.description,
-    required this.icon,
-  });
 }

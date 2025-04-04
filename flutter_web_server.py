@@ -1,6 +1,9 @@
 import http.server
 import socketserver
 import os
+import shutil
+import subprocess
+import time
 
 PORT = 5000
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "build/web")
@@ -8,6 +11,13 @@ WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "build/web")
 class MimeTypeHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=WEB_DIR, **kwargs)
+
+    def end_headers(self):
+        # Add CORS headers to allow resources to be loaded properly
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        super().end_headers()
 
     def guess_type(self, path):
         base, ext = os.path.splitext(path)

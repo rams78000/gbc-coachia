@@ -194,6 +194,18 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "dio",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/dio-5.8.0+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "dio_web_adapter",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/dio_web_adapter-2.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "equatable",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/equatable-2.0.7",
       "packageUri": "lib/",
@@ -854,7 +866,7 @@
       "languageVersion": "3.2"
     }
   ],
-  "generated": "2025-04-04T15:03:30.832146Z",
+  "generated": "2025-04-04T15:38:18.056742Z",
   "generator": "pub",
   "generatorVersion": "3.4.0",
   "flutterRoot": "file:///nix/store/yk06k2xi481mkz7lbnqip2178l547ihl-flutter-wrapped-3.22.0-sdk-links",

@@ -6,6 +6,7 @@ import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
 import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
+import 'package:gbc_coachia/features/planner/presentation/bloc/planner_bloc.dart';
 
 /// Application principale
 class App extends StatelessWidget {
@@ -22,6 +23,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<ChatbotBloc>(
           create: (context) => serviceLocator<ChatbotBloc>(),
+        ),
+        BlocProvider<PlannerBloc>(
+          create: (context) => serviceLocator<PlannerBloc>(),
         ),
         // Ajouter d'autres BlocProviders ici
       ],

@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gbc_coachia/config/router/app_router.dart';
-import 'package:gbc_coachia/config/theme/app_theme.dart';
-import 'package:gbc_coachia/core/widgets/app_button.dart';
-import 'package:gbc_coachia/core/widgets/app_text_field.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
 
-/// Page d'inscription
+import '../bloc/auth_bloc.dart';
+
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -17,66 +13,85 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _nomController = TextEditingController();
-  final _prenomController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
+  bool _isObscuredPassword = true;
+  bool _isObscuredConfirm = true;
+  bool _acceptTerms = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _nomController.dispose();
-    _prenomController.dispose();
     super.dispose();
   }
 
-  void _handleRegister() {
-    if (_formKey.currentState!.validate()) {
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isObscuredPassword = !_isObscuredPassword;
+    });
+  }
+
+  void _toggleConfirmVisibility() {
+    setState(() {
+      _isObscuredConfirm = !_isObscuredConfirm;
+    });
+  }
+
+  void _register() {
+    if (_formKey.currentState!.validate() && _acceptTerms) {
       context.read<AuthBloc>().add(
-            RegisterUser(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-              nom: _nomController.text.trim(),
-              prenom: _prenomController.text.trim(),
-            ),
-          );
+        AuthRegister(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
+    } else if (!_acceptTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vous devez accepter les conditions d\'utilisation'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  }
+
+  void _navigateToLogin() {
+    context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+    final goldColor = const Color(0xFFFFD700);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Créer un compte'),
-        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          color: primaryColor,
+        ),
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthLoading) {
-            setState(() {
-              _isLoading = true;
-              _errorMessage = null;
-            });
-          } else if (state is Authenticated) {
-            setState(() {
-              _isLoading = false;
-              _errorMessage = null;
-            });
-            context.go(AppRoutes.dashboard);
-          } else if (state is AuthError) {
-            setState(() {
-              _isLoading = false;
-              _errorMessage = state.message;
-            });
+          if (state is AuthSuccess && state.status.isAuthenticated) {
+            // Rediriger vers l'onboarding pour les nouveaux utilisateurs
+            context.go('/onboarding');
+          } else if (state is AuthFailure) {
+            // Afficher un message d'erreur
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Theme.of(context).colorScheme.error,
+                backgroundColor: Colors.red,
               ),
             );
           }
@@ -85,7 +100,7 @@ class _RegisterPageState extends State<RegisterPage> {
           return SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppTheme.spacing * 2),
+                padding: const EdgeInsets.all(24.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -94,109 +109,133 @@ class _RegisterPageState extends State<RegisterPage> {
                     children: [
                       // Titre
                       Text(
-                        'Rejoignez GBC CoachIA',
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        'Créer un compte',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
+                        ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: AppTheme.smallSpacing),
-                      Text(
-                        'Créez votre compte pour accéder à toutes les fonctionnalités',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Rejoignez GBC CoachIA pour gérer votre entreprise',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: AppTheme.spacing * 2),
+                      const SizedBox(height: 32),
 
-                      // Affichage des erreurs s'il y en a
-                      if (_errorMessage != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(AppTheme.spacing),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .error
-                                .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(
-                                AppTheme.smallBorderRadius),
+                      // Champ nom
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Nom complet',
+                          hintText: 'Entrez votre nom',
+                          prefixIcon: const Icon(Icons.person),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                            textAlign: TextAlign.center,
+                          floatingLabelStyle: TextStyle(
+                            color: primaryColor,
                           ),
                         ),
-                        const SizedBox(height: AppTheme.spacing),
-                      ],
-
-                      // Champs de formulaire
-                      AppTextField(
-                        label: 'Nom',
-                        hintText: 'Entrez votre nom',
-                        controller: _nomController,
-                        prefixIcon: Icons.person_outline,
-                        textCapitalization: TextCapitalization.words,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez entrer votre nom';
                           }
                           return null;
                         },
-                        textInputAction: TextInputAction.next,
                       ),
-                      const SizedBox(height: AppTheme.spacing),
-                      AppTextField(
-                        label: 'Prénom',
-                        hintText: 'Entrez votre prénom',
-                        controller: _prenomController,
-                        prefixIcon: Icons.person_outline,
-                        textCapitalization: TextCapitalization.words,
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: AppTheme.spacing),
-                      AppTextField(
-                        label: 'Email',
-                        hintText: 'Entrez votre adresse email',
+                      const SizedBox(height: 16),
+
+                      // Champ email
+                      TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        prefixIcon: Icons.email_outlined,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'Entrez votre adresse email',
+                          prefixIcon: const Icon(Icons.email),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            color: primaryColor,
+                          ),
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez entrer votre email';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                              .hasMatch(value)) {
+                          if (!value.contains('@') || !value.contains('.')) {
                             return 'Veuillez entrer un email valide';
                           }
                           return null;
                         },
-                        textInputAction: TextInputAction.next,
                       ),
-                      const SizedBox(height: AppTheme.spacing),
-                      AppTextField(
-                        label: 'Mot de passe',
-                        hintText: 'Créez votre mot de passe',
+                      const SizedBox(height: 16),
+
+                      // Champ mot de passe
+                      TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
-                        prefixIcon: Icons.lock_outline,
+                        obscureText: _isObscuredPassword,
+                        decoration: InputDecoration(
+                          labelText: 'Mot de passe',
+                          hintText: 'Créez votre mot de passe',
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isObscuredPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: _togglePasswordVisibility,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            color: primaryColor,
+                          ),
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer un mot de passe';
+                            return 'Veuillez entrer votre mot de passe';
                           }
-                          if (value.length < 8) {
-                            return 'Le mot de passe doit contenir au moins 8 caractères';
+                          if (value.length < 6) {
+                            return 'Le mot de passe doit contenir au moins 6 caractères';
                           }
                           return null;
                         },
-                        textInputAction: TextInputAction.next,
                       ),
-                      const SizedBox(height: AppTheme.spacing),
-                      AppTextField(
-                        label: 'Confirmer le mot de passe',
-                        hintText: 'Confirmez votre mot de passe',
+                      const SizedBox(height: 16),
+
+                      // Champ confirmation mot de passe
+                      TextFormField(
                         controller: _confirmPasswordController,
-                        obscureText: true,
-                        prefixIcon: Icons.lock_outline,
+                        obscureText: _isObscuredConfirm,
+                        decoration: InputDecoration(
+                          labelText: 'Confirmer le mot de passe',
+                          hintText: 'Confirmez votre mot de passe',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isObscuredConfirm
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: _toggleConfirmVisibility,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            color: primaryColor,
+                          ),
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Veuillez confirmer votre mot de passe';
@@ -206,49 +245,107 @@ class _RegisterPageState extends State<RegisterPage> {
                           }
                           return null;
                         },
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (_) => _handleRegister(),
                       ),
-                      const SizedBox(height: AppTheme.spacing * 2),
+                      const SizedBox(height: 16),
 
-                      // Termes et conditions
+                      // Accepter les conditions
                       Row(
                         children: [
+                          Checkbox(
+                            value: _acceptTerms,
+                            onChanged: (value) {
+                              setState(() {
+                                _acceptTerms = value ?? false;
+                              });
+                            },
+                            activeColor: primaryColor,
+                          ),
                           Expanded(
-                            child: Text(
-                              'En vous inscrivant, vous acceptez nos Conditions d\'utilisation et notre Politique de confidentialité',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              textAlign: TextAlign.center,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _acceptTerms = !_acceptTerms;
+                                });
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                  text: 'J\'accepte les ',
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: 'Conditions d\'utilisation',
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: ' et la ',
+                                    ),
+                                    TextSpan(
+                                      text: 'Politique de confidentialité',
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: AppTheme.spacing * 2),
+                      const SizedBox(height: 24),
 
                       // Bouton d'inscription
-                      AppButton(
-                        label: 'S\'inscrire',
-                        isLoading: _isLoading,
-                        isFullWidth: true,
-                        onPressed: _isLoading ? null : _handleRegister,
+                      ElevatedButton(
+                        onPressed: state is AuthLoading ? null : _register,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          minimumSize: const Size(double.infinity, 0),
+                          elevation: 5,
+                        ),
+                        child: state is AuthLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'S\'inscrire',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
-                      const SizedBox(height: AppTheme.spacing),
+                      const SizedBox(height: 16),
 
-                      // Lien pour se connecter
+                      // Déjà un compte
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Vous avez déjà un compte ?',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
+                          const Text('Déjà un compte?'),
                           TextButton(
-                            onPressed: _isLoading
-                                ? null
-                                : () {
-                                    context.go(AppRoutes.login);
-                                  },
-                            child: const Text('Se connecter'),
+                            onPressed: _navigateToLogin,
+                            child: Text(
+                              'Se connecter',
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),

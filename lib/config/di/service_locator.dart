@@ -1,41 +1,28 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_bloc.dart';
-import '../../features/chatbot/presentation/bloc/chatbot_bloc.dart';
-import '../../features/finance/presentation/bloc/finance_bloc.dart';
-import '../../features/planner/presentation/bloc/planner_bloc.dart';
-import '../../features/settings/presentation/bloc/settings_bloc.dart';
+import '../router/app_router.dart';
 
-final getIt = GetIt.instance;
+final GetIt serviceLocator = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
-  // External
+  // Singletons externes
   final sharedPreferences = await SharedPreferences.getInstance();
-  getIt.registerSingleton<SharedPreferences>(sharedPreferences);
+  serviceLocator.registerSingleton<SharedPreferences>(sharedPreferences);
 
-  // BLoCs
-  getIt.registerFactory<OnboardingBloc>(() => OnboardingBloc());
-  
-  getIt.registerFactory<ChatbotBloc>(
-    () => ChatbotBloc(preferences: getIt<SharedPreferences>())
-  );
-  
-  getIt.registerFactory<FinanceBloc>(
-    () => FinanceBloc(preferences: getIt<SharedPreferences>())
-  );
-  
-  getIt.registerFactory<PlannerBloc>(
-    () => PlannerBloc(preferences: getIt<SharedPreferences>())
-  );
-  
-  getIt.registerFactory<SettingsBloc>(
-    () => SettingsBloc(preferences: getIt<SharedPreferences>())
+  // Blocs / Cubits
+  serviceLocator.registerSingleton<AuthBloc>(
+    AuthBloc(preferences: serviceLocator<SharedPreferences>()),
   );
 
-  // Repositories
+  serviceLocator.registerSingleton<OnboardingBloc>(
+    OnboardingBloc(preferences: serviceLocator<SharedPreferences>()),
+  );
 
-  // Use cases
-
-  // Data sources
+  // Router
+  serviceLocator.registerSingleton<AppRouter>(
+    AppRouter(serviceLocator<AuthBloc>()),
+  );
 }

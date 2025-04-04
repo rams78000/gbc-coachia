@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../bloc/onboarding_bloc.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({Key? key}) : super(key: key);
@@ -66,11 +70,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _completeOnboarding() {
-    // Sauvegarder le statut d'onboarding comme terminé
-    // SharedPreferences ou autre stockage
+    // Marquer l'onboarding comme terminé via le bloc
+    context.read<OnboardingBloc>().add(const OnboardingCompleted());
     
     // Naviguer vers le tableau de bord
-    Navigator.of(context).pushReplacementNamed('/');
+    context.go('/');
   }
 
   @override
@@ -197,6 +201,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
             child: Image.asset(
               step.imagePath,
               fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                // Afficher une icône par défaut en cas d'erreur de chargement d'image
+                return Icon(
+                  Icons.image_not_supported_outlined,
+                  size: 100,
+                  color: Colors.grey[400],
+                );
+              },
             ),
           ),
           const SizedBox(height: 40),

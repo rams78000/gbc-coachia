@@ -10,12 +10,16 @@ abstract class OnboardingEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class OnboardingCheckStatus extends OnboardingEvent {
+  const OnboardingCheckStatus();
+}
+
 class OnboardingCompleted extends OnboardingEvent {
   const OnboardingCompleted();
 }
 
-class OnboardingCheckStatus extends OnboardingEvent {
-  const OnboardingCheckStatus();
+class OnboardingReset extends OnboardingEvent {
+  const OnboardingReset();
 }
 
 // States
@@ -30,44 +34,36 @@ class OnboardingInitial extends OnboardingState {
   const OnboardingInitial();
 }
 
-class OnboardingLoading extends OnboardingState {
-  const OnboardingLoading();
-}
-
 class OnboardingRequired extends OnboardingState {
   const OnboardingRequired();
 }
 
-class OnboardingNotRequired extends OnboardingState {
-  const OnboardingNotRequired();
+class OnboardingCompletedState extends OnboardingState {
+  const OnboardingCompletedState();
 }
 
 // BLoC
 class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
-  OnboardingBloc() : super(const OnboardingInitial()) {
+  final SharedPreferences _preferences;
+  static const String _onboardingCompletedKey = 'onboarding_completed';
+
+  OnboardingBloc({required SharedPreferences preferences}) 
+      : _preferences = preferences,
+        super(const OnboardingInitial()) {
     on<OnboardingCheckStatus>(_onCheckStatus);
     on<OnboardingCompleted>(_onOnboardingCompleted);
+    on<OnboardingReset>(_onOnboardingReset);
   }
-
-  static const String _onboardingCompletedKey = 'onboarding_completed';
 
   Future<void> _onCheckStatus(
     OnboardingCheckStatus event,
     Emitter<OnboardingState> emit,
   ) async {
-    emit(const OnboardingLoading());
+    final isCompleted = _preferences.getBool(_onboardingCompletedKey) ?? false;
     
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final isCompleted = prefs.getBool(_onboardingCompletedKey) ?? false;
-      
-      if (isCompleted) {
-        emit(const OnboardingNotRequired());
-      } else {
-        emit(const OnboardingRequired());
-      }
-    } catch (e) {
-      // En cas d'erreur, toujours montrer l'onboarding pour éviter les problèmes
+    if (isCompleted) {
+      emit(const OnboardingCompletedState());
+    } else {
       emit(const OnboardingRequired());
     }
   }
@@ -76,16 +72,15 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     OnboardingCompleted event,
     Emitter<OnboardingState> emit,
   ) async {
-    emit(const OnboardingLoading());
-    
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_onboardingCompletedKey, true);
-      
-      emit(const OnboardingNotRequired());
-    } catch (e) {
-      // En cas d'erreur, on considère quand même l'onboarding comme terminé pour cette session
-      emit(const OnboardingNotRequired());
-    }
+    await _preferences.setBool(_onboardingCompletedKey, true);
+    emit(const OnboardingCompletedState());
+  }
+
+  Future<void> _onOnboardingReset(
+    OnboardingReset event,
+    Emitter<OnboardingState> emit,
+  ) async {
+    await _preferences.setBool(_onboardingCompletedKey, false);
+    emit(const OnboardingRequired());
   }
 }

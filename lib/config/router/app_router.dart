@@ -7,6 +7,7 @@ import 'package:gbc_coachia/features/auth/presentation/pages/register_page.dart'
 import 'package:gbc_coachia/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:gbc_coachia/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:gbc_coachia/features/splash/presentation/pages/splash_page.dart';
+import 'package:gbc_coachia/features/documents/presentation/pages/documents_page.dart';
 
 /// Routes de l'application
 class AppRoutes {
@@ -19,6 +20,7 @@ class AppRoutes {
   static const String planner = '/planner';
   static const String finance = '/finance';
   static const String profile = '/profile';
+  static const String documents = '/documents';
 }
 
 /// Configuration du routeur de l'application
@@ -52,6 +54,11 @@ class AppRouter {
           path: AppRoutes.dashboard,
           name: 'dashboard',
           builder: (context, state) => const DashboardPage(),
+        ),
+        GoRoute(
+          path: AppRoutes.documents,
+          name: 'documents',
+          builder: (context, state) => const DocumentsPage(),
         ),
         // TODO: Ajouter les autres routes au fur et à mesure de l'implémentation
       ],

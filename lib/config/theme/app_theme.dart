@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Thème de l'application
 class AppTheme {
-  // Constantes de couleurs
-  static const primaryColor = Color(0xFF2563EB);
-  static const secondaryColor = Color(0xFF9333EA);
-  static const accentColor = Color(0xFF0EA5E9);
+  // Constantes de couleurs de la charte graphique
+  static const primaryColor = Color(0xFFB87333);    // Cuivre/bronze
+  static const secondaryColor = Color(0xFFFFD700);  // Or
+  static const accentColor = Color(0xFFB87333);     // Variante du cuivre/bronze
   static const backgroundColorLight = Color(0xFFF5F7FA);
   static const backgroundColorDark = Color(0xFF1A1C2E);
   static const textColorLight = Color(0xFF1F2937);
@@ -59,6 +59,7 @@ class AppTheme {
       brightness: Brightness.light,
       // Utiliser surface au lieu de background
       surface: backgroundColorLight,
+      secondary: secondaryColor,
     ),
     scaffoldBackgroundColor: backgroundColorLight,
     textTheme: _buildTextTheme(Brightness.light),
@@ -138,6 +139,16 @@ class AppTheme {
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
     ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: primaryColor,
+      foregroundColor: Colors.white,
+    ),
+    iconTheme: IconThemeData(
+      color: primaryColor.withOpacity(0.8),
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: secondaryColor,
+    ),
   );
 
   /// Thème sombre
@@ -148,6 +159,7 @@ class AppTheme {
       brightness: Brightness.dark,
       // Utiliser surface au lieu de background
       surface: backgroundColorDark,
+      secondary: secondaryColor,
     ),
     scaffoldBackgroundColor: backgroundColorDark,
     textTheme: _buildTextTheme(Brightness.dark),
@@ -227,6 +239,16 @@ class AppTheme {
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
     ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: primaryColor,
+      foregroundColor: Colors.white,
+    ),
+    iconTheme: IconThemeData(
+      color: primaryColor.withOpacity(0.8),
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: secondaryColor,
+    ),
   );
 
   static TextTheme _buildTextTheme(Brightness brightness) {
@@ -238,73 +260,88 @@ class AppTheme {
         fontSize: 32,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       displayMedium: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       displaySmall: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       headlineLarge: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       headlineMedium: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       headlineSmall: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       titleLarge: TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       titleMedium: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       titleSmall: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w500,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       bodyLarge: TextStyle(
         fontSize: 16,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       bodyMedium: TextStyle(
         fontSize: 14,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       bodySmall: TextStyle(
         fontSize: 12,
         color: textColor.withOpacity(0.7),
+        fontFamily: 'Inter',
       ),
       labelLarge: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       labelMedium: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.bold,
         color: textColor,
+        fontFamily: 'Inter',
       ),
       labelSmall: TextStyle(
         fontSize: 10,
         fontWeight: FontWeight.w500,
         color: textColor,
+        fontFamily: 'Inter',
       ),
     );
   }

@@ -47,6 +47,9 @@ class _DashboardPageState extends State<DashboardPage> {
         context.push(AppRoutes.planner);
         break;
       case 3:
+        context.push(AppRoutes.documents);
+        break;
+      case 4:
         context.push(AppRoutes.profile);
         break;
     }
@@ -153,6 +156,15 @@ class _DashboardPageState extends State<DashboardPage> {
                       Navigator.pop(context);
                     },
                   ),
+                  ListTile(
+                    leading: const Icon(Icons.description_outlined),
+                    title: const Text('Documents'),
+                    selected: _selectedIndex == 3,
+                    onTap: () {
+                      _onItemTapped(3);
+                      Navigator.pop(context);
+                    },
+                  ),
                   const Divider(),
                   ListTile(
                     leading: const Icon(Icons.settings_outlined),
@@ -187,6 +199,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.calendar_today_outlined),
                   label: 'Planner',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.description_outlined),
+                  label: 'Documents',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.person_outline),
@@ -369,7 +385,7 @@ class _DashboardContent extends StatelessWidget {
                         subtitle: const Text('Factures, devis, et plus'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // TODO: Implémenter la génération de documents
+                          context.push(AppRoutes.documents);
                         },
                       ),
                     ],
@@ -410,6 +426,14 @@ class _DashboardContent extends StatelessWidget {
                             fontSize: 14,
                           ),
                         ),
+                        const SizedBox(height: AppTheme.spacing),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {},
+                            child: const Text('En savoir plus'),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -418,7 +442,6 @@ class _DashboardContent extends StatelessWidget {
             ),
           );
         }
-        
         return const Center(
           child: CircularProgressIndicator(),
         );
@@ -427,7 +450,7 @@ class _DashboardContent extends StatelessWidget {
   }
 }
 
-/// Carte de statistique pour le tableau de bord
+/// Carte de statistique
 class _StatCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -458,44 +481,30 @@ class _StatCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      shape: BoxShape.circle,
+                  Icon(icon, color: color),
+                  const SizedBox(width: AppTheme.smallSpacing),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
                     ),
-                    child: Icon(
-                      icon,
-                      color: color,
-                      size: 20,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(
-                    Icons.more_vert,
-                    size: 16,
-                    color: Colors.grey,
                   ),
                 ],
               ),
-              const SizedBox(height: AppTheme.smallSpacing),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      color: Colors.grey,
-                    ),
-              ),
-              const SizedBox(height: 2),
+              const Spacer(),
               Text(
                 value,
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: color,
                     ),
               ),
-              const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: const TextStyle(
+                  color: AppTheme.textSecondaryColor,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),

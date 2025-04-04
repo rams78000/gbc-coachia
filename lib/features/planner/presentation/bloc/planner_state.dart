@@ -1,99 +1,112 @@
-import 'package:equatable/equatable.dart';
-import 'package:gbc_coachia/features/planner/domain/entities/event.dart';
-import 'package:gbc_coachia/features/planner/domain/entities/optimized_plan.dart';
-import 'package:gbc_coachia/features/planner/domain/entities/task.dart';
+part of 'planner_bloc.dart';
 
-/// États du BLoC Planner
-class PlannerState extends Equatable {
-  /// Liste des événements actuellement chargés
-  final List<Event> events;
-  
-  /// Liste des tâches actuellement chargées
-  final List<Task> tasks;
-  
-  /// Plan optimisé actuel
-  final OptimizedPlan? optimizedPlan;
-  
-  /// Date de début de la période actuelle
-  final DateTime? startDate;
-  
-  /// Date de fin de la période actuelle
-  final DateTime? endDate;
-  
-  /// Mois actuellement affiché
-  final DateTime currentMonth;
-  
-  /// Vue actuelle du calendrier ('day', 'week', 'month')
-  final String currentView;
-  
-  /// Onglet actif (0 = Calendrier, 1 = Tâches, 2 = Plan optimisé)
-  final int activeTab;
-  
-  /// Indique si des données sont en cours de chargement
-  final bool isLoading;
-  
-  /// Message d'erreur éventuel
-  final String? errorMessage;
-  
-  /// Constructeur
-  const PlannerState({
-    this.events = const [],
-    this.tasks = const [],
-    this.optimizedPlan,
-    this.startDate,
-    this.endDate,
-    required this.currentMonth,
-    this.currentView = 'month',
-    this.activeTab = 0,
-    this.isLoading = false,
-    this.errorMessage,
-  });
-  
-  /// État initial
-  factory PlannerState.initial() {
-    return PlannerState(
-      currentMonth: DateTime.now(),
-    );
-  }
-  
-  /// Méthode pour créer une copie de l'état avec des modifications
-  PlannerState copyWith({
-    List<Event>? events,
-    List<Task>? tasks,
-    OptimizedPlan? optimizedPlan,
-    DateTime? startDate,
-    DateTime? endDate,
-    DateTime? currentMonth,
-    String? currentView,
-    int? activeTab,
-    bool? isLoading,
-    String? errorMessage,
-  }) {
-    return PlannerState(
-      events: events ?? this.events,
-      tasks: tasks ?? this.tasks,
-      optimizedPlan: optimizedPlan ?? this.optimizedPlan,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      currentMonth: currentMonth ?? this.currentMonth,
-      currentView: currentView ?? this.currentView,
-      activeTab: activeTab ?? this.activeTab,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? this.errorMessage,
-    );
-  }
+abstract class PlannerState extends Equatable {
+  const PlannerState();
   
   @override
+  List<Object?> get props => [];
+}
+
+class PlannerInitial extends PlannerState {}
+
+class EventsLoading extends PlannerState {}
+
+class EventsLoaded extends PlannerState {
+  final List<Event> events;
+
+  const EventsLoaded({required this.events});
+
+  @override
+  List<Object> get props => [events];
+}
+
+class EventsLoadedForDate extends PlannerState {
+  final List<Event> events;
+  final DateTime selectedDate;
+
+  const EventsLoadedForDate({
+    required this.events,
+    required this.selectedDate,
+  });
+
+  @override
+  List<Object> get props => [events, selectedDate];
+}
+
+class EventsLoadedForDateRange extends PlannerState {
+  final List<Event> events;
+  final DateTime startDate;
+  final DateTime endDate;
+
+  const EventsLoadedForDateRange({
+    required this.events,
+    required this.startDate,
+    required this.endDate,
+  });
+
+  @override
+  List<Object> get props => [events, startDate, endDate];
+}
+
+class EventsLoadedByCategory extends PlannerState {
+  final List<Event> events;
+  final EventCategory category;
+
+  const EventsLoadedByCategory({
+    required this.events,
+    required this.category,
+  });
+
+  @override
+  List<Object> get props => [events, category];
+}
+
+class EventsLoadedByPriority extends PlannerState {
+  final List<Event> events;
+  final EventPriority priority;
+
+  const EventsLoadedByPriority({
+    required this.events,
+    required this.priority,
+  });
+
+  @override
+  List<Object> get props => [events, priority];
+}
+
+class EventsFiltered extends PlannerState {
+  final List<Event> events;
+  final EventCategory? category;
+  final EventPriority? priority;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final bool? isCompleted;
+
+  const EventsFiltered({
+    required this.events,
+    this.category,
+    this.priority,
+    this.startDate,
+    this.endDate,
+    this.isCompleted,
+  });
+
+  @override
   List<Object?> get props => [
-    events, 
-    tasks, 
-    optimizedPlan, 
-    startDate, 
-    endDate, 
-    currentMonth, 
-    currentView,
-    activeTab,
-    isLoading, 
-    errorMessage,
+    events,
+    category,
+    priority,
+    startDate,
+    endDate,
+    isCompleted,
   ];
+}
+
+class EventsError extends PlannerState {
+  final String message;
+
+  const EventsError({required this.message});
+
+  @override
+  List<Object> get props => [message];
 }

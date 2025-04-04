@@ -1,18 +1,14 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:gbc_coachia/app.dart';
+import 'package:gbc_coachia/config/di/service_locator.dart';
 
-import 'app.dart';
-
-void main() {
-  // Capture les erreurs non gérées
-  runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    runApp(const App());
-  }, (error, stack) {
-    // Capture les erreurs non gérées
-    debugPrint('Erreur non gérée: $error');
-    debugPrint('Stack trace: $stack');
-  });
+void main() async {
+  // Initialiser le framework Flutter
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialiser le localisateur de services
+  setupServiceLocator();
+  
+  // Lancer l'application
+  runApp(const App());
 }

@@ -15,17 +15,32 @@ class AppTheme {
   static const warningColor = Color(0xFFF59E0B);
   static const infoColor = Color(0xFF0EA5E9);
 
+  // Constantes pour le texte secondaire
+  static const textSecondaryColor = Color(0xFF6B7280);
+
   // Constantes d'espacement
-  static const double smallSpacing = 8.0;
-  static const double spacing = 16.0;
-  static const double largeSpacing = 24.0;
-  static const double extraLargeSpacing = 32.0;
+  static const double spacing1x = 8.0;
+  static const double spacing2x = 16.0;
+  static const double spacing3x = 24.0;
+  static const double spacing4x = 32.0;
+  
+  // Aliases pour compatibilité
+  static const double smallSpacing = spacing1x;
+  static const double spacing = spacing2x;
+  static const double largeSpacing = spacing3x;
+  static const double extraLargeSpacing = spacing4x;
 
   // Constantes de bordures
-  static const double smallBorderRadius = 4.0;
-  static const double borderRadius = 8.0;
-  static const double largeBorderRadius = 12.0;
-  static const double extraLargeBorderRadius = 16.0;
+  static const double borderRadiusSmall = 4.0;
+  static const double borderRadiusMedium = 8.0;
+  static const double borderRadiusLarge = 12.0;
+  static const double borderRadiusXLarge = 16.0;
+  
+  // Aliases pour compatibilité
+  static const double smallBorderRadius = borderRadiusSmall;
+  static const double borderRadius = borderRadiusMedium;
+  static const double largeBorderRadius = borderRadiusLarge;
+  static const double extraLargeBorderRadius = borderRadiusXLarge;
 
   // Ombres
   static List<BoxShadow> get defaultShadow => [
@@ -42,7 +57,8 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryColor,
       brightness: Brightness.light,
-      background: backgroundColorLight,
+      // Utiliser surface au lieu de background
+      surface: backgroundColorLight,
     ),
     scaffoldBackgroundColor: backgroundColorLight,
     textTheme: _buildTextTheme(Brightness.light),
@@ -130,7 +146,8 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryColor,
       brightness: Brightness.dark,
-      background: backgroundColorDark,
+      // Utiliser surface au lieu de background
+      surface: backgroundColorDark,
     ),
     scaffoldBackgroundColor: backgroundColorDark,
     textTheme: _buildTextTheme(Brightness.dark),

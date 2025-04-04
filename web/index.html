@@ -23,8 +23,6 @@
   <script>
     // Taille par défaut de Flutter
     window.flutterWebRenderer = "html";
-    // La ligne suivante peut être modifiée par Flutter pour activer d'autres fonctionnalités
-    var serviceWorkerVersion = null;
   </script>
 
   <script src="flutter.js" defer></script>
@@ -33,15 +31,14 @@
   <script>
     window.addEventListener('load', function(ev) {
       // Télécharger le chargeur de Flutter
-      _flutter.loader.loadEntrypoint({
+      _flutter.loader.load({
         serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
+          serviceWorkerVersion: '{{flutter_service_worker_version}}',
         }
+      }).then(function(engineInitializer) {
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        return appRunner.runApp();
       });
     });
   </script>

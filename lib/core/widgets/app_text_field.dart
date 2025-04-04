@@ -31,6 +31,7 @@ class AppTextField extends StatefulWidget {
   final bool filled;
   final Color? fillColor;
   final BorderRadius? borderRadius;
+  final TextInputAction? textInputAction;
 
   const AppTextField({
     Key? key,
@@ -61,6 +62,7 @@ class AppTextField extends StatefulWidget {
     this.filled = true,
     this.fillColor,
     this.borderRadius,
+    this.textInputAction,
   }) : super(key: key);
 
   @override
@@ -183,6 +185,7 @@ class _AppTextFieldState extends State<AppTextField> {
           textCapitalization: widget.textCapitalization,
           inputFormatters: widget.inputFormatters,
           cursorColor: AppTheme.primaryColor,
+          textInputAction: widget.textInputAction,
           decoration: InputDecoration(
             hintText: widget.hintText,
             helperText: widget.helperText,

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:gbc_coachia/app.dart';
 import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/core/utils/screenshot_generator.dart';
 import 'package:gbc_coachia/features/auth/presentation/pages/login_page.dart';

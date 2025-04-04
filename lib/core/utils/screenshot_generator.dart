@@ -18,7 +18,7 @@ class ScreenshotGenerator {
     final RenderRepaintBoundary boundary = RenderRepaintBoundary();
     
     // Créer un pipeline de rendu
-    final BuildContext? context = WidgetsBinding.instance.renderViewElement;
+    final BuildContext? context = WidgetsBinding.instance.rootElement;
     if (context == null) {
       return 'Erreur: Aucun contexte disponible';
     }
@@ -31,7 +31,6 @@ class ScreenshotGenerator {
         child: boundary,
       ),
       configuration: ViewConfiguration(
-        size: size,
         devicePixelRatio: 2.0,
       ),
     );

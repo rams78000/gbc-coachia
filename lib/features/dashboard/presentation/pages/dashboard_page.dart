@@ -1,78 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../chatbot/presentation/pages/chatbot_page.dart';
-import '../../../finance/presentation/pages/finance_overview_page.dart';
-import '../../../planner/presentation/pages/planner_page.dart';
-import '../../../settings/presentation/pages/settings_page.dart';
+import 'package:go_router/go_router.dart';
+import 'package:gbc_coachai/features/dashboard/domain/entities/dashboard_data.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/widgets/activity_summary_card.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/widgets/financial_summary_card.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/widgets/quick_actions_card.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/widgets/recent_documents_card.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/widgets/recent_transactions_card.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/widgets/upcoming_events_card.dart';
+import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachai/features/documents/presentation/bloc/document_bloc.dart';
+import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({Key? key}) : super(key: key);
+  const DashboardPage({super.key});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = [
-    const DashboardHomeTab(),
-    const ChatbotPage(),
-    const PlannerPage(),
-    const FinanceOverviewPage(),
-    const SettingsPage(),
-  ];
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFFB87333),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBar.Item(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'Tableau de bord',
-          ),
-          BottomNavigationBar.Item(
-            icon: Icon(Icons.chat_outlined),
-            activeIcon: Icon(Icons.chat),
-            label: 'CoachIA',
-          ),
-          BottomNavigationBar.Item(
-            icon: Icon(Icons.calendar_today_outlined),
-            activeIcon: Icon(Icons.calendar_today),
-            label: 'Planning',
-          ),
-          BottomNavigationBar.Item(
-            icon: Icon(Icons.bar_chart_outlined),
-            activeIcon: Icon(Icons.bar_chart),
-            label: 'Finances',
-          ),
-          BottomNavigationBar.Item(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Paramètres',
-          ),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    context.read<DashboardBloc>().add(const LoadDashboardData());
   }
-}
-
-class DashboardHomeTab extends StatelessWidget {
-  const DashboardHomeTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -80,273 +33,193 @@ class DashboardHomeTab extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tableau de bord'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Bonjour Entrepreneur',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              _getTodayDate(),
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
         actions: [
-          // Action pour se déconnecter
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
-              // Afficher une boîte de dialogue pour confirmer la déconnexion
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Se déconnecter'),
-                  content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Annuler'),
+              // Show notifications
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              // Navigate to settings
+            },
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          context.read<DashboardBloc>().add(const RefreshDashboardData());
+        },
+        child: BlocBuilder<DashboardBloc, DashboardState>(
+          builder: (context, state) {
+            if (state is DashboardInitial) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is DashboardLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is DashboardRefreshing) {
+              return _buildDashboardContent(context, state.dashboardData);
+            } else if (state is DashboardLoaded) {
+              return _buildDashboardContent(context, state.dashboardData);
+            } else if (state is DashboardError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 60,
                     ),
-                    TextButton(
+                    const SizedBox(height: 16),
+                    Text('Erreur: ${state.message}'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
-                        context.read<AuthBloc>().add(const AuthLoggedOut());
+                        context.read<DashboardBloc>().add(const LoadDashboardData());
                       },
-                      child: const Text('Se déconnecter'),
+                      child: const Text('Réessayer'),
                     ),
                   ],
                 ),
               );
-            },
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Message de bienvenue
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Color(0xFFB87333),
-                        child: Icon(Icons.person, color: Colors.white),
-                      ),
-                      SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Bienvenue',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text('Bon retour parmi nous'),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'CoachIA est votre assistant business intelligent.',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Section CoachIA
-          _buildSectionTitle(context, 'Assistant IA'),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _currentIndex = 1; // Aller à l'onglet CoachIA
-              });
-            },
-            child: Card(
-              color: const Color(0xFFFFD700).withOpacity(0.1),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFB87333),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.chat_outlined,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Discuter avec CoachIA',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Obtenez des conseils et des réponses à vos questions business',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.arrow_forward_ios, size: 16),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Section Planning
-          _buildSectionTitle(context, 'Planning'),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _currentIndex = 2; // Aller à l'onglet Planning
-              });
-            },
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.event_note, color: Color(0xFFB87333)),
-                        SizedBox(width: 8),
-                        Text(
-                          'Prochains rendez-vous',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Aucun rendez-vous à venir'),
-                    const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _currentIndex = 2; // Aller à l'onglet Planning
-                        });
-                      },
-                      icon: const Icon(Icons.add, size: 16),
-                      label: const Text('Ajouter un rendez-vous'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Section Finances
-          _buildSectionTitle(context, 'Finances'),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _currentIndex = 3; // Aller à l'onglet Finances
-              });
-            },
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.euro, color: Color(0xFFB87333)),
-                        SizedBox(width: 8),
-                        Text(
-                          'Aperçu financier',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Revenus du mois'),
-                        Text('0 €'),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Dépenses du mois'),
-                        Text('0 €'),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Balance',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '0 €',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+            } else {
+              return const Center(child: Text('État inconnu'));
+            }
+          },
         ),
       ),
     );
   }
 
-  void setState(VoidCallback callback) {
-    // Cette méthode est nécessaire car nous utilisons un StatelessWidget
-    // mais avons besoin de changer l'index dans le StatefulWidget parent
-    final state = context.findAncestorStateOfType<_DashboardPageState>();
-    if (state != null) {
-      state.setState(callback);
-    }
+  Widget _buildDashboardContent(BuildContext context, DashboardData data) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Quick actions
+          QuickActionsCard(
+            actions: _buildQuickActions(context),
+          ),
+          const SizedBox(height: 16),
+          
+          // Financial summary
+          FinancialSummaryCard(
+            financialOverview: data.financialOverview,
+            onTap: () {
+              context.go('/finance');
+            },
+          ),
+          const SizedBox(height: 16),
+          
+          // Upcoming events
+          UpcomingEventsCard(
+            events: data.upcomingEvents,
+            onTap: () {
+              context.go('/planner');
+            },
+            onAddEvent: () {
+              context.go('/planner');
+              // Idéalement déclenchement de la modale d'ajout d'événement
+            },
+          ),
+          const SizedBox(height: 16),
+          
+          // Recent transactions
+          RecentTransactionsCard(
+            transactions: data.recentTransactions,
+            onTap: () {
+              context.go('/finance');
+            },
+          ),
+          const SizedBox(height: 16),
+          
+          // Recent documents
+          RecentDocumentsCard(
+            documents: data.recentDocuments,
+            onTap: () {
+              context.go('/documents');
+            },
+            onDocumentTap: (document) {
+              context.read<DocumentBloc>().add(ViewDocument(document.id));
+              context.go('/documents');
+            },
+          ),
+          const SizedBox(height: 16),
+          
+          // Activity summary
+          ActivitySummaryCard(
+            activitySummary: data.activitySummary,
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  List<QuickAction> _buildQuickActions(BuildContext context) {
+    return [
+      QuickAction(
+        label: 'Nouvelle transaction',
+        icon: Icons.add_card,
+        color: Colors.green,
+        onTap: () {
+          context.go('/finance');
+          // Idéalement déclenchement de la modale d'ajout de transaction
+        },
+      ),
+      QuickAction(
+        label: 'Ajouter événement',
+        icon: Icons.event_available,
+        color: Colors.blue,
+        onTap: () {
+          context.go('/planner');
+          // Idéalement déclenchement de la modale d'ajout d'événement
+        },
+      ),
+      QuickAction(
+        label: 'Scanner document',
+        icon: Icons.document_scanner,
+        color: Colors.amber,
+        onTap: () {
+          context.go('/documents');
+          // Idéalement déclenchement de la modale d'ajout de document
+        },
+      ),
+      QuickAction(
+        label: 'Consulter IA',
+        icon: Icons.smart_toy,
+        color: Colors.purple,
+        onTap: () {
+          context.go('/chatbot');
+        },
+      ),
+    ];
+  }
+
+  String _getTodayDate() {
+    final now = DateTime.now();
+    final dateFormat = DateFormat('EEEE d MMMM yyyy', 'fr_FR');
+    String formatted = dateFormat.format(now);
+    // Capitalize first letter
+    return formatted[0].toUpperCase() + formatted.substring(1);
   }
 }

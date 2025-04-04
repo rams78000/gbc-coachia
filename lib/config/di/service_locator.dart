@@ -32,6 +32,11 @@ import 'package:gbc_coachai/features/documents/data/sources/document_local_sourc
 import 'package:gbc_coachai/features/documents/domain/repositories/document_repository.dart';
 import 'package:gbc_coachai/features/documents/presentation/bloc/document_bloc.dart';
 
+// Dashboard
+import 'package:gbc_coachai/features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:gbc_coachai/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:gbc_coachai/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+
 final serviceLocator = GetIt.instance;
 
 Future<void> initServiceLocator() async {
@@ -135,6 +140,21 @@ Future<void> initServiceLocator() async {
   
   serviceLocator.registerFactory<DocumentBloc>(
     () => DocumentBloc(
+      repository: serviceLocator(),
+    ),
+  );
+  
+  // Dashboard
+  serviceLocator.registerLazySingleton<DashboardRepository>(
+    () => DashboardRepositoryImpl(
+      transactionRepository: serviceLocator(),
+      eventRepository: serviceLocator(),
+      documentRepository: serviceLocator(),
+    ),
+  );
+  
+  serviceLocator.registerFactory<DashboardBloc>(
+    () => DashboardBloc(
       repository: serviceLocator(),
     ),
   );

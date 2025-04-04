@@ -1,56 +1,48 @@
 # GBC CoachIA
 
-GBC CoachIA est une application mobile complète conçue pour les entrepreneurs et freelances, offrant un assistant IA, des outils de planification et des fonctionnalités de gestion financière.
+Une application Flutter pour les entrepreneurs et freelances avec assistance IA, planification et outils financiers.
 
-## Fonctionnalités
+## Description
 
-- **Assistant IA**: Conversez avec un assistant IA spécialisé pour les entrepreneurs et freelances
-- **Planification**: Gérez vos tâches, projets et deadlines efficacement
-- **Finance**: Suivez vos revenus, dépenses et la santé financière de votre activité
-- **Dashboard**: Visualisez vos données et votre progression
-- **Profil**: Personnalisez votre expérience utilisateur
+GBC CoachIA est une application mobile conçue pour aider les entrepreneurs et freelances à optimiser leur temps, productivité et gestion financière. L'application dispose d'une interface moderne, intuitive et professionnelle, réactive sur iOS et Android.
 
-## Architecture
+## Fonctionnalités principales
 
-L'application est construite avec Flutter en utilisant une architecture orientée fonctionnalités (feature-first), ce qui permet une meilleure séparation des préoccupations et une maintenance plus facile.
+- **Système d'onboarding** : Processus en 3 étapes avec connexion sociale et vérification par email
+- **Assistant IA (Chatbot)** : Entrée vocale, intégration GPT-4, historique des conversations
+- **Planificateur intelligent** : Vues hebdomadaires/mensuelles, synchronisation avec Google Calendar
+- **Module Finances** : Catégorisation des dépenses, connexions aux API bancaires, rapports PDF
+- **Générateur de documents** : Système de modèles, pad de signature électronique, synchronisation cloud
 
-Chaque fonctionnalité est divisée en trois couches :
-- **Presentation**: Widgets et BLoCs pour l'interface utilisateur
-- **Domain**: Entités, cas d'utilisation et interfaces de repository
-- **Data**: Implémentations de repository et sources de données
+## Maquettes visuelles
 
-## Structure du projet
+Les maquettes SVG montrent l'interface utilisateur prévue pour l'application mobile :
 
-```
-lib/
-├── app.dart               # Point d'entrée de l'application
-├── config/                # Configuration de l'application
-│   ├── di/                # Injection de dépendances
-│   ├── router/            # Configuration des routes
-│   └── theme/             # Thème de l'application
-├── core/                  # Composants partagés
-│   ├── constants/         # Constantes de l'application
-│   └── utils/             # Utilitaires partagés
-└── features/              # Fonctionnalités
-    ├── auth/              # Authentification
-    ├── chatbot/           # Assistant IA
-    ├── planner/           # Planification
-    ├── finance/           # Gestion financière
-    ├── dashboard/         # Tableau de bord
-    └── profile/           # Profil utilisateur
-```
+1. [Écran de démarrage](https://5002-gbc-coachia-replit-user.replit.app/mockups/splash.svg)
+2. [Tableau de bord](https://5002-gbc-coachia-replit-user.replit.app/mockups/dashboard.svg)
+3. [Assistant IA](https://5002-gbc-coachia-replit-user.replit.app/mockups/chatbot.svg)
+4. [Gestion financière](https://5002-gbc-coachia-replit-user.replit.app/mockups/finance.svg)
+5. [Mode sombre](https://5002-gbc-coachia-replit-user.replit.app/mockups/dark_mode.svg)
 
-## Exécution du projet
+Pour voir toutes les maquettes sur une seule page, consultez [la galerie de maquettes](https://5002-gbc-coachia-replit-user.replit.app/svg_viewer.html).
 
-1. Assurez-vous d'avoir Flutter installé sur votre machine
-2. Clonez le repository
-3. Installez les dépendances : `flutter pub get`
-4. Lancez l'application : `flutter run`
+## Architecture technique
 
-## Technologies utilisées
+- Architecture par fonctionnalités avec séparation nette des préoccupations (présentation, domaine, données)
+- Gestion d'état avec le pattern BLoC
+- Navigation avec Go Router
+- Injection de dépendances avec GetIt
 
-- **Flutter**: Framework UI pour le développement multiplateforme
-- **Bloc**: Gestion d'état
-- **Get_It**: Injection de dépendances
-- **Dio**: Client HTTP pour les requêtes d'API
-- **Hive**: Base de données locale
+## Style et thème
+
+- Système de thème avec support du mode sombre
+- Typographie avec la police Inter
+- Palette de couleurs personnalisée
+- Animations fluides avec Flutter Animate
+
+## Plateforme cible
+
+L'application est développée pour être réactive sur :
+- iOS
+- Android
+- Web (fonctionnalité secondaire)

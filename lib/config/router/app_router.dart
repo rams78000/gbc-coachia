@@ -5,6 +5,10 @@ import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
 import 'package:gbc_coachia/features/chatbot/presentation/pages/chatbot_page.dart';
 import 'package:gbc_coachia/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
+import 'package:gbc_coachia/features/documents/presentation/pages/document_create_page.dart';
+import 'package:gbc_coachia/features/documents/presentation/pages/document_detail_page.dart';
+import 'package:gbc_coachia/features/documents/presentation/pages/document_templates_page.dart';
 import 'package:gbc_coachia/features/documents/presentation/pages/documents_page.dart';
 import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
 import 'package:gbc_coachia/features/finance/presentation/pages/finance_overview_page.dart';
@@ -79,7 +83,36 @@ class AppRouter {
             GoRoute(
               path: '/documents',
               name: 'documents',
-              builder: (context, state) => const DocumentsPage(),
+              builder: (context, state) => BlocProvider(
+                create: (context) => serviceLocator<DocumentBloc>(),
+                child: const DocumentsPage(),
+              ),
+              routes: [
+                // Liste des modèles de document
+                GoRoute(
+                  path: 'templates',
+                  name: 'document_templates',
+                  builder: (context, state) => const DocumentTemplatesPage(),
+                ),
+                // Création d'un document à partir d'un modèle
+                GoRoute(
+                  path: 'create',
+                  name: 'document_create',
+                  builder: (context, state) {
+                    final templateId = state.uri.queryParameters['templateId'] ?? '';
+                    return DocumentCreatePage(templateId: templateId);
+                  },
+                ),
+                // Détail d'un document
+                GoRoute(
+                  path: 'detail',
+                  name: 'document_detail',
+                  builder: (context, state) {
+                    final documentId = state.uri.queryParameters['documentId'] ?? '';
+                    return DocumentDetailPage(documentId: documentId);
+                  },
+                ),
+              ],
             ),
             
             // Profil

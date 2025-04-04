@@ -6,6 +6,7 @@ import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
 import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
+import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
 import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
 import 'package:gbc_coachia/features/planner/presentation/bloc/planner_bloc.dart';
 
@@ -29,7 +30,9 @@ class App extends StatelessWidget {
         BlocProvider<FinanceBloc>(
           create: (context) => serviceLocator<FinanceBloc>(),
         ),
-        // Ajouter d'autres BlocProviders ici
+        BlocProvider<DocumentBloc>(
+          create: (context) => serviceLocator<DocumentBloc>(),
+        ),
       ],
       child: Builder(
         builder: (context) {

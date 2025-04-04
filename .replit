@@ -1,4 +1,4 @@
-modules = ["flutter", "nodejs-20", "python-3.11"]
+modules = ["flutter", "python-3.11", "nodejs-18"]
 
 [nix]
 channel = "stable-24_05"
@@ -53,8 +53,8 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd /home/runner/workspace && python -m http.server 5001 --bind 0.0.0.0 --directory preview"
-waitForPort = 5001
+args = "cd /home/runner/workspace && python -m http.server 5000 --bind 0.0.0.0 --directory preview"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Preview SVG"

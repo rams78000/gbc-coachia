@@ -6,6 +6,7 @@ import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart
 import 'package:gbc_coachia/features/chatbot/presentation/pages/chatbot_page.dart';
 import 'package:gbc_coachia/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:gbc_coachia/features/documents/presentation/pages/documents_page.dart';
+import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
 import 'package:gbc_coachia/features/finance/presentation/pages/finance_overview_page.dart';
 import 'package:gbc_coachia/features/planner/presentation/pages/planner_page.dart';
 import 'package:gbc_coachia/features/profile/presentation/pages/profile_page.dart';
@@ -68,7 +69,10 @@ class AppRouter {
             GoRoute(
               path: '/finances',
               name: 'finances',
-              builder: (context, state) => const FinanceOverviewPage(),
+              builder: (context, state) => BlocProvider(
+                create: (context) => serviceLocator<FinanceBloc>(),
+                child: const FinanceOverviewPage(),
+              ),
             ),
             
             // Documents

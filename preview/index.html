@@ -1,131 +1,174 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GBC CoachIA - Aperçu</title>
-    <style>
-        body {
-            font-family: 'Inter', 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            color: #333;
-        }
-        h1 {
-            color: #B87333;
-            margin-bottom: 10px;
-        }
-        h2 {
-            color: #333;
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        .preview-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 30px;
-            max-width: 800px;
-            width: 100%;
-        }
-        .phone-preview {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .feature-list {
-            margin-top: 30px;
-        }
-        .feature-list h3 {
-            color: #B87333;
-            border-bottom: 2px solid #FFD700;
-            padding-bottom: 5px;
-            display: inline-block;
-        }
-        .feature-item {
-            margin-bottom: 15px;
-            padding-left: 20px;
-            position: relative;
-        }
-        .feature-item::before {
-            content: "✓";
-            color: #B87333;
-            position: absolute;
-            left: 0;
-            font-weight: bold;
-        }
-        .tech-details {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        .tech-details code {
-            background-color: #eee;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-    </style>
+  <title>GBC CoachIA - Aperçu</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #B87333;
+      border-bottom: 2px solid #FFD700;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #B87333;
+    }
+    .feature {
+      margin-bottom: 30px;
+      border-left: 4px solid #FFD700;
+      padding-left: 15px;
+    }
+    .mockup {
+      margin: 20px 0;
+      text-align: center;
+    }
+    .mockup img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .color-palette {
+      display: flex;
+      margin: 20px 0;
+    }
+    .color {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
     <h1>GBC CoachIA</h1>
-    <h2>Aperçu du tableau de bord</h2>
+    <p>Une application d'assistance pour entrepreneurs et freelances avec IA</p>
     
-    <div class="preview-container">
-        <p>Voici un aperçu du tableau de bord de votre application GBC CoachIA, conçu selon les spécifications demandées :</p>
-        
-        <div class="phone-preview">
-            <object data="dashboard_preview.svg" type="image/svg+xml" width="375" height="812">
-                <img src="dashboard_preview.svg" alt="Aperçu du tableau de bord" width="375" />
-            </object>
-        </div>
-        
-        <div class="feature-list">
-            <h3>Fonctionnalités implémentées</h3>
-            
-            <div class="feature-item">
-                <strong>Message de bienvenue personnalisé</strong> - Adapté selon l'heure du jour (bonjour, bon après-midi, bonsoir) et affichant le nom de l'utilisateur.
-            </div>
-            
-            <div class="feature-item">
-                <strong>Statistiques de productivité visuelles</strong> - Graphique d'activité hebdomadaire et cartes de statistiques avec chiffres clés.
-            </div>
-            
-            <div class="feature-item">
-                <strong>Prochains événements</strong> - Liste des réunions et échéances à venir avec indicateurs visuels de priorité.
-            </div>
-            
-            <div class="feature-item">
-                <strong>Accès rapide</strong> - Raccourcis vers les fonctionnalités principales (IA, planificateur, documents).
-            </div>
-            
-            <div class="feature-item">
-                <strong>Notifications</strong> - Système de notifications avec badge indiquant le nombre d'éléments non lus.
-            </div>
-            
-            <div class="feature-item">
-                <strong>Recommandations IA</strong> - Accès aux conseils personnalisés via le bouton flottant et la section "Conseil du jour".
-            </div>
-        </div>
-        
-        <div class="tech-details">
-            <p><strong>Informations techniques :</strong></p>
-            <ul>
-                <li>Interface développée avec <code>Flutter</code> pour une expérience native sur iOS et Android</li>
-                <li>Utilisation des couleurs de marque : <code>#B87333</code> (cuivre/bronze) et <code>#FFD700</code> (or)</li>
-                <li>Polices utilisées : famille <code>Inter</code></li>
-                <li>Prise en charge du thème sombre (non illustré dans cet aperçu)</li>
-                <li>Implémentation réactive adaptée aux différentes tailles d'écran</li>
-            </ul>
-        </div>
+    <h2>Palette de Couleurs</h2>
+    <div class="color-palette">
+      <div class="color" style="background-color: #B87333;">Primary</div>
+      <div class="color" style="background-color: #FFD700;">Secondary</div>
+      <div class="color" style="background-color: #FAFAE6; color: #333;">Light BG</div>
+      <div class="color" style="background-color: #FFFDD0; color: #333;">Dark BG</div>
     </div>
+    
+    <h2>Fonctionnalités Principales</h2>
+    
+    <div class="feature">
+      <h3>Tableau de Bord Intelligent</h3>
+      <p>Vue d'ensemble personnalisée de votre activité avec statistiques et recommandations basées sur l'IA.</p>
+    </div>
+    
+    <div class="feature">
+      <h3>Assistant IA Conversationnel</h3>
+      <p>Communication naturelle avec l'IA pour obtenir des conseils, générer du contenu et analyser vos données.</p>
+    </div>
+    
+    <div class="feature">
+      <h3>Planificateur Optimisé</h3>
+      <p>Gestion de calendrier et de tâches avec suggestions d'optimisation du temps basées sur l'IA.</p>
+    </div>
+    
+    <div class="feature">
+      <h3>Suivi Financier</h3>
+      <p>Analyse complète de vos revenus, dépenses et performance financière avec visualisations et prévisions.</p>
+    </div>
+    
+    <div class="feature">
+      <h3>Gestion de Documents</h3>
+      <p>Création et organisation de documents professionnels avec assistance IA pour les contrats et propositions.</p>
+    </div>
+    
+    <h2>Aperçu de l'écran Finances</h2>
+    <p>L'écran Finances permet aux entrepreneurs et freelances de suivre leurs revenus, dépenses et transactions par catégorie.</p>
+    
+    <div class="mockup">
+      <svg width="300" height="600" viewBox="0 0 300 600" xmlns="http://www.w3.org/2000/svg">
+        <!-- Fond du téléphone -->
+        <rect x="0" y="0" width="300" height="600" rx="20" fill="#f0f0f0"/>
+        
+        <!-- Écran -->
+        <rect x="10" y="50" width="280" height="500" rx="10" fill="#ffffff"/>
+        
+        <!-- Barre de statut -->
+        <rect x="10" y="50" width="280" height="40" rx="10" fill="#B87333"/>
+        <text x="30" y="75" font-family="Arial" font-size="14" fill="#ffffff">Finances</text>
+        
+        <!-- Onglets -->
+        <rect x="10" y="90" width="280" height="40" fill="#F5F5F5"/>
+        <rect x="10" y="90" width="93" height="40" fill="#FFD700" opacity="0.3"/>
+        <text x="40" y="115" font-family="Arial" font-size="12" fill="#333333">Aperçu</text>
+        <text x="140" y="115" font-family="Arial" font-size="12" fill="#666666">Transactions</text>
+        <text x="240" y="115" font-family="Arial" font-size="12" fill="#666666">Comptes</text>
+        
+        <!-- Sélecteur de période -->
+        <rect x="20" y="140" width="260" height="30" rx="15" fill="#F5F5F5"/>
+        <text x="40" y="160" font-family="Arial" font-size="12" fill="#333333">Période: Mois</text>
+        
+        <!-- Carte résumé -->
+        <rect x="20" y="180" width="260" height="100" rx="10" fill="#FFFDD0"/>
+        <text x="30" y="200" font-family="Arial" font-size="14" fill="#333333">Résumé du mois</text>
+        <text x="30" y="225" font-family="Arial" font-size="12" fill="#666666">Revenus</text>
+        <text x="180" y="225" font-family="Arial" font-size="14" fill="#38A169">2,750 €</text>
+        <text x="30" y="250" font-family="Arial" font-size="12" fill="#666666">Dépenses</text>
+        <text x="180" y="250" font-family="Arial" font-size="14" fill="#E53E3E">1,540 €</text>
+        <text x="30" y="275" font-family="Arial" font-size="12" fill="#666666">Solde</text>
+        <text x="180" y="275" font-family="Arial" font-size="14" fill="#333333">1,210 €</text>
+        
+        <!-- Graphique revenus/dépenses -->
+        <rect x="20" y="290" width="260" height="120" rx="10" fill="#FFFFFF" stroke="#EEEEEE"/>
+        <text x="30" y="310" font-family="Arial" font-size="14" fill="#333333">Revenus vs Dépenses</text>
+        
+        <!-- Graphique simplifié -->
+        <rect x="40" y="330" width="30" height="60" fill="#B87333"/>
+        <rect x="80" y="330" width="30" height="40" fill="#E53E3E"/>
+        <rect x="130" y="330" width="30" height="70" fill="#B87333"/>
+        <rect x="170" y="330" width="30" height="35" fill="#E53E3E"/>
+        <rect x="220" y="330" width="30" height="50" fill="#B87333"/>
+        
+        <!-- Graphique dépenses -->
+        <rect x="20" y="420" width="260" height="120" rx="10" fill="#FFFFFF" stroke="#EEEEEE"/>
+        <text x="30" y="440" font-family="Arial" font-size="14" fill="#333333">Dépenses par catégorie</text>
+        
+        <!-- Graphique camembert simplifié -->
+        <circle cx="140" cy="490" r="40" fill="none" stroke="#EEEEEE" stroke-width="40" stroke-dasharray="40 190"/>
+        <circle cx="140" cy="490" r="40" fill="none" stroke="#B87333" stroke-width="40" stroke-dasharray="70 190" stroke-dashoffset="40"/>
+        <circle cx="140" cy="490" r="40" fill="none" stroke="#FFD700" stroke-width="40" stroke-dasharray="50 190" stroke-dashoffset="110"/>
+        <circle cx="140" cy="490" r="40" fill="none" stroke="#38A169" stroke-width="40" stroke-dasharray="50 190" stroke-dashoffset="160"/>
+        
+        <!-- Légende -->
+        <rect x="210" y="470" width="10" height="10" fill="#B87333"/>
+        <text x="225" y="480" font-family="Arial" font-size="10" fill="#666666">Loyer</text>
+        <rect x="210" y="490" width="10" height="10" fill="#FFD700"/>
+        <text x="225" y="500" font-family="Arial" font-size="10" fill="#666666">Logiciels</text>
+        <rect x="210" y="510" width="10" height="10" fill="#38A169"/>
+        <text x="225" y="520" font-family="Arial" font-size="10" fill="#666666">Fournitures</text>
+        
+        <!-- Navigation -->
+        <circle cx="260" cy="530" r="25" fill="#B87333"/>
+        <text x="255" y="535" font-family="Arial" font-size="20" fill="#FFFFFF">+</text>
+      </svg>
+    </div>
+  </div>
 </body>
 </html>

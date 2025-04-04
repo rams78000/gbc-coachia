@@ -6,6 +6,7 @@ import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
 import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
+import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
 import 'package:gbc_coachia/features/planner/presentation/bloc/planner_bloc.dart';
 
 /// Application principale
@@ -17,15 +18,16 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>(
-          create: (context) => AuthBloc(
-            authRepository: serviceLocator<AuthRepository>(),
-          ),
+          create: (context) => AuthBloc(),
         ),
         BlocProvider<ChatbotBloc>(
           create: (context) => serviceLocator<ChatbotBloc>(),
         ),
         BlocProvider<PlannerBloc>(
           create: (context) => serviceLocator<PlannerBloc>(),
+        ),
+        BlocProvider<FinanceBloc>(
+          create: (context) => serviceLocator<FinanceBloc>(),
         ),
         // Ajouter d'autres BlocProviders ici
       ],

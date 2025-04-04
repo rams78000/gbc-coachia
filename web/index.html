@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
 <html>
 <head>
   <base href="$FLUTTER_BASE_HREF">
@@ -19,26 +22,26 @@
   <title>GBC CoachIA</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Fix pour éviter les erreurs MIME -->
   <script>
-    // Taille par défaut de Flutter
-    window.flutterWebRenderer = "html";
+    // The value below is injected by flutter build, do not touch.
+    var serviceWorkerVersion = null;
   </script>
-
+  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
 <body>
   <script>
     window.addEventListener('load', function(ev) {
-      // Télécharger le chargeur de Flutter
-      _flutter.loader.load({
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
         serviceWorker: {
-          serviceWorkerVersion: '{{flutter_service_worker_version}}',
+          serviceWorkerVersion: serviceWorkerVersion,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
         }
-      }).then(function(engineInitializer) {
-        return engineInitializer.initializeEngine();
-      }).then(function(appRunner) {
-        return appRunner.runApp();
       });
     });
   </script>

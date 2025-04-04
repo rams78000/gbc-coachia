@@ -7,11 +7,15 @@ void main() async {
   // Assurer que les widgets sont initialisés
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Configurer l'orientation de l'application (portrait uniquement)
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // Configurer l'orientation de l'application (portrait uniquement pour mobile)
+  // Vérifier si nous sommes sur le web pour éviter les erreurs avec l'orientation
+  bool isMobile = !(const bool.fromEnvironment('dart.library.js'));
+  if (isMobile) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
   // Initialiser les dépendances
   await initDependencies();

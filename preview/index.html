@@ -3,172 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GBC CoachIA - Documentation</title>
+    <title>GBC CoachIA - Preview</title>
     <style>
         body {
-            font-family: 'Inter', Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
             color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #B87333;
-            padding-bottom: 20px;
-        }
-        h1, h2, h3 {
-            color: #B87333;
-        }
-        h1 {
-            font-size: 2.5em;
-        }
-        h2 {
-            font-size: 1.8em;
-            margin-top: 30px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-        h3 {
-            font-size: 1.3em;
-            margin-top: 25px;
-        }
-        p {
-            margin-bottom: 16px;
         }
         .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-        .diagram {
-            max-width: 100%;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 300px;
-            text-align: center;
-        }
-        .diagram img {
-            max-width: 100%;
-            height: auto;
-        }
-        .diagram h3 {
-            margin-top: 15px;
-        }
-        .feature-list {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .highlight {
-            background-color: #FFF9E6;
-            border-left: 4px solid #FFD700;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .button {
-            display: inline-block;
+        header {
             background-color: #B87333;
             color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin: 10px;
-        }
-        footer {
+            padding: 20px;
             text-align: center;
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #777;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .preview-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            padding: 20px;
+        }
+        .preview-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #B87333;
+            margin-bottom: 15px;
+        }
+        .onboarding-images {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .image-item {
+            width: 48%;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .image-item img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+            border-radius: 10px;
+        }
+        .image-title {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .button {
+            background-color: #B87333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover {
+            background-color: #a06125;
+        }
+        .message {
+            background-color: #FFF9C4;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>GBC CoachIA</h1>
-        <p>Application mobile Flutter pour entrepreneurs et freelances</p>
+        <h1>GBC CoachIA - Aperçu du projet</h1>
     </header>
-    
-    <main>
-        <div class="highlight">
-            <h2>Documentation de la Structure du Projet</h2>
-            <p>Cette page présente les diagrammes de l'architecture de l'application GBC CoachIA, avec un focus sur la mise en place du module de Paramètres. L'application est conçue selon une architecture feature-first avec séparation des couches (présentation, domaine, données).</p>
+
+    <div class="container">
+        <div class="message">
+            Cette page est un aperçu du projet GBC CoachIA. Pour voir l'application complète, veuillez exécuter le projet Flutter.
         </div>
-        
-        <h2>Architecture Globale</h2>
-        <div class="container">
-            <div class="diagram">
-                <img src="app_structure.svg" alt="Structure globale de l'application">
-                <h3>Vue d'ensemble des modules</h3>
-                <p>Ce diagramme illustre l'interconnexion entre les différentes fonctionnalités de l'application et leur relation avec le module de paramètres central.</p>
-                <a href="app_structure.svg" class="button">Voir en plein écran</a>
-            </div>
-        </div>
-        
-        <h2>Détail du Module de Paramètres</h2>
-        <div class="container">
-            <div class="diagram">
-                <img src="settings_structure.svg" alt="Structure du module de paramètres">
-                <h3>Architecture interne</h3>
-                <p>Ce diagramme détaille l'organisation en couches (domaine, données, présentation) du module de paramètres conformément aux principes du Clean Architecture.</p>
-                <a href="settings_structure.svg" class="button">Voir en plein écran</a>
-            </div>
-        </div>
-        
-        <h2>Interfaces Utilisateur</h2>
-        <div class="container">
-            <div class="diagram">
-                <img src="settings_ui.svg" alt="Maquettes d'interfaces">
-                <h3>Maquettes des écrans</h3>
-                <p>Ce diagramme présente les différents écrans du module de paramètres, illustrant l'organisation visuelle et l'expérience utilisateur.</p>
-                <a href="settings_ui.svg" class="button">Voir en plein écran</a>
-            </div>
-        </div>
-        
-        <h2>Fonctionnalités Implémentées</h2>
-        <div class="feature-list">
-            <h3>Module de paramètres</h3>
+
+        <div class="preview-section">
+            <div class="preview-title">À propos de GBC CoachIA</div>
+            <p>
+                GBC CoachIA est une application mobile conçue pour les entrepreneurs et freelances, leur permettant de gérer efficacement leur activité.
+            </p>
+            <p>
+                Principales fonctionnalités :
+            </p>
             <ul>
-                <li><strong>Gestion du profil utilisateur</strong> - Modification des informations personnelles et professionnelles</li>
-                <li><strong>Personnalisation de l'interface</strong> - Configuration du thème (clair/sombre) et de l'apparence</li>
-                <li><strong>Gestion des notifications</strong> - Contrôle des alertes et rappels</li>
-                <li><strong>Configuration des API</strong> - Intégration avec OpenAI, Deepseek et Gemini 2.5 Pro</li>
-                <li><strong>Paramètres de confidentialité</strong> - Options de partage et conservation des données</li>
-            </ul>
-            
-            <h3>Autres modules</h3>
-            <ul>
-                <li><strong>Tableau de bord</strong> - Aperçu des activités et métriques clés</li>
-                <li><strong>Assistant IA</strong> - Interface de conversation avec l'intelligence artificielle</li>
-                <li><strong>Planning</strong> - Gestion des rendez-vous et planification</li>
-                <li><strong>Finance</strong> - Suivi des revenus, dépenses et projections</li>
-                <li><strong>Documents</strong> - Génération de documents professionnels</li>
-                <li><strong>Stockage</strong> - Organisation et accès aux fichiers</li>
+                <li>Assistant IA pour répondre aux questions</li>
+                <li>Gestion du planning et des tâches</li>
+                <li>Suivi des finances et des factures</li>
+                <li>Génération et gestion de documents</li>
+                <li>Stockage sécurisé des fichiers</li>
             </ul>
         </div>
-        
-        <div class="highlight">
-            <h3>Priorités techniques</h3>
-            <p>Conformément aux exigences client, l'application est développée avec une priorité absolue pour l'expérience mobile. L'interface est optimisée pour iOS et Android avec un design adaptatif utilisant les couleurs d'identité visuelle bronze/cuivre (B87333) et or (FFD700).</p>
+
+        <div class="preview-section">
+            <div class="preview-title">Images d'onboarding</div>
+            <div class="onboarding-images">
+                <div class="image-item">
+                    <img src="../assets/images/onboarding/welcome.svg" alt="Bienvenue">
+                    <div class="image-title">Écran de bienvenue</div>
+                </div>
+                <div class="image-item">
+                    <img src="../assets/images/onboarding/chatbot.svg" alt="Assistant IA">
+                    <div class="image-title">Assistant IA</div>
+                </div>
+                <div class="image-item">
+                    <img src="../assets/images/onboarding/planner.svg" alt="Planification">
+                    <div class="image-title">Planification</div>
+                </div>
+                <div class="image-item">
+                    <img src="../assets/images/onboarding/finance.svg" alt="Finances">
+                    <div class="image-title">Finances</div>
+                </div>
+                <div class="image-item">
+                    <img src="../assets/images/onboarding/complete.svg" alt="Prêt à démarrer">
+                    <div class="image-title">Prêt à démarrer</div>
+                </div>
+            </div>
         </div>
-    </main>
-    
-    <footer>
-        <p>GBC CoachIA - Documentation technique - 2025</p>
-    </footer>
+
+        <div class="preview-section">
+            <div class="preview-title">Technologies utilisées</div>
+            <ul>
+                <li>Flutter pour le développement cross-platform</li>
+                <li>Dart comme langage de programmation</li>
+                <li>Architecture feature-first</li>
+                <li>BLoC pour la gestion d'état</li>
+                <li>Go Router pour la navigation</li>
+                <li>SharedPreferences pour le stockage local</li>
+                <li>FL Chart pour les visualisations de données</li>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>

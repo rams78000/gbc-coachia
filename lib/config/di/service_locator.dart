@@ -1,20 +1,21 @@
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../features/settings/data/repositories/mock_settings_repository.dart';
-import '../../features/settings/domain/repositories/settings_repository.dart';
+import '../../features/onboarding/data/repositories/mock_onboarding_repository.dart';
+import '../../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 
-final GetIt getIt = GetIt.instance;
+final getIt = GetIt.instance;
 
-Future<void> initServiceLocator() async {
-  // Services externes
-  final sharedPreferences = await SharedPreferences.getInstance();
-  getIt.registerSingleton<SharedPreferences>(sharedPreferences);
-  
-  // Repositories
-  getIt.registerLazySingleton<SettingsRepository>(
-    () => MockSettingsRepository(getIt<SharedPreferences>()),
-  );
-  
-  // BLoCs seront enregistrés au niveau des écrans pour une gestion de cycle de vie appropriée
+class ServiceLocator {
+  static Future<void> init() async {
+    // Repositories
+    getIt.registerLazySingleton<OnboardingRepository>(
+      () => MockOnboardingRepository(),
+    );
+    
+    // BLoCs
+    getIt.registerFactory<OnboardingBloc>(
+      () => OnboardingBloc(repository: getIt<OnboardingRepository>()),
+    );
+  }
 }

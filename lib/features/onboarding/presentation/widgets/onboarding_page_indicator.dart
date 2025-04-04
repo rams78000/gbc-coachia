@@ -1,55 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:gbc_coachia/config/theme/app_theme.dart';
 
-/// Widget pour afficher les indicateurs de page d'onboarding
 class OnboardingPageIndicator extends StatelessWidget {
-  /// Nombre total de pages
-  final int count;
-  
-  /// Index de la page actuelle
   final int currentIndex;
-  
-  /// Taille des indicateurs
-  final double size;
-  
-  /// Espacement entre les indicateurs
-  final double spacing;
-  
-  /// Couleur de l'indicateur actif
+  final int pageCount;
   final Color activeColor;
-  
-  /// Couleur des indicateurs inactifs
   final Color inactiveColor;
+  final double dotSize;
+  final double spacing;
 
-  /// Constructeur
   const OnboardingPageIndicator({
     Key? key,
-    required this.count,
     required this.currentIndex,
-    this.size = 10.0,
+    required this.pageCount,
+    this.activeColor = const Color(0xFFB87333),
+    this.inactiveColor = const Color(0xFFE0E0E0),
+    this.dotSize = 8.0,
     this.spacing = 8.0,
-    this.activeColor = AppTheme.primaryColor,
-    this.inactiveColor = AppTheme.textSecondaryColor,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (index) {
-        // Déterminer si cet indicateur est actif
+      children: List.generate(pageCount, (index) {
         final isActive = index == currentIndex;
         
         return Container(
           margin: EdgeInsets.symmetric(horizontal: spacing / 2),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: isActive ? size * 2.5 : size,
-            height: size,
-            decoration: BoxDecoration(
-              color: isActive ? activeColor : inactiveColor.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(size / 2),
-            ),
+          width: isActive ? dotSize * 3 : dotSize,
+          height: dotSize,
+          decoration: BoxDecoration(
+            color: isActive ? activeColor : inactiveColor,
+            borderRadius: BorderRadius.circular(dotSize / 2),
           ),
         );
       }),

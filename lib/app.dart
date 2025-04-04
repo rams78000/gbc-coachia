@@ -1,22 +1,46 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'config/router/app_router.dart';
-import 'config/theme/app_theme.dart';
 
-class GBCCoachIAApp extends StatelessWidget {
-  const GBCCoachIAApp({super.key});
+class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'GBC CoachIA',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system, // A remplacer par les préférences de l'utilisateur
-      routerConfig: appRouter,
+      theme: ThemeData(
+        primaryColor: const Color(0xFFB87333),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFB87333),
+          primary: const Color(0xFFB87333),
+          secondary: const Color(0xFFFFD700),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFB87333),
+          foregroundColor: Colors.white,
+        ),
+        fontFamily: 'Inter',
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFFB87333),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFB87333),
+          primary: const Color(0xFFB87333),
+          secondary: const Color(0xFFFFD700),
+          brightness: Brightness.dark,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFB87333),
+          foregroundColor: Colors.white,
+        ),
+        fontFamily: 'Inter',
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system,
+      routerConfig: AppRouter.router,
     );
   }
 }

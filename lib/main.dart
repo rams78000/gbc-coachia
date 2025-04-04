@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'app.dart';
 import 'config/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialiser les services et dépendances
-  await initServiceLocator();
+  // Initialiser les dépendances
+  await ServiceLocator.init();
   
-  runApp(const GBCCoachIAApp());
+  // Forcer l'orientation portrait pour mobile
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+  
+  runApp(const App());
 }

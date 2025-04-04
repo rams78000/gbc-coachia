@@ -1,55 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gbc_coachia/config/router/app_router.dart';
-import 'package:gbc_coachia/config/theme/app_theme.dart';
-import 'package:gbc_coachia/core/widgets/app_button.dart';
-import 'package:gbc_coachia/features/onboarding/presentation/widgets/page_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Page d'onboarding
-class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({super.key});
+import '../bloc/onboarding_bloc.dart';
+import '../widgets/onboarding_step_content.dart';
+import '../widgets/onboarding_step_indicator.dart';
+
+class OnboardingPage extends StatelessWidget {
+  const OnboardingPage({Key? key}) : super(key: key);
 
   @override
-  State<OnboardingPage> createState() => _OnboardingPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => context.read<OnboardingBloc>()
+        ..add(const InitializeOnboarding()),
+      child: BlocConsumer<OnboardingBloc, OnboardingState>(
+        listener: (context, state) {
+          if (state is OnboardingCompleted) {
+            context.go('/dashboard');
+          }
+          
+          if (state is OnboardingError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is OnboardingLoading) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB87333)),
+                ),
+              ),
+            );
+          }
+
+          if (state is OnboardingInProgress) {
+            return _OnboardingView(currentStep: state.currentStep);
+          }
+
+          return const Scaffold(
+            body: Center(
+              child: Text('Chargement...'),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
-class _OnboardingPageState extends State<OnboardingPage> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-  final int _numPages = 3;
-  static const String _onboardingCompletedKey = 'onboarding_completed';
+class _OnboardingView extends StatelessWidget {
+  final int currentStep;
+  static const int totalSteps = 5; // 0-4
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _completeOnboarding() async {
-    // Marquer l'onboarding comme terminé
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_onboardingCompletedKey, true);
-    if (!mounted) return;
-    context.go(AppRoutes.login);
-  }
-
-  void _onPageChanged(int page) {
-    setState(() {
-      _currentPage = page;
-    });
-  }
-
-  void _nextPage() {
-    if (_currentPage < _numPages - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeIn,
-      );
-    } else {
-      _completeOnboarding();
-    }
-  }
+  const _OnboardingView({
+    Key? key,
+    required this.currentStep,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -57,126 +67,114 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: SafeArea(
         child: Column(
           children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: TextButton(
+                onPressed: () {
+                  context.read<OnboardingBloc>().add(SkipOnboarding());
+                },
+                child: const Text(
+                  'Passer',
+                  style: TextStyle(
+                    color: Color(0xFFB87333),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: PageView(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                children: const [
-                  _OnboardingPageContent(
+                physics: const NeverScrollableScrollPhysics(),
+                controller: PageController(initialPage: currentStep),
+                children: [
+                  OnboardingStepContent(
                     title: 'Bienvenue sur GBC CoachIA',
-                    description:
-                        'Votre assistant personnel pour vous accompagner dans le développement de votre entreprise ou activité freelance.',
-                    icon: Icons.psychology_alt,
-                    color: AppTheme.primaryColor,
+                    description: 'Votre assistant IA de gestion d\'entreprise pour entrepreneurs et freelances.',
+                    imagePath: 'assets/images/onboarding/welcome.png',
                   ),
-                  _OnboardingPageContent(
-                    title: 'Planifiez et Organisez',
-                    description:
-                        'Gérez efficacement votre temps, vos projets et vos rendez-vous grâce à notre planificateur intelligent.',
-                    icon: Icons.calendar_today,
-                    color: AppTheme.accentColor,
+                  OnboardingStepContent(
+                    title: 'Assistant IA Intelligent',
+                    description: 'Posez vos questions, obtenez des conseils personnalisés et des réponses précises.',
+                    imagePath: 'assets/images/onboarding/chatbot.png',
                   ),
-                  _OnboardingPageContent(
-                    title: 'Gérez vos Finances',
-                    description:
-                        'Suivez vos revenus, dépenses et créez facilement des factures et devis professionnels.',
-                    icon: Icons.account_balance_wallet,
-                    color: AppTheme.secondaryColor,
+                  OnboardingStepContent(
+                    title: 'Planification Simplifiée',
+                    description: 'Gérez votre agenda, vos tâches et vos projets de manière intuitive.',
+                    imagePath: 'assets/images/onboarding/planner.png',
+                  ),
+                  OnboardingStepContent(
+                    title: 'Suivi Financier',
+                    description: 'Suivez vos finances, factures et paiements en un coup d\'œil.',
+                    imagePath: 'assets/images/onboarding/finance.png',
+                  ),
+                  OnboardingStepContent(
+                    title: 'Tout est prêt !',
+                    description: 'Vous êtes maintenant prêt à utiliser toutes les fonctionnalités de GBC CoachIA.',
+                    imagePath: 'assets/images/onboarding/complete.png',
+                    additionalContent: ElevatedButton(
+                      onPressed: () {
+                        context.read<OnboardingBloc>().add(CompleteOnboarding());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFB87333),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                      ),
+                      child: const Text(
+                        'Commencer',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(AppTheme.spacing * 2),
-              child: Column(
-                children: [
-                  PageIndicator(
-                    count: _numPages,
-                    currentIndex: _currentPage,
-                  ),
-                  const SizedBox(height: AppTheme.spacing * 2),
-                  Row(
-                    children: [
-                      if (_currentPage < _numPages - 1) ...[
-                        TextButton(
-                          onPressed: _completeOnboarding,
-                          child: const Text('Passer'),
-                        ),
-                        const Spacer(),
-                        AppButton(
-                          label: 'Suivant',
-                          onPressed: _nextPage,
-                          icon: Icons.arrow_forward,
-                        ),
-                      ] else ...[
-                        const Spacer(),
-                        AppButton(
-                          label: 'Commencer',
-                          onPressed: _completeOnboarding,
-                          isFullWidth: true,
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(vertical: 24.0),
+              child: OnboardingStepIndicator(
+                currentStep: currentStep,
+                totalSteps: totalSteps,
               ),
             ),
+            if (currentStep < totalSteps - 1)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (currentStep > 0)
+                      OutlinedButton(
+                        onPressed: () {
+                          context.read<OnboardingBloc>().add(PreviousStep());
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFFB87333)),
+                          foregroundColor: const Color(0xFFB87333),
+                        ),
+                        child: const Text('Précédent'),
+                      )
+                    else
+                      const SizedBox(width: 80), // Espace pour équilibrer
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<OnboardingBloc>().add(NextStep());
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFB87333),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Suivant'),
+                    ),
+                  ],
+                ),
+              )
+            else
+              const SizedBox(height: 80), // Espace pour la dernière page
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Contenu d'une page d'onboarding
-class _OnboardingPageContent extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-
-  const _OnboardingPageContent({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.spacing * 2),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              size: 60,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacing * 2),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppTheme.spacing),
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

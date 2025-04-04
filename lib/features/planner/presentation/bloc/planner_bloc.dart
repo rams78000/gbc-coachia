@@ -1,271 +1,164 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/task.dart';
 import '../../domain/repositories/planner_repository.dart';
-import 'planner_event.dart';
-import 'planner_state.dart';
 
-/// BLoC to handle planner functionality
+/// Événements pour le bloc planificateur
+abstract class PlannerEvent extends Equatable {
+  /// Constructeur
+  const PlannerEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+/// Événement pour charger tous les événements
+class LoadEvents extends PlannerEvent {
+  /// Constructeur
+  const LoadEvents();
+}
+
+/// Événement pour ajouter un nouvel événement
+class AddEvent extends PlannerEvent {
+  /// L'événement à ajouter
+  final PlanEvent event;
+
+  /// Constructeur
+  const AddEvent(this.event);
+
+  @override
+  List<Object> get props => [event];
+}
+
+/// Événement pour mettre à jour un événement existant
+class UpdateEvent extends PlannerEvent {
+  /// L'événement à mettre à jour
+  final PlanEvent event;
+
+  /// Constructeur
+  const UpdateEvent(this.event);
+
+  @override
+  List<Object> get props => [event];
+}
+
+/// Événement pour supprimer un événement
+class DeleteEvent extends PlannerEvent {
+  /// L'identifiant de l'événement à supprimer
+  final String id;
+
+  /// Constructeur
+  const DeleteEvent(this.id);
+
+  @override
+  List<Object> get props => [id];
+}
+
+/// États pour le bloc planificateur
+abstract class PlannerState extends Equatable {
+  /// Constructeur
+  const PlannerState();
+
+  @override
+  List<Object> get props => [];
+}
+
+/// État initial du planificateur
+class PlannerInitial extends PlannerState {}
+
+/// État de chargement des événements
+class PlannerLoading extends PlannerState {}
+
+/// État lorsque les événements sont chargés
+class PlannerLoaded extends PlannerState {
+  /// Liste des événements
+  final List<PlanEvent> events;
+
+  /// Constructeur
+  const PlannerLoaded(this.events);
+
+  @override
+  List<Object> get props => [events];
+}
+
+/// État d'erreur du planificateur
+class PlannerError extends PlannerState {
+  /// Message d'erreur
+  final String message;
+
+  /// Constructeur
+  const PlannerError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+/// Bloc gérant le planificateur
 class PlannerBloc extends Bloc<PlannerEvent, PlannerState> {
-  /// Planner repository
-  final PlannerRepository? plannerRepository;
+  final PlannerRepository _plannerRepository;
 
-  /// Constructor
-  PlannerBloc({this.plannerRepository}) : super(PlannerInitial()) {
-    on<LoadTasksEvent>(_onLoadTasks);
-    on<LoadTasksByStatusEvent>(_onLoadTasksByStatus);
-    on<LoadTasksByDateRangeEvent>(_onLoadTasksByDateRange);
-    on<AddTaskEvent>(_onAddTask);
-    on<UpdateTaskEvent>(_onUpdateTask);
-    on<DeleteTaskEvent>(_onDeleteTask);
-    on<UpdateTaskStatusEvent>(_onUpdateTaskStatus);
-    on<LoadTagsEvent>(_onLoadTags);
+  /// Constructeur
+  PlannerBloc({required PlannerRepository plannerRepository})
+      : _plannerRepository = plannerRepository,
+        super(PlannerInitial()) {
+    on<LoadEvents>(_onLoadEvents);
+    on<AddEvent>(_onAddEvent);
+    on<UpdateEvent>(_onUpdateEvent);
+    on<DeleteEvent>(_onDeleteEvent);
   }
 
-  /// Handle loading all tasks
-  Future<void> _onLoadTasks(
-    LoadTasksEvent event,
+  Future<void> _onLoadEvents(
+    LoadEvents event,
     Emitter<PlannerState> emit,
   ) async {
     emit(PlannerLoading());
-    
     try {
-      // TODO: Replace with actual repository implementation
-      final tasks = await Future.delayed(
-        const Duration(milliseconds: 500),
-        () => <Task>[],
-      );
-      
-      final tags = await Future.delayed(
-        const Duration(milliseconds: 500),
-        () => <String>[],
-      );
-      
-      emit(PlannerLoaded(tasks: tasks, tags: tags));
+      final events = await _plannerRepository.getEvents();
+      emit(PlannerLoaded(events));
     } catch (e) {
-      emit(PlannerError(message: 'Failed to load tasks'));
+      emit(PlannerError(e.toString()));
     }
   }
 
-  /// Handle loading tasks by status
-  Future<void> _onLoadTasksByStatus(
-    LoadTasksByStatusEvent event,
+  Future<void> _onAddEvent(
+    AddEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    if (state is PlannerLoaded) {
-      final currentState = state as PlannerLoaded;
-      emit(PlannerLoading());
-      
-      try {
-        // TODO: Replace with actual repository implementation
-        final tasks = await Future.delayed(
-          const Duration(milliseconds: 500),
-          () => <Task>[],
-        );
-        
-        emit(currentState.copyWith(
-          tasks: tasks,
-          filterStatus: event.status,
-          clearDateRange: true,
-        ));
-      } catch (e) {
-        emit(PlannerError(message: 'Failed to load tasks by status'));
-        emit(currentState); // Revert to previous state
-      }
+    emit(PlannerLoading());
+    try {
+      await _plannerRepository.addEvent(event.event);
+      final events = await _plannerRepository.getEvents();
+      emit(PlannerLoaded(events));
+    } catch (e) {
+      emit(PlannerError(e.toString()));
     }
   }
 
-  /// Handle loading tasks by date range
-  Future<void> _onLoadTasksByDateRange(
-    LoadTasksByDateRangeEvent event,
+  Future<void> _onUpdateEvent(
+    UpdateEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    if (state is PlannerLoaded) {
-      final currentState = state as PlannerLoaded;
-      emit(PlannerLoading());
-      
-      try {
-        // TODO: Replace with actual repository implementation
-        final tasks = await Future.delayed(
-          const Duration(milliseconds: 500),
-          () => <Task>[],
-        );
-        
-        emit(currentState.copyWith(
-          tasks: tasks,
-          startDate: event.startDate,
-          endDate: event.endDate,
-          clearFilterStatus: true,
-        ));
-      } catch (e) {
-        emit(PlannerError(message: 'Failed to load tasks by date range'));
-        emit(currentState); // Revert to previous state
-      }
+    emit(PlannerLoading());
+    try {
+      await _plannerRepository.updateEvent(event.event);
+      final events = await _plannerRepository.getEvents();
+      emit(PlannerLoaded(events));
+    } catch (e) {
+      emit(PlannerError(e.toString()));
     }
   }
 
-  /// Handle adding a task
-  Future<void> _onAddTask(
-    AddTaskEvent event,
+  Future<void> _onDeleteEvent(
+    DeleteEvent event,
     Emitter<PlannerState> emit,
   ) async {
-    if (state is PlannerLoaded) {
-      final currentState = state as PlannerLoaded;
-      emit(PlannerOperationInProgress());
-      
-      try {
-        // TODO: Replace with actual repository implementation
-        final newTask = await Future.delayed(
-          const Duration(milliseconds: 500),
-          () => event.task,
-        );
-        
-        final updatedTasks = List.of(currentState.tasks)..add(newTask);
-        emit(currentState.copyWith(tasks: updatedTasks));
-      } catch (e) {
-        emit(PlannerError(message: 'Failed to add task'));
-        emit(currentState); // Revert to previous state
-      }
-    }
-  }
-
-  /// Handle updating a task
-  Future<void> _onUpdateTask(
-    UpdateTaskEvent event,
-    Emitter<PlannerState> emit,
-  ) async {
-    if (state is PlannerLoaded) {
-      final currentState = state as PlannerLoaded;
-      emit(PlannerOperationInProgress());
-      
-      try {
-        // TODO: Replace with actual repository implementation
-        final updatedTask = await Future.delayed(
-          const Duration(milliseconds: 500),
-          () => event.task,
-        );
-        
-        final taskIndex = currentState.tasks.indexWhere(
-          (task) => task.id == updatedTask.id,
-        );
-        
-        if (taskIndex != -1) {
-          final updatedTasks = List.of(currentState.tasks);
-          updatedTasks[taskIndex] = updatedTask;
-          emit(currentState.copyWith(tasks: updatedTasks));
-        } else {
-          emit(PlannerError(message: 'Task not found'));
-          emit(currentState); // Revert to previous state
-        }
-      } catch (e) {
-        emit(PlannerError(message: 'Failed to update task'));
-        emit(currentState); // Revert to previous state
-      }
-    }
-  }
-
-  /// Handle deleting a task
-  Future<void> _onDeleteTask(
-    DeleteTaskEvent event,
-    Emitter<PlannerState> emit,
-  ) async {
-    if (state is PlannerLoaded) {
-      final currentState = state as PlannerLoaded;
-      emit(PlannerOperationInProgress());
-      
-      try {
-        // TODO: Replace with actual repository implementation
-        final success = await Future.delayed(
-          const Duration(milliseconds: 500),
-          () => true,
-        );
-        
-        if (success) {
-          final updatedTasks = currentState.tasks
-              .where((task) => task.id != event.taskId)
-              .toList();
-          emit(currentState.copyWith(tasks: updatedTasks));
-        } else {
-          emit(PlannerError(message: 'Failed to delete task'));
-          emit(currentState); // Revert to previous state
-        }
-      } catch (e) {
-        emit(PlannerError(message: 'Failed to delete task'));
-        emit(currentState); // Revert to previous state
-      }
-    }
-  }
-
-  /// Handle updating task status
-  Future<void> _onUpdateTaskStatus(
-    UpdateTaskStatusEvent event,
-    Emitter<PlannerState> emit,
-  ) async {
-    if (state is PlannerLoaded) {
-      final currentState = state as PlannerLoaded;
-      emit(PlannerOperationInProgress());
-      
-      try {
-        // TODO: Replace with actual repository implementation
-        final updatedTask = await Future.delayed(
-          const Duration(milliseconds: 500),
-          () {
-            final taskIndex = currentState.tasks.indexWhere(
-              (task) => task.id == event.taskId,
-            );
-            
-            if (taskIndex != -1) {
-              return currentState.tasks[taskIndex].copyWith(
-                status: event.status,
-                updatedAt: DateTime.now(),
-              );
-            } else {
-              return null;
-            }
-          },
-        );
-        
-        if (updatedTask != null) {
-          final taskIndex = currentState.tasks.indexWhere(
-            (task) => task.id == event.taskId,
-          );
-          
-          final updatedTasks = List.of(currentState.tasks);
-          updatedTasks[taskIndex] = updatedTask;
-          emit(currentState.copyWith(tasks: updatedTasks));
-        } else {
-          emit(PlannerError(message: 'Task not found'));
-          emit(currentState); // Revert to previous state
-        }
-      } catch (e) {
-        emit(PlannerError(message: 'Failed to update task status'));
-        emit(currentState); // Revert to previous state
-      }
-    }
-  }
-
-  /// Handle loading all tags
-  Future<void> _onLoadTags(
-    LoadTagsEvent event,
-    Emitter<PlannerState> emit,
-  ) async {
-    if (state is PlannerLoaded) {
-      final currentState = state as PlannerLoaded;
-      
-      try {
-        // TODO: Replace with actual repository implementation
-        final tags = await Future.delayed(
-          const Duration(milliseconds: 500),
-          () => <String>[],
-        );
-        
-        emit(currentState.copyWith(tags: tags));
-      } catch (e) {
-        emit(PlannerError(message: 'Failed to load tags'));
-        emit(currentState); // Revert to previous state
-      }
-    } else {
-      emit(TagsLoaded(tags: []));
+    emit(PlannerLoading());
+    try {
+      await _plannerRepository.deleteEvent(event.id);
+      final events = await _plannerRepository.getEvents();
+      emit(PlannerLoaded(events));
+    } catch (e) {
+      emit(PlannerError(e.toString()));
     }
   }
 }

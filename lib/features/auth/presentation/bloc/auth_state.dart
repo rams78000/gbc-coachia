@@ -1,41 +1,52 @@
 part of 'auth_bloc.dart';
 
-/// États pour le bloc d'authentification
+/// Base class for all authentication states
 abstract class AuthState extends Equatable {
-  /// Constructeur
+  /// Constructor
   const AuthState();
   
   @override
   List<Object> get props => [];
 }
 
-/// État initial
-class AuthInitial extends AuthState {}
+/// Initial authentication state
+class AuthInitialState extends AuthState {
+  /// Constructor
+  const AuthInitialState();
+}
 
-/// État de chargement
-class AuthLoading extends AuthState {}
+/// Loading authentication state
+class AuthLoadingState extends AuthState {
+  /// Constructor
+  const AuthLoadingState();
+}
 
-/// État authentifié
-class Authenticated extends AuthState {
-  /// Constructeur
-  const Authenticated({required this.user});
+/// Authenticated state
+class AuthenticatedState extends AuthState {
+  /// Constructor
+  const AuthenticatedState({
+    required this.user,
+  });
 
-  /// Utilisateur authentifié
-  final User user;
+  /// User data
+  final dynamic user;
 
   @override
   List<Object> get props => [user];
 }
 
-/// État non authentifié
-class Unauthenticated extends AuthState {}
+/// Unauthenticated state
+class UnauthenticatedState extends AuthState {
+  /// Constructor
+  const UnauthenticatedState();
+}
 
-/// État d'erreur
-class AuthError extends AuthState {
-  /// Constructeur
-  const AuthError({required this.message});
+/// Error authentication state
+class AuthErrorState extends AuthState {
+  /// Constructor
+  const AuthErrorState(this.message);
 
-  /// Message d'erreur
+  /// Error message
   final String message;
 
   @override

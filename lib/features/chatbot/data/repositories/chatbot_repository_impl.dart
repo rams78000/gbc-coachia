@@ -1,176 +1,106 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
-import '../../domain/entities/conversation.dart';
-import '../../domain/entities/message.dart';
 import '../../domain/repositories/chatbot_repository.dart';
 
-/// Implementation of ChatbotRepository
+/// Implémentation du repository chatbot
 class ChatbotRepositoryImpl implements ChatbotRepository {
-  /// In-memory conversations for testing, will be replaced with API or local storage
-  final List<Conversation> _conversations = [];
+  /// Clé pour stocker les messages dans SharedPreferences
+  static const _messagesKey = 'chatbot_messages';
   
-  /// Uuid generator
-  final Uuid _uuid = const Uuid();
+  /// Liste des réponses prédéfinies du chatbot
+  final List<String> _predefinedResponses = [
+    'Je vous recommande de planifier votre journée le soir précédent pour optimiser votre productivité.',
+    'Avez-vous pensé à déléguer certaines tâches administratives pour vous concentrer sur votre cœur de métier ?',
+    'Pour améliorer votre trésorerie, envisagez d\'établir un échéancier de facturation plus régulier.',
+    'Je vous conseille de consacrer au moins 2 heures par semaine à la prospection de nouveaux clients.',
+    'La diversification de vos sources de revenus pourrait renforcer la stabilité financière de votre activité.',
+    'Pensez à automatiser vos tâches répétitives pour gagner du temps et réduire les erreurs.',
+    'Un bilan trimestriel vous permettrait de mieux ajuster votre stratégie commerciale.',
+    'Avez-vous évalué récemment la rentabilité de chacun de vos services ou produits ?',
+    'Je vous suggère d\'analyser les performances de votre site web pour optimiser votre présence en ligne.',
+    'N\'oubliez pas l\'importance du networking pour développer votre portefeuille de clients.',
+  ];
 
   @override
-  Future<List<Conversation>> getConversations() async {
-    // TODO: Implement with API or local storage
-    return _conversations;
-  }
-
-  @override
-  Future<Conversation?> getConversationById(String id) async {
-    // TODO: Implement with API or local storage
-    return _conversations.firstWhere(
-      (conversation) => conversation.id == id,
-      orElse: () => throw Exception('Conversation not found'),
-    );
-  }
-
-  @override
-  Future<Conversation> createConversation(String title) async {
-    // TODO: Implement with API or local storage
-    final newConversation = Conversation(
-      id: _uuid.v4(),
-      title: title,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    
-    _conversations.add(newConversation);
-    return newConversation;
-  }
-
-  @override
-  Future<Conversation> updateConversation(Conversation conversation) async {
-    // TODO: Implement with API or local storage
-    final index = _conversations.indexWhere(
-      (c) => c.id == conversation.id,
-    );
-    
-    if (index != -1) {
-      _conversations[index] = conversation;
-      return conversation;
-    } else {
-      throw Exception('Conversation not found');
-    }
-  }
-
-  @override
-  Future<bool> deleteConversation(String id) async {
-    // TODO: Implement with API or local storage
-    final index = _conversations.indexWhere(
-      (conversation) => conversation.id == id,
-    );
-    
-    if (index != -1) {
-      _conversations.removeAt(index);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  @override
-  Future<List<Message>> getMessages(String conversationId) async {
-    // TODO: Implement with API or local storage
-    final conversation = await getConversationById(conversationId);
-    return conversation?.messages ?? [];
-  }
-
-  @override
-  Future<Message> sendMessage(String conversationId, String content, List<String> attachments) async {
-    // Create user message
-    final userMessage = Message(
-      id: _uuid.v4(),
-      content: content,
-      sender: MessageSender.user,
-      timestamp: DateTime.now(),
-      attachments: attachments,
-      createdAt: DateTime.now(),
-    );
-    
-    // Save user message
-    await saveMessage(conversationId, userMessage);
-    
-    // Generate AI response
-    return generateResponse(conversationId, userMessage);
-  }
-
-  @override
-  Future<Message> generateResponse(String conversationId, Message userMessage) async {
-    // TODO: Implement with API call to AI service
-    // This is a mock implementation
+  Future<String> sendMessage(String message) async {
+    // Simuler un délai de réponse
     await Future.delayed(const Duration(seconds: 1));
     
-    final response = Message(
-      id: _uuid.v4(),
-      content: "This is a placeholder AI response",
-      sender: MessageSender.assistant,
+    // Enregistrer le message de l'utilisateur
+    final userMessage = ChatMessage(
+      id: const Uuid().v4(),
+      content: message,
       timestamp: DateTime.now(),
-      createdAt: DateTime.now(),
+      isUserMessage: true,
     );
+    await _saveMessage(userMessage);
     
-    // Save AI response
-    await saveMessage(conversationId, response);
+    // Générer la réponse du chatbot
+    final response = _getAIResponse();
+    final aiMessage = ChatMessage(
+      id: const Uuid().v4(),
+      content: response,
+      timestamp: DateTime.now(),
+      isUserMessage: false,
+    );
+    await _saveMessage(aiMessage);
     
     return response;
   }
 
   @override
-  Future<List<String>> getSuggestedPrompts(String conversationId) async {
-    // TODO: Implement with API or local storage
-    return [
-      "Tell me more about managing my time better",
-      "How can I improve my business strategy?",
-      "What are some marketing tips for my freelance work?",
-    ];
+  Future<List<ChatMessage>> getConversationHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final messagesJson = prefs.getStringList(_messagesKey) ?? [];
+    
+    return messagesJson
+        .map((json) => _chatMessageFromJson(json))
+        .toList()
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
   }
 
   @override
-  Future<Message> saveMessage(String conversationId, Message message) async {
-    // TODO: Implement with API or local storage
-    final conversationIndex = _conversations.indexWhere(
-      (conversation) => conversation.id == conversationId,
-    );
-    
-    if (conversationIndex != -1) {
-      final conversation = _conversations[conversationIndex];
-      final updatedMessages = List.of(conversation.messages)..add(message);
-      
-      final updatedConversation = conversation.copyWith(
-        messages: updatedMessages,
-        lastMessageTimestamp: message.timestamp,
-        updatedAt: DateTime.now(),
-      );
-      
-      _conversations[conversationIndex] = updatedConversation;
-      return message;
-    } else {
-      throw Exception('Conversation not found');
-    }
+  Future<void> clearConversationHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_messagesKey);
   }
 
-  @override
-  Future<bool> markMessagesAsRead(String conversationId) async {
-    // TODO: Implement with API or local storage
-    final conversationIndex = _conversations.indexWhere(
-      (conversation) => conversation.id == conversationId,
-    );
+  /// Enregistre un message dans l'historique
+  Future<void> _saveMessage(ChatMessage message) async {
+    final prefs = await SharedPreferences.getInstance();
+    final messagesJson = prefs.getStringList(_messagesKey) ?? [];
     
-    if (conversationIndex != -1) {
-      final conversation = _conversations[conversationIndex];
-      final updatedMessages = conversation.messages
-          .map((message) => message.copyWith(isRead: true))
-          .toList();
-      
-      _conversations[conversationIndex] = conversation.copyWith(
-        messages: updatedMessages,
-      );
-      
-      return true;
-    } else {
-      return false;
-    }
+    messagesJson.add(_chatMessageToJson(message));
+    await prefs.setStringList(_messagesKey, messagesJson);
+  }
+
+  /// Génère une réponse IA simple
+  String _getAIResponse() {
+    // Choisir une réponse aléatoire dans la liste des réponses prédéfinies
+    final index = DateTime.now().millisecondsSinceEpoch % _predefinedResponses.length;
+    return _predefinedResponses[index];
+  }
+
+  /// Convertit un ChatMessage en JSON
+  String _chatMessageToJson(ChatMessage message) {
+    return jsonEncode({
+      'id': message.id,
+      'content': message.content,
+      'timestamp': message.timestamp.toIso8601String(),
+      'isUserMessage': message.isUserMessage,
+    });
+  }
+
+  /// Crée un ChatMessage à partir d'un JSON
+  ChatMessage _chatMessageFromJson(String json) {
+    final data = jsonDecode(json);
+    return ChatMessage(
+      id: data['id'],
+      content: data['content'],
+      timestamp: DateTime.parse(data['timestamp']),
+      isUserMessage: data['isUserMessage'],
+    );
   }
 }

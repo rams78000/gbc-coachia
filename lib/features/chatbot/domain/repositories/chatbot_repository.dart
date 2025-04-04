@@ -1,38 +1,34 @@
-import '../entities/conversation.dart';
-import '../entities/message.dart';
-
-/// Chatbot repository interface
+/// Interface pour le repository du chatbot
 abstract class ChatbotRepository {
-  /// Get all conversations
-  Future<List<Conversation>> getConversations();
-  
-  /// Get conversation by ID
-  Future<Conversation?> getConversationById(String id);
-  
-  /// Create a new conversation
-  Future<Conversation> createConversation(String title);
-  
-  /// Update conversation
-  Future<Conversation> updateConversation(Conversation conversation);
-  
-  /// Delete conversation
-  Future<bool> deleteConversation(String id);
-  
-  /// Get messages for a conversation
-  Future<List<Message>> getMessages(String conversationId);
-  
-  /// Send a message to the chatbot
-  Future<Message> sendMessage(String conversationId, String content, List<String> attachments);
-  
-  /// Generate response from AI
-  Future<Message> generateResponse(String conversationId, Message userMessage);
-  
-  /// Get suggested prompts for a conversation
-  Future<List<String>> getSuggestedPrompts(String conversationId);
-  
-  /// Save message
-  Future<Message> saveMessage(String conversationId, Message message);
-  
-  /// Mark messages as read
-  Future<bool> markMessagesAsRead(String conversationId);
+  /// Envoie un message à l'IA et récupère la réponse
+  Future<String> sendMessage(String message);
+
+  /// Récupère l'historique des conversations
+  Future<List<ChatMessage>> getConversationHistory();
+
+  /// Efface l'historique des conversations
+  Future<void> clearConversationHistory();
+}
+
+/// Classe représentant un message dans la conversation
+class ChatMessage {
+  /// ID unique du message
+  final String id;
+
+  /// Contenu du message
+  final String content;
+
+  /// Date d'envoi du message
+  final DateTime timestamp;
+
+  /// Indique si le message est envoyé par l'utilisateur (true) ou l'IA (false)
+  final bool isUserMessage;
+
+  /// Constructeur
+  ChatMessage({
+    required this.id,
+    required this.content,
+    required this.timestamp,
+    required this.isUserMessage,
+  });
 }

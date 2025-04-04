@@ -1,56 +1,76 @@
 part of 'auth_bloc.dart';
 
-/// Événements pour le bloc d'authentification
+/// Base class for all authentication events
 abstract class AuthEvent extends Equatable {
-  /// Constructeur
+  /// Constructor
   const AuthEvent();
 
   @override
   List<Object> get props => [];
 }
 
-/// Événement pour vérifier le statut d'authentification
-class CheckAuthStatus extends AuthEvent {}
+/// Event for when the app starts
+class AppStarted extends AuthEvent {
+  /// Constructor
+  const AppStarted();
+}
 
-/// Événement pour la connexion
+/// Event for when a login is requested
 class LoginRequested extends AuthEvent {
-  /// Constructeur
+  /// Constructor
   const LoginRequested({
     required this.email,
     required this.password,
   });
 
-  /// Email
+  /// Email for login
   final String email;
   
-  /// Mot de passe
+  /// Password for login
   final String password;
 
   @override
   List<Object> get props => [email, password];
 }
 
-/// Événement pour l'inscription
+/// Event for when a registration is requested
 class RegisterRequested extends AuthEvent {
-  /// Constructeur
+  /// Constructor
   const RegisterRequested({
     required this.name,
     required this.email,
     required this.password,
   });
 
-  /// Nom
+  /// User's name
   final String name;
   
-  /// Email
+  /// Email for registration
   final String email;
   
-  /// Mot de passe
+  /// Password for registration
   final String password;
 
   @override
   List<Object> get props => [name, email, password];
 }
 
-/// Événement pour la déconnexion
-class LogoutRequested extends AuthEvent {}
+/// Event for when a logout is requested
+class LogoutRequested extends AuthEvent {
+  /// Constructor
+  const LogoutRequested();
+}
+
+/// Event for when the authentication state changes
+class AuthStateChanged extends AuthEvent {
+  /// Constructor
+  const AuthStateChanged({
+    required this.isAuthenticated,
+  });
+
+  /// Whether the user is authenticated
+  final bool isAuthenticated;
+
+  @override
+  List<Object> get props => [isAuthenticated];
+}

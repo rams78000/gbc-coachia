@@ -1,265 +1,174 @@
 import 'package:flutter/material.dart';
-import '../../config/theme/app_colors.dart';
 
-/// Button variants
-enum AppButtonVariant {
-  /// Primary filled button
+/// Types de boutons disponibles
+enum AppButtonType {
+  /// Bouton principal
   primary,
-
-  /// Outline button
+  
+  /// Bouton secondaire
+  secondary,
+  
+  /// Bouton avec contour
   outline,
-
-  /// Text-only button
+  
+  /// Bouton texte
   text,
 }
 
-/// Button sizes
-enum AppButtonSize {
-  /// Small button
-  small,
-
-  /// Medium button
-  medium,
-
-  /// Large button
-  large,
-}
-
-/// Custom app button
+/// Bouton personnalisé pour l'application
 class AppButton extends StatelessWidget {
-  /// Constructor
+  /// Constructeur
   const AppButton({
     Key? key,
     required this.label,
-    this.onPressed,
-    this.variant = AppButtonVariant.primary,
-    this.size = AppButtonSize.medium,
+    required this.onPressed,
+    this.type = AppButtonType.primary,
     this.icon,
-    this.iconPosition = IconPosition.left,
-    this.fullWidth = false,
     this.isLoading = false,
-    this.borderRadius,
-    this.customColors,
+    this.isFullWidth = true,
+    this.borderRadius = 8.0,
+    this.padding,
   }) : super(key: key);
 
-  /// Button label text
+  /// Texte du bouton
   final String label;
-
-  /// Button tap handler
+  
+  /// Action au clic
   final VoidCallback? onPressed;
-
-  /// Button style variant
-  final AppButtonVariant variant;
-
-  /// Button size
-  final AppButtonSize size;
-
-  /// Optional icon
+  
+  /// Type de bouton
+  final AppButtonType type;
+  
+  /// Icône optionnelle
   final IconData? icon;
-
-  /// Icon position
-  final IconPosition iconPosition;
-
-  /// Should button take full width
-  final bool fullWidth;
-
-  /// Is button in loading state
+  
+  /// Indicateur de chargement
   final bool isLoading;
-
-  /// Custom border radius
-  final double? borderRadius;
-
-  /// Custom colors for button
-  final AppButtonColors? customColors;
+  
+  /// Bouton pleine largeur
+  final bool isFullWidth;
+  
+  /// Rayon de la bordure
+  final double borderRadius;
+  
+  /// Padding personnalisé
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
-    // Determine button style based on variant
-    final ButtonStyle style = _getButtonStyle(context);
-
-    // Determine padding based on size
-    final EdgeInsets padding = _getPadding();
-
-    // Determine content based on loading state, icon, etc.
-    Widget content = _buildContent();
-
-    // Create the appropriate button type based on variant
-    switch (variant) {
-      case AppButtonVariant.primary:
-      case AppButtonVariant.outline:
-        return SizedBox(
-          width: fullWidth ? double.infinity : null,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : onPressed,
-            style: style,
-            child: Padding(
-              padding: padding,
-              child: content,
-            ),
-          ),
+    final theme = Theme.of(context);
+    
+    switch (type) {
+      case AppButtonType.primary:
+        return _buildElevatedButton(
+          context: context,
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
         );
-      case AppButtonVariant.text:
-        return SizedBox(
-          width: fullWidth ? double.infinity : null,
-          child: TextButton(
-            onPressed: isLoading ? null : onPressed,
-            style: style,
-            child: Padding(
-              padding: padding,
-              child: content,
-            ),
-          ),
+      case AppButtonType.secondary:
+        return _buildElevatedButton(
+          context: context,
+          backgroundColor: theme.colorScheme.secondary,
+          foregroundColor: theme.colorScheme.onSecondary,
         );
+      case AppButtonType.outline:
+        return _buildOutlinedButton(context: context);
+      case AppButtonType.text:
+        return _buildTextButton(context: context);
     }
   }
 
-  ButtonStyle _getButtonStyle(BuildContext context) {
-    final effectiveBorderRadius = borderRadius ?? 12.0;
-    final colors = customColors ?? _getDefaultColors();
-
-    switch (variant) {
-      case AppButtonVariant.primary:
-        return ElevatedButton.styleFrom(
-          backgroundColor: colors.background,
-          foregroundColor: colors.foreground,
-          disabledBackgroundColor: colors.background.withOpacity(0.6),
-          disabledForegroundColor: colors.foreground.withOpacity(0.6),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(effectiveBorderRadius),
-          ),
-        );
-      case AppButtonVariant.outline:
-        return ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: colors.background,
-          disabledBackgroundColor: Colors.transparent,
-          disabledForegroundColor: colors.background.withOpacity(0.6),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(effectiveBorderRadius),
-            side: BorderSide(
-              color: colors.background,
-              width: 1.5,
-            ),
-          ),
-        );
-      case AppButtonVariant.text:
-        return TextButton.styleFrom(
-          foregroundColor: colors.background,
-          disabledForegroundColor: colors.background.withOpacity(0.6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(effectiveBorderRadius),
-          ),
-        );
-    }
+  /// Construit un ElevatedButton
+  Widget _buildElevatedButton({
+    required BuildContext context,
+    required Color backgroundColor,
+    required Color foregroundColor,
+  }) {
+    return ElevatedButton(
+      onPressed: isLoading ? null : onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        minimumSize: isFullWidth ? const Size(double.infinity, 56) : null,
+        padding: padding ?? const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 16,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+      ),
+      child: _buildContent(color: foregroundColor),
+    );
   }
 
-  EdgeInsets _getPadding() {
-    switch (size) {
-      case AppButtonSize.small:
-        return const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
-      case AppButtonSize.medium:
-        return const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
-      case AppButtonSize.large:
-        return const EdgeInsets.symmetric(horizontal: 24, vertical: 16);
-    }
+  /// Construit un OutlinedButton
+  Widget _buildOutlinedButton({required BuildContext context}) {
+    final primary = Theme.of(context).colorScheme.primary;
+    
+    return OutlinedButton(
+      onPressed: isLoading ? null : onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: primary,
+        minimumSize: isFullWidth ? const Size(double.infinity, 56) : null,
+        padding: padding ?? const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 16,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+        side: BorderSide(color: primary),
+      ),
+      child: _buildContent(color: primary),
+    );
   }
 
-  Widget _buildContent() {
-    // If loading, show a loading indicator
+  /// Construit un TextButton
+  Widget _buildTextButton({required BuildContext context}) {
+    final primary = Theme.of(context).colorScheme.primary;
+    
+    return TextButton(
+      onPressed: isLoading ? null : onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: primary,
+        minimumSize: isFullWidth ? const Size(double.infinity, 56) : null,
+        padding: padding ?? const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 16,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+      ),
+      child: _buildContent(color: primary),
+    );
+  }
+
+  /// Construit le contenu du bouton
+  Widget _buildContent({required Color color}) {
     if (isLoading) {
-      return const SizedBox(
-        height: 20,
-        width: 20,
+      return SizedBox(
+        width: 24,
+        height: 24,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          valueColor: AlwaysStoppedAnimation<Color>(color),
         ),
       );
     }
-
-    // Text style based on button size
-    final TextStyle textStyle = _getTextStyle();
-
-    // If has icon, show icon and text
+    
     if (icon != null) {
-      final iconSize = _getIconSize();
-      final spacing = iconPosition == IconPosition.left ? const SizedBox(width: 8) : const SizedBox(width: 8);
-      final iconWidget = Icon(icon, size: iconSize);
-
       return Row(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: iconPosition == IconPosition.left
-            ? [iconWidget, spacing, Text(label, style: textStyle)]
-            : [Text(label, style: textStyle), spacing, iconWidget],
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
+          Text(label),
+        ],
       );
     }
-
-    // Just show text
-    return Text(label, style: textStyle);
+    
+    return Text(label);
   }
-
-  TextStyle _getTextStyle() {
-    switch (size) {
-      case AppButtonSize.small:
-        return const TextStyle(fontSize: 12, fontWeight: FontWeight.w500);
-      case AppButtonSize.medium:
-        return const TextStyle(fontSize: 14, fontWeight: FontWeight.w500);
-      case AppButtonSize.large:
-        return const TextStyle(fontSize: 16, fontWeight: FontWeight.w500);
-    }
-  }
-
-  double _getIconSize() {
-    switch (size) {
-      case AppButtonSize.small:
-        return 16;
-      case AppButtonSize.medium:
-        return 18;
-      case AppButtonSize.large:
-        return 20;
-    }
-  }
-
-  AppButtonColors _getDefaultColors() {
-    switch (variant) {
-      case AppButtonVariant.primary:
-        return AppButtonColors(
-          background: AppColors.primary,
-          foreground: Colors.white,
-        );
-      case AppButtonVariant.outline:
-      case AppButtonVariant.text:
-        return AppButtonColors(
-          background: AppColors.primary,
-          foreground: AppColors.primary,
-        );
-    }
-  }
-}
-
-/// Icon position in button
-enum IconPosition {
-  /// Icon on the left
-  left,
-
-  /// Icon on the right
-  right,
-}
-
-/// Button colors
-class AppButtonColors {
-  /// Button background color
-  final Color background;
-
-  /// Button text color
-  final Color foreground;
-
-  /// Constructor
-  const AppButtonColors({
-    required this.background,
-    required this.foreground,
-  });
 }

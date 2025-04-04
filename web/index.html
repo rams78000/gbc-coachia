@@ -9,6 +9,10 @@ found in the LICENSE file. -->
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="GBC CoachIA - Assistant IA pour entrepreneurs et freelances avec planification et outils financiers.">
+  
+  <!-- Fix pour les problèmes de MIME type dans Replit -->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,7 +28,7 @@ found in the LICENSE file. -->
 
   <script>
     // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
+    const serviceWorkerVersion = null;
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
@@ -32,16 +36,18 @@ found in the LICENSE file. -->
 <body>
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
+      // Fix pour Replit - définir le type MIME correct pour JavaScript
+      const script = document.createElement('script');
+      script.type = 'application/javascript';
+      // Modification pour utiliser la nouvelle API Flutter
+      _flutter.loader.load({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
         }
+      }).then(function(engineInitializer) {
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        return appRunner.runApp();
       });
     });
   </script>

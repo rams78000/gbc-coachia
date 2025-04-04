@@ -5,6 +5,7 @@ import 'package:gbc_coachia/config/router/app_router.dart';
 import 'package:gbc_coachia/config/theme/app_theme.dart';
 import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
 import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
 
 /// Application principale
 class App extends StatelessWidget {
@@ -19,6 +20,9 @@ class App extends StatelessWidget {
             authRepository: serviceLocator<AuthRepository>(),
           ),
         ),
+        BlocProvider<ChatbotBloc>(
+          create: (context) => serviceLocator<ChatbotBloc>(),
+        ),
         // Ajouter d'autres BlocProviders ici
       ],
       child: Builder(
@@ -27,8 +31,8 @@ class App extends StatelessWidget {
           
           return MaterialApp.router(
             title: 'GBC CoachIA',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppTheme.lightTheme(),
+            darkTheme: AppTheme.darkTheme(),
             themeMode: ThemeMode.system,
             debugShowCheckedModeBanner: false,
             routerConfig: router,

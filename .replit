@@ -17,15 +17,15 @@ args = "Flutter Analyze"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Flutter Web"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Preview"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Preview SVG"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Flutter Web"
 
 [[workflows.workflow]]
 name = "Flutter Analyze"
@@ -40,21 +40,6 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd /home/runner/workspace && flutter analyze"
-
-[[workflows.workflow]]
-name = "Flutter Web"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd /home/runner/workspace && export FLUTTER_WEB_USE_SKIA=false && flutter run -d web-server --web-hostname=0.0.0.0 --web-port=5000 --web-renderer=html"
-waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Preview"
@@ -85,6 +70,21 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "cd /home/runner/workspace && python -m http.server 5002 --bind 0.0.0.0 --directory preview"
 waitForPort = 5002
+
+[[workflows.workflow]]
+name = "Flutter Web"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd /home/runner/workspace && flutter build web --web-renderer html && python flutter_web_server.py"
+waitForPort = 5000
 
 [deployment]
 run = ["sh", "-c", "flutter run --web-port=5000 --web-hostname=0.0.0.0"]

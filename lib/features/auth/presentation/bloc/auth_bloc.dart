@@ -1,78 +1,80 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:gbc_coachia/features/auth/domain/entities/user.dart';
-import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/repositories/auth_repository.dart';
 
-// Événements
+// Events
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
-
+  
   @override
   List<Object?> get props => [];
 }
 
-class CheckAuthStatus extends AuthEvent {}
+class CheckAuthStatus extends AuthEvent {
+  const CheckAuthStatus();
+}
 
-class LoginUser extends AuthEvent {
+class SignIn extends AuthEvent {
   final String email;
   final String password;
-
-  const LoginUser({
+  
+  const SignIn({
     required this.email,
     required this.password,
   });
-
+  
   @override
   List<Object?> get props => [email, password];
 }
 
-class RegisterUser extends AuthEvent {
+class SignUp extends AuthEvent {
+  final String name;
   final String email;
   final String password;
-  final String? nom;
-  final String? prenom;
-
-  const RegisterUser({
+  
+  const SignUp({
+    required this.name,
     required this.email,
     required this.password,
-    this.nom,
-    this.prenom,
   });
-
+  
   @override
-  List<Object?> get props => [email, password, nom, prenom];
+  List<Object?> get props => [name, email, password];
 }
 
-class LogoutUser extends AuthEvent {}
+class SignOut extends AuthEvent {
+  const SignOut();
+}
 
-// États
+// States
 abstract class AuthState extends Equatable {
   const AuthState();
-
+  
   @override
   List<Object?> get props => [];
 }
 
-class AuthInitial extends AuthState {}
-
-class AuthLoading extends AuthState {}
-
-class Authenticated extends AuthState {
-  final User user;
-
-  const Authenticated(this.user);
-
-  @override
-  List<Object?> get props => [user];
+class AuthInitial extends AuthState {
+  const AuthInitial();
 }
 
-class Unauthenticated extends AuthState {}
+class Authenticated extends AuthState {
+  const Authenticated();
+}
+
+class Unauthenticated extends AuthState {
+  const Unauthenticated();
+}
+
+class AuthLoading extends AuthState {
+  const AuthLoading();
+}
 
 class AuthError extends AuthState {
   final String message;
-
+  
   const AuthError(this.message);
-
+  
   @override
   List<Object?> get props => [message];
 }
@@ -80,78 +82,74 @@ class AuthError extends AuthState {
 // Bloc
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
-
-  AuthBloc({required this.authRepository}) : super(AuthInitial()) {
+  
+  AuthBloc({
+    required this.authRepository,
+  }) : super(const AuthInitial()) {
     on<CheckAuthStatus>(_onCheckAuthStatus);
-    on<LoginUser>(_onLoginUser);
-    on<RegisterUser>(_onRegisterUser);
-    on<LogoutUser>(_onLogoutUser);
+    on<SignIn>(_onSignIn);
+    on<SignUp>(_onSignUp);
+    on<SignOut>(_onSignOut);
   }
-
+  
   Future<void> _onCheckAuthStatus(
     CheckAuthStatus event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      final isLoggedIn = await authRepository.isLoggedIn();
-      if (isLoggedIn) {
-        final user = await authRepository.getCurrentUser();
-        if (user != null) {
-          emit(Authenticated(user));
-        } else {
-          emit(Unauthenticated());
-        }
+      final isAuthenticated = await authRepository.isAuthenticated();
+      if (isAuthenticated) {
+        emit(const Authenticated());
       } else {
-        emit(Unauthenticated());
+        emit(const Unauthenticated());
       }
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
-
-  Future<void> _onLoginUser(
-    LoginUser event,
+  
+  Future<void> _onSignIn(
+    SignIn event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      final user = await authRepository.login(
-        email: event.email,
-        password: event.password,
+      await authRepository.signInWithEmailAndPassword(
+        event.email,
+        event.password,
       );
-      emit(Authenticated(user));
+      emit(const Authenticated());
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
-
-  Future<void> _onRegisterUser(
-    RegisterUser event,
+  
+  Future<void> _onSignUp(
+    SignUp event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      final user = await authRepository.register(
-        email: event.email,
-        password: event.password,
-        nom: event.nom,
-        prenom: event.prenom,
+      await authRepository.signUpWithEmailAndPassword(
+        event.email,
+        event.password,
+        event.name,
       );
-      emit(Authenticated(user));
+      emit(const Authenticated());
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
-
-  Future<void> _onLogoutUser(
-    LogoutUser event,
+  
+  Future<void> _onSignOut(
+    SignOut event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(const AuthLoading());
     try {
-      await authRepository.logout();
-      emit(Unauthenticated());
+      await authRepository.signOut();
+      emit(const Unauthenticated());
     } catch (e) {
       emit(AuthError(e.toString()));
     }

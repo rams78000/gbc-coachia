@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gbc_coachai/features/finance/domain/entities/transaction.dart';
+import 'package:gbc_coachia/features/finance/domain/entities/transaction.dart';
 
 abstract class TransactionLocalSource {
   Future<List<Transaction>> getTransactions();

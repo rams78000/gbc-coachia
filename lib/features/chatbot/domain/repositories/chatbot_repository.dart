@@ -1,22 +1,30 @@
 import '../entities/conversation.dart';
 import '../entities/message.dart';
 
+/// Interface pour le repository Chatbot
 abstract class ChatbotRepository {
-  // Récupérer toutes les conversations
+  /// Récupère toutes les conversations
   Future<List<Conversation>> getConversations();
   
-  // Récupérer une conversation par son ID
+  /// Récupère une conversation par son ID
   Future<Conversation?> getConversationById(String id);
   
-  // Créer une nouvelle conversation
+  /// Crée une nouvelle conversation
   Future<Conversation> createConversation(String title);
   
-  // Mettre à jour une conversation
-  Future<void> updateConversation(Conversation conversation);
-  
-  // Supprimer une conversation
+  /// Supprime une conversation
   Future<void> deleteConversation(String id);
   
-  // Envoyer un message à l'IA et obtenir une réponse
-  Future<Message> sendMessageToAI(Conversation conversation, String content);
+  /// Envoie un message dans une conversation et obtient la réponse de l'IA
+  Future<Message> sendMessage(
+    String conversationId,
+    String content, {
+    bool useFeatures = true,
+  });
+  
+  /// Vérifie si la clé API est valide
+  Future<bool> isApiKeyValid();
+  
+  /// Configure la clé API
+  Future<void> setApiKey(String apiKey);
 }

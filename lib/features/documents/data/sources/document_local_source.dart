@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
 
 abstract class DocumentLocalSource {
   Future<List<Document>> getDocuments();

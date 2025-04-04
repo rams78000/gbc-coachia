@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:gbc_coachai/features/documents/data/sources/document_local_source.dart';
-import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachai/features/documents/domain/repositories/document_repository.dart';
+import 'package:gbc_coachia/features/documents/data/sources/document_local_source.dart';
+import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachia/features/documents/domain/repositories/document_repository.dart';
 
 class DocumentRepositoryImpl implements DocumentRepository {
   final DocumentLocalSource localSource;

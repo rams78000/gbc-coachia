@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gbc_coachai/features/planner/domain/entities/event.dart';
+import 'package:gbc_coachia/features/planner/domain/entities/event.dart';
 
 abstract class EventLocalSource {
   Future<List<Event>> getEvents();

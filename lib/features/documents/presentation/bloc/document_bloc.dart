@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachai/features/documents/domain/repositories/document_repository.dart';
+import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachia/features/documents/domain/repositories/document_repository.dart';
 
 part 'document_event.dart';
 part 'document_state.dart';

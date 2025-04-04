@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:gbc_coachai/features/finance/domain/entities/transaction.dart';
-import 'package:gbc_coachai/features/finance/domain/repositories/transaction_repository.dart';
+import 'package:gbc_coachia/features/finance/domain/entities/transaction.dart';
+import 'package:gbc_coachia/features/finance/domain/repositories/transaction_repository.dart';
 
 part 'finance_event.dart';
 part 'finance_state.dart';

@@ -1,6 +1,6 @@
-import 'package:gbc_coachai/features/finance/data/sources/transaction_local_source.dart';
-import 'package:gbc_coachai/features/finance/domain/entities/transaction.dart';
-import 'package:gbc_coachai/features/finance/domain/repositories/transaction_repository.dart';
+import 'package:gbc_coachia/features/finance/data/sources/transaction_local_source.dart';
+import 'package:gbc_coachia/features/finance/domain/entities/transaction.dart';
+import 'package:gbc_coachia/features/finance/domain/repositories/transaction_repository.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
   final TransactionLocalSource localSource;

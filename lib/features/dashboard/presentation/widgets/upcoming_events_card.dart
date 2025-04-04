@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gbc_coachai/features/planner/domain/models/calendar_event.dart';
+import 'package:gbc_coachia/features/planner/domain/models/calendar_event.dart';
 import 'package:intl/intl.dart';
 
 class UpcomingEventsCard extends StatelessWidget {
@@ -153,15 +153,15 @@ class UpcomingEventsCard extends StatelessWidget {
     
     // Determine if event is today
     final now = DateTime.now();
-    final isToday = event.start.year == now.year &&
-        event.start.month == now.month &&
-        event.start.day == now.day;
+    final isToday = event.date.year == now.year &&
+        event.date.month == now.month &&
+        event.date.day == now.day;
     
     // Determine if it's tomorrow
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
-    final isTomorrow = event.start.year == tomorrow.year &&
-        event.start.month == tomorrow.month &&
-        event.start.day == tomorrow.day;
+    final isTomorrow = event.date.year == tomorrow.year &&
+        event.date.month == tomorrow.month &&
+        event.date.day == tomorrow.day;
     
     // Format date text
     String dateText;
@@ -170,7 +170,7 @@ class UpcomingEventsCard extends StatelessWidget {
     } else if (isTomorrow) {
       dateText = "Demain";
     } else {
-      dateText = dateFormat.format(event.start);
+      dateText = dateFormat.format(event.date);
     }
     
     return Row(
@@ -208,17 +208,17 @@ class UpcomingEventsCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              timeFormat.format(event.start),
+              timeFormat.format(event.date),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[700],
               ),
             ),
-            if (event.end != null) ...[
+            if (event.endDate != null) ...[
               const SizedBox(height: 2),
               Text(
-                timeFormat.format(event.end!),
+                timeFormat.format(event.endDate!),
                 style: TextStyle(
                   fontSize: 10,
                   color: Colors.grey[600],
@@ -236,7 +236,7 @@ class UpcomingEventsCard extends StatelessWidget {
           height: 65,
           margin: const EdgeInsets.symmetric(horizontal: 6),
           decoration: BoxDecoration(
-            color: _getCategoryColor(event.category),
+            color: event.color,
             borderRadius: BorderRadius.circular(4),
           ),
         ),
@@ -268,19 +268,19 @@ class UpcomingEventsCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    _getCategoryIcon(event.category),
+                    _getCategoryIcon(event.category.toString()),
                     size: 14,
-                    color: _getCategoryColor(event.category),
+                    color: event.color,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    _getCategoryName(event.category),
+                    _getCategoryName(event.category.toString()),
                     style: TextStyle(
                       fontSize: 12,
-                      color: _getCategoryColor(event.category),
+                      color: event.color,
                     ),
                   ),
-                  if (event.location.isNotEmpty) ...[
+                  if (event.location != null && event.location!.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     Icon(
                       Icons.location_on,
@@ -290,7 +290,7 @@ class UpcomingEventsCard extends StatelessWidget {
                     const SizedBox(width: 2),
                     Expanded(
                       child: Text(
-                        event.location,
+                        event.location!,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gbc_coachai/features/finance/domain/models/transaction.dart';
+import 'package:gbc_coachia/features/finance/domain/models/transaction.dart';
 import 'package:intl/intl.dart';
 
 class RecentTransactionsCard extends StatelessWidget {

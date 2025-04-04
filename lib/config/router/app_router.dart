@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gbc_coachai/features/chatbot/presentation/pages/chatbot_page.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:gbc_coachai/features/documents/presentation/pages/documents_page.dart';
-import 'package:gbc_coachai/features/finance/presentation/pages/finance_overview_page.dart';
-import 'package:gbc_coachai/features/planner/presentation/pages/planner_page.dart';
+import 'package:gbc_coachia/features/chatbot/presentation/pages/chatbot_page.dart';
+import 'package:gbc_coachia/features/chatbot/presentation/pages/conversation_detail_page.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:gbc_coachia/features/documents/presentation/pages/documents_page.dart';
+import 'package:gbc_coachia/features/finance/presentation/pages/finance_overview_page.dart';
+import 'package:gbc_coachia/features/planner/presentation/pages/planner_page.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
@@ -39,6 +40,21 @@ class AppRouter {
               key: state.pageKey,
               child: const ChatbotPage(),
             ),
+            routes: [
+              GoRoute(
+                path: 'conversation/:id',
+                name: 'conversation_detail',
+                pageBuilder: (context, state) {
+                  final conversationId = state.pathParameters['id'] ?? '';
+                  return MaterialPage<void>(
+                    key: state.pageKey,
+                    child: ConversationDetailPage(
+                      conversationId: conversationId,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: '/planner',
@@ -115,13 +131,18 @@ class _ScaffoldWithBottomNavBarState extends State<ScaffoldWithBottomNavBar> {
   Widget build(BuildContext context) {
     // Convert the current location path to an index for the BottomNavigationBar
     final String location = GoRouterState.of(context).matchedLocation;
-    final int index = _destinations
-        .indexWhere((destination) => destination.route == location);
+    
+    // Check if we're on a route that shouldn't show the bottom navigation
+    final bool showBottomNav = !location.contains('/chatbot/conversation/');
+    
+    // Get the index of the current route in our destinations
+    final String baseRoute = location.split('/').length > 1 ? '/${location.split('/')[1]}' : '/dashboard';
+    final int index = _destinations.indexWhere((destination) => destination.route == baseRoute);
     _currentIndex = index >= 0 ? index : 0;
 
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: showBottomNav ? NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (int index) {
           _onItemTapped(index, context);
@@ -134,7 +155,7 @@ class _ScaffoldWithBottomNavBarState extends State<ScaffoldWithBottomNavBar> {
               ),
             )
             .toList(),
-      ),
+      ) : null,
     );
   }
 

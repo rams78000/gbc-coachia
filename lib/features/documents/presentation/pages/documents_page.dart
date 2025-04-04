@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachai/features/documents/presentation/bloc/document_bloc.dart';
-import 'package:gbc_coachai/features/documents/presentation/widgets/document_grid_item.dart';
-import 'package:gbc_coachai/features/documents/presentation/widgets/folder_grid_item.dart';
+import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
+import 'package:gbc_coachia/features/documents/presentation/widgets/document_grid_item.dart';
+import 'package:gbc_coachia/features/documents/presentation/widgets/folder_grid_item.dart';
 import 'package:path/path.dart' as path;
 
 class DocumentsPage extends StatefulWidget {

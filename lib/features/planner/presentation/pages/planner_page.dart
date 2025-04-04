@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gbc_coachai/features/planner/domain/entities/event.dart';
-import 'package:gbc_coachai/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:gbc_coachia/features/planner/domain/entities/event.dart';
+import 'package:gbc_coachia/features/planner/presentation/bloc/planner_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 

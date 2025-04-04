@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
 import 'package:intl/intl.dart';
 
 class FolderGridItem extends StatelessWidget {

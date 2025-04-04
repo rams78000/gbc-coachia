@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/uuid.dart';
 
+import '../../../../shared/widgets/empty_state.dart';
+import '../../domain/entities/conversation.dart';
 import '../../domain/entities/message.dart';
 import '../bloc/chatbot_bloc.dart';
+import '../widgets/api_key_dialog.dart';
+import '../widgets/input_message_box.dart';
 import '../widgets/message_item.dart';
+import '../widgets/suggested_prompts.dart';
 
 class ConversationDetailPage extends StatefulWidget {
   final String conversationId;
@@ -15,28 +19,27 @@ class ConversationDetailPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ConversationDetailPage> createState() => _ConversationDetailPageState();
+  _ConversationDetailPageState createState() => _ConversationDetailPageState();
 }
 
 class _ConversationDetailPageState extends State<ConversationDetailPage> {
-  final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  String? _pendingPrompt;
 
   @override
   void initState() {
     super.initState();
-    // Charger la conversation au démarrage
-    context.read<ChatbotBloc>().add(ChatbotLoadConversation(widget.conversationId));
+    context.read<ChatbotBloc>().add(
+          LoadConversationDetail(conversationId: widget.conversationId),
+        );
   }
 
   @override
   void dispose() {
-    _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  // Faire défiler jusqu'au dernier message
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
@@ -49,183 +52,165 @@ class _ConversationDetailPageState extends State<ConversationDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: BlocBuilder<ChatbotBloc, ChatbotState>(
-          builder: (context, state) {
-            if (state is ChatbotConversationLoaded) {
-              return Text(state.conversation.title);
-            }
-            return const Text('Conversation');
-          },
-        ),
-      ),
-      body: Column(
-        children: [
-          // Messages
-          Expanded(
-            child: BlocConsumer<ChatbotBloc, ChatbotState>(
-              listener: (context, state) {
-                if (state is ChatbotConversationLoaded) {
-                  // Après avoir chargé la conversation ou envoyé un message, faire défiler vers le bas
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToBottom();
-                  });
-                }
-              },
-              builder: (context, state) {
-                if (state is ChatbotLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is ChatbotConversationLoaded) {
-                  final messages = state.conversation.messages;
-                  
-                  if (messages.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.chat_bubble_outline,
-                            size: 80,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Démarrez la conversation',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 32),
-                            child: Text(
-                              'Posez une question ou demandez de l\'aide à propos de votre entreprise',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  
-                  return ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.only(bottom: 16),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      return MessageItem(message: message);
-                    },
-                  );
-                } else if (state is ChatbotError) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        'Erreur: ${state.message}',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  );
-                } else {
-                  return const Center(child: Text('Chargement de la conversation...'));
-                }
-              },
-            ),
-          ),
+    return BlocConsumer<ChatbotBloc, ChatbotState>(
+      listener: (context, state) {
+        if (state is ConversationDetailLoaded) {
+          // Faire défiler vers le bas lorsque les messages sont chargés
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToBottom();
+          });
           
-          // Indicateur de chargement
-          BlocBuilder<ChatbotBloc, ChatbotState>(
-            builder: (context, state) {
-              if (state is ChatbotConversationLoaded && state.isProcessing) {
-                return const LinearProgressIndicator();
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-          
-          // Zone de saisie
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  offset: const Offset(0, -1),
-                  blurRadius: 3,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      hintText: 'Tapez un message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(24)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    minLines: 1,
-                    maxLines: 5,
-                    textCapitalization: TextCapitalization.sentences,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    onSubmitted: (value) {
-                      if (value.trim().isNotEmpty) {
-                        _sendMessage();
-                      }
-                    },
+          // Si nous avons un message en attente (d'une suggestion), l'envoyer maintenant
+          if (_pendingPrompt != null) {
+            context.read<ChatbotBloc>().add(
+                  SendMessage(
+                    conversationId: widget.conversationId,
+                    content: _pendingPrompt!,
                   ),
-                ),
-                const SizedBox(width: 8),
-                ClipOval(
-                  child: Material(
-                    color: Color(0xFFB87333), // Couleur cuivre/bronze
-                    child: InkWell(
-                      onTap: _sendMessage,
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        child: const Icon(
-                          Icons.send,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                );
+            _pendingPrompt = null;
+          }
+        } else if (state is ApiKeyInvalid) {
+          _showApiKeyDialog(context);
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: _buildTitle(state),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => _showApiKeyDialog(context),
+              ),
+            ],
           ),
-        ],
-      ),
+          body: Column(
+            children: [
+              Expanded(
+                child: _buildMessageList(context, state),
+              ),
+              _buildInputArea(context, state),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  void _sendMessage() {
-    final message = _messageController.text.trim();
-    if (message.isEmpty) return;
+  Widget _buildTitle(ChatbotState state) {
+    if (state is ConversationDetailLoaded) {
+      return Text(state.conversation.title);
+    } else if (state is ConversationMessageSending) {
+      return Text(state.conversation.title);
+    }
+    return const Text('Conversation');
+  }
+
+  Widget _buildMessageList(BuildContext context, ChatbotState state) {
+    if (state is ConversationDetailLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (state is ConversationDetailLoaded) {
+      final messages = state.conversation.messages;
+      if (messages.isEmpty) {
+        return _buildStartConversation(context);
+      }
+      return ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.only(bottom: 16.0),
+        itemCount: messages.length,
+        itemBuilder: (context, index) {
+          final message = messages[index];
+          return MessageItem(message: message);
+        },
+      );
+    } else if (state is ConversationMessageSending) {
+      final messages = [
+        ...state.conversation.messages,
+        Message(
+          id: 'loading',
+          content: 'Chargement...',
+          role: MessageRole.assistant,
+          timestamp: DateTime.now(),
+          isLoading: true,
+        ),
+      ];
+      return ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.only(bottom: 16.0),
+        itemCount: messages.length,
+        itemBuilder: (context, index) {
+          final message = messages[index];
+          return MessageItem(message: message);
+        },
+      );
+    } else {
+      return const Center(child: Text('Erreur de chargement des messages'));
+    }
+  }
+
+  Widget _buildStartConversation(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: EmptyState(
+              icon: Icons.chat_bubble_outline,
+              title: 'Commencez la conversation',
+              description: 'Posez une question à GBC CoachIA pour obtenir de l\'aide avec votre entreprise.',
+              showAction: false,
+            ),
+          ),
+        ),
+        SuggestedPromptsWidget(
+          onPromptSelected: (prompt) => _sendMessage(context, prompt),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputArea(BuildContext context, ChatbotState state) {
+    final isLoading = state is ConversationMessageSending;
     
-    // Vérifier si nous ne sommes pas déjà en train de traiter un message
-    final state = context.read<ChatbotBloc>().state;
-    if (state is ChatbotConversationLoaded && state.isProcessing) return;
+    return InputMessageBox(
+      onSendMessage: (content) => _sendMessage(context, content),
+      isLoading: isLoading,
+    );
+  }
+
+  void _sendMessage(BuildContext context, String content) {
+    final currentState = context.read<ChatbotBloc>().state;
     
-    // Envoyer le message
-    context.read<ChatbotBloc>().add(ChatbotSendMessage(message));
-    
-    // Effacer le champ de texte
-    _messageController.clear();
+    if (currentState is ConversationDetailLoaded) {
+      context.read<ChatbotBloc>().add(
+            SendMessage(
+              conversationId: widget.conversationId,
+              content: content,
+            ),
+          );
+    } else {
+      // Si les messages ne sont pas encore chargés, stocker le message pour l'envoyer plus tard
+      setState(() {
+        _pendingPrompt = content;
+      });
+    }
+  }
+
+  void _showApiKeyDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => BlocBuilder<ChatbotBloc, ChatbotState>(
+        builder: (context, state) {
+          return ApiKeyDialog(
+            isKeyValid: state is ApiKeyValid,
+            onApiKeySubmitted: (apiKey) {
+              context.read<ChatbotBloc>().add(SetApiKey(apiKey: apiKey));
+              Navigator.of(context).pop();
+            },
+          );
+        },
+      ),
+    );
   }
 }

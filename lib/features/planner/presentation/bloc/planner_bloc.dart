@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:gbc_coachai/features/planner/domain/entities/event.dart';
-import 'package:gbc_coachai/features/planner/domain/repositories/event_repository.dart';
+import 'package:gbc_coachia/features/planner/domain/entities/event.dart';
+import 'package:gbc_coachia/features/planner/domain/repositories/event_repository.dart';
 
 part 'planner_event.dart';
 part 'planner_state.dart';

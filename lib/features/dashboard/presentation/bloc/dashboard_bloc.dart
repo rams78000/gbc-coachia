@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:gbc_coachai/features/dashboard/domain/entities/dashboard_data.dart';
-import 'package:gbc_coachai/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:gbc_coachia/features/dashboard/domain/entities/dashboard_data.dart';
+import 'package:gbc_coachia/features/dashboard/domain/repositories/dashboard_repository.dart';
 
 part 'dashboard_event.dart';
 part 'dashboard_state.dart';

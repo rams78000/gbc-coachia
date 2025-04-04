@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gbc_coachai/features/dashboard/domain/entities/dashboard_data.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/widgets/activity_summary_card.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/widgets/financial_summary_card.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/widgets/quick_actions_card.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/widgets/recent_documents_card.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/widgets/recent_transactions_card.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/widgets/upcoming_events_card.dart';
-import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachai/features/documents/presentation/bloc/document_bloc.dart';
+import 'package:gbc_coachia/features/dashboard/domain/entities/dashboard_data.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/widgets/activity_summary_card.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/widgets/financial_summary_card.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/widgets/quick_actions_card.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/widgets/recent_documents_card.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/widgets/recent_transactions_card.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/widgets/upcoming_events_card.dart';
+import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
 import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {

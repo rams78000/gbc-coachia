@@ -1,6 +1,6 @@
-import 'package:gbc_coachai/features/planner/data/sources/event_local_source.dart';
-import 'package:gbc_coachai/features/planner/domain/entities/event.dart';
-import 'package:gbc_coachai/features/planner/domain/repositories/event_repository.dart';
+import 'package:gbc_coachia/features/planner/data/sources/event_local_source.dart';
+import 'package:gbc_coachia/features/planner/domain/entities/event.dart';
+import 'package:gbc_coachia/features/planner/domain/repositories/event_repository.dart';
 
 class EventRepositoryImpl implements EventRepository {
   final EventLocalSource localSource;

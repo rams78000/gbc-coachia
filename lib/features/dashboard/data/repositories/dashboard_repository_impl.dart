@@ -1,8 +1,10 @@
-import 'package:gbc_coachai/features/dashboard/domain/entities/dashboard_data.dart';
-import 'package:gbc_coachai/features/dashboard/domain/repositories/dashboard_repository.dart';
-import 'package:gbc_coachai/features/documents/domain/repositories/document_repository.dart';
-import 'package:gbc_coachai/features/finance/domain/repositories/transaction_repository.dart';
-import 'package:gbc_coachai/features/planner/domain/repositories/event_repository.dart';
+import 'package:gbc_coachia/features/dashboard/domain/entities/activity_summary.dart';
+import 'package:gbc_coachia/features/dashboard/domain/entities/dashboard_data.dart';
+import 'package:gbc_coachia/features/dashboard/domain/entities/financial_overview.dart';
+import 'package:gbc_coachia/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:gbc_coachia/features/documents/domain/repositories/document_repository.dart';
+import 'package:gbc_coachia/features/finance/domain/repositories/transaction_repository.dart';
+import 'package:gbc_coachia/features/planner/domain/repositories/event_repository.dart';
 import 'package:intl/intl.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
@@ -26,12 +28,6 @@ class DashboardRepositoryImpl implements DashboardRepository {
       now,
       now.add(const Duration(days: 7)),
     );
-
-    // Récupérer les transactions récentes
-    final recentTransactions = await _transactionRepository.getRecentTransactions(5);
-
-    // Récupérer les documents récents
-    final recentDocuments = await _documentRepository.getRecentDocuments(5);
 
     // Calculer la synthèse financière
     final currentMonth = DateTime(now.year, now.month);
@@ -84,24 +80,13 @@ class DashboardRepositoryImpl implements DashboardRepository {
       categoryCount[category] = (categoryCount[category] ?? 0) + 1;
     }
     
-    final List<CategoryUsage> categoryUsage = [];
     final totalTransactions = allTransactions.length;
     
-    if (totalTransactions > 0) {
-      categoryCount.forEach((category, count) {
-        categoryUsage.add(
-          CategoryUsage(
-            category: category,
-            percentage: count / totalTransactions * 100,
-          ),
-        );
-      });
-    }
+    // Calculer le taux de complétion
+    final completionRate = allEvents.isEmpty ? 0.0 : (completedEvents / allEvents.length) * 100;
 
     return DashboardData(
       upcomingEvents: upcomingEvents,
-      recentTransactions: recentTransactions,
-      recentDocuments: recentDocuments,
       financialOverview: FinancialOverview(
         currentBalance: currentBalance,
         incomeThisMonth: incomeThisMonth,
@@ -114,14 +99,14 @@ class DashboardRepositoryImpl implements DashboardRepository {
         completedEvents: completedEvents,
         totalDocuments: allDocuments.length,
         totalTransactions: allTransactions.length,
-        categoryUsage: categoryUsage,
+        completionRate: completionRate,
       ),
     );
   }
 
   @override
-  Future<List<MonthlyFinancialData>> getFinancialTrends({int months = 6}) async {
-    final List<MonthlyFinancialData> monthlySummary = [];
+  Future<List<MonthlySummary>> getFinancialTrends({int months = 6}) async {
+    final List<MonthlySummary> monthlySummary = [];
     final now = DateTime.now();
     
     for (int i = months - 1; i >= 0; i--) {
@@ -146,7 +131,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
       }
       
       monthlySummary.add(
-        MonthlyFinancialData(
+        MonthlySummary(
           month: DateFormat('MMM').format(startOfMonth),
           income: monthlyIncome,
           expenses: monthlyExpenses,
@@ -165,33 +150,15 @@ class DashboardRepositoryImpl implements DashboardRepository {
     final allDocuments = await _documentRepository.getAllDocuments();
     final allTransactions = await _transactionRepository.getAllTransactions();
     
-    // Calculer la répartition par catégorie
-    final Map<String, int> categoryCount = {};
-    for (final transaction in allTransactions) {
-      final category = transaction.category;
-      categoryCount[category] = (categoryCount[category] ?? 0) + 1;
-    }
-    
-    final List<CategoryUsage> categoryUsage = [];
-    final totalTransactions = allTransactions.length;
-    
-    if (totalTransactions > 0) {
-      categoryCount.forEach((category, count) {
-        categoryUsage.add(
-          CategoryUsage(
-            category: category,
-            percentage: count / totalTransactions * 100,
-          ),
-        );
-      });
-    }
+    // Calculer le taux de complétion
+    final completionRate = allEvents.isEmpty ? 0.0 : (completedEvents / allEvents.length) * 100;
     
     return ActivitySummary(
       totalEvents: allEvents.length,
       completedEvents: completedEvents,
       totalDocuments: allDocuments.length,
       totalTransactions: allTransactions.length,
-      categoryUsage: categoryUsage,
+      completionRate: completionRate,
     );
   }
 

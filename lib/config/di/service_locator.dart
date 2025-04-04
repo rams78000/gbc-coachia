@@ -3,39 +3,40 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Auth
-import 'package:gbc_coachai/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:gbc_coachai/features/auth/data/sources/auth_local_source.dart';
-import 'package:gbc_coachai/features/auth/domain/repositories/auth_repository.dart';
-import 'package:gbc_coachai/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:gbc_coachia/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:gbc_coachia/features/auth/data/sources/auth_local_source.dart';
+import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
+import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
 
 // Chatbot
-import 'package:gbc_coachai/features/chatbot/data/repositories/chatbot_repository_impl.dart';
-import 'package:gbc_coachai/features/chatbot/data/sources/chatbot_remote_source.dart';
-import 'package:gbc_coachai/features/chatbot/domain/repositories/chatbot_repository.dart';
-import 'package:gbc_coachai/features/chatbot/presentation/bloc/chatbot_bloc.dart';
+import 'package:gbc_coachia/features/chatbot/data/repositories/chatbot_repository_impl.dart';
+import 'package:gbc_coachia/features/chatbot/data/sources/chatbot_remote_source.dart';
+import 'package:gbc_coachia/features/chatbot/data/sources/chatbot_local_source.dart';
+import 'package:gbc_coachia/features/chatbot/domain/repositories/chatbot_repository.dart';
+import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
 
 // Finance
-import 'package:gbc_coachai/features/finance/data/repositories/transaction_repository_impl.dart';
-import 'package:gbc_coachai/features/finance/data/sources/transaction_local_source.dart';
-import 'package:gbc_coachai/features/finance/domain/repositories/transaction_repository.dart';
-import 'package:gbc_coachai/features/finance/presentation/bloc/finance_bloc.dart';
+import 'package:gbc_coachia/features/finance/data/repositories/transaction_repository_impl.dart';
+import 'package:gbc_coachia/features/finance/data/sources/transaction_local_source.dart';
+import 'package:gbc_coachia/features/finance/domain/repositories/transaction_repository.dart';
+import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
 
 // Planner
-import 'package:gbc_coachai/features/planner/data/repositories/event_repository_impl.dart';
-import 'package:gbc_coachai/features/planner/data/sources/event_local_source.dart';
-import 'package:gbc_coachai/features/planner/domain/repositories/event_repository.dart';
-import 'package:gbc_coachai/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:gbc_coachia/features/planner/data/repositories/event_repository_impl.dart';
+import 'package:gbc_coachia/features/planner/data/sources/event_local_source.dart';
+import 'package:gbc_coachia/features/planner/domain/repositories/event_repository.dart';
+import 'package:gbc_coachia/features/planner/presentation/bloc/planner_bloc.dart';
 
 // Documents
-import 'package:gbc_coachai/features/documents/data/repositories/document_repository_impl.dart';
-import 'package:gbc_coachai/features/documents/data/sources/document_local_source.dart';
-import 'package:gbc_coachai/features/documents/domain/repositories/document_repository.dart';
-import 'package:gbc_coachai/features/documents/presentation/bloc/document_bloc.dart';
+import 'package:gbc_coachia/features/documents/data/repositories/document_repository_impl.dart';
+import 'package:gbc_coachia/features/documents/data/sources/document_local_source.dart';
+import 'package:gbc_coachia/features/documents/domain/repositories/document_repository.dart';
+import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
 
 // Dashboard
-import 'package:gbc_coachai/features/dashboard/data/repositories/dashboard_repository_impl.dart';
-import 'package:gbc_coachai/features/dashboard/domain/repositories/dashboard_repository.dart';
-import 'package:gbc_coachai/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:gbc_coachia/features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:gbc_coachia/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:gbc_coachia/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 
 final serviceLocator = GetIt.instance;
 
@@ -75,15 +76,26 @@ Future<void> initServiceLocator() async {
     ),
   );
   
+  serviceLocator.registerLazySingleton<ChatbotLocalSource>(
+    () => ChatbotLocalSourceImpl(
+      sharedPreferences: serviceLocator(),
+    ),
+  );
+  
   serviceLocator.registerLazySingleton<ChatbotRepository>(
     () => ChatbotRepositoryImpl(
       remoteSource: serviceLocator(),
+      localSource: serviceLocator(),
+      transactionRepository: serviceLocator(),
+      eventRepository: serviceLocator(),
+      documentRepository: serviceLocator(),
+      dashboardRepository: serviceLocator(),
     ),
   );
   
   serviceLocator.registerFactory<ChatbotBloc>(
     () => ChatbotBloc(
-      repository: serviceLocator(),
+      chatbotRepository: serviceLocator(),
     ),
   );
 

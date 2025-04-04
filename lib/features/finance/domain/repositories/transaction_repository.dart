@@ -1,4 +1,4 @@
-import 'package:gbc_coachai/features/finance/domain/entities/transaction.dart';
+import 'package:gbc_coachia/features/finance/domain/entities/transaction.dart';
 
 abstract class TransactionRepository {
   /// Récupère toutes les transactions

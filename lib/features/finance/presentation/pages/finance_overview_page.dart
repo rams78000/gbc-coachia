@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gbc_coachai/features/finance/domain/entities/transaction.dart';
-import 'package:gbc_coachai/features/finance/presentation/bloc/finance_bloc.dart';
+import 'package:gbc_coachia/features/finance/domain/entities/transaction.dart';
+import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 

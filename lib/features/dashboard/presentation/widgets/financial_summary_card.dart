@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gbc_coachai/features/dashboard/domain/entities/dashboard_data.dart';
+import 'package:gbc_coachia/features/dashboard/domain/entities/dashboard_data.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 

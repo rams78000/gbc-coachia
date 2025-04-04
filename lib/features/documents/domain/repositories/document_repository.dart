@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
 
 abstract class DocumentRepository {
   /// Récupère tous les documents

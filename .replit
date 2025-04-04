@@ -23,6 +23,10 @@ args = "Flutter Web"
 task = "workflow.run"
 args = "Preview"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Preview SVG"
+
 [[workflows.workflow]]
 name = "Flutter Analyze"
 author = "agent"
@@ -67,6 +71,21 @@ task = "shell.exec"
 args = "cd /home/runner/workspace && python -m http.server 5001 --bind 0.0.0.0 --directory preview"
 waitForPort = 5001
 
+[[workflows.workflow]]
+name = "Preview SVG"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd /home/runner/workspace && python -m http.server 5002 --bind 0.0.0.0 --directory preview"
+waitForPort = 5002
+
 [deployment]
 run = ["sh", "-c", "flutter run --web-port=5000 --web-hostname=0.0.0.0"]
 
@@ -77,3 +96,11 @@ externalPort = 80
 [[ports]]
 localPort = 5001
 externalPort = 3000
+
+[[ports]]
+localPort = 5002
+externalPort = 3001
+
+[[ports]]
+localPort = 5003
+externalPort = 3002

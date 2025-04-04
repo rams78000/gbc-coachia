@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GBC CoachIA - Maquettes Mobile</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .mockup {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s;
+      margin-bottom: 30px;
+    }
+    .mockup:hover {
+      transform: translateY(-5px);
+    }
+    .mockup h2 {
+      margin-top: 10px;
+      color: #4a6feb;
+    }
+    .mockup p {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .mockup-image {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      background: white;
+    }
+    .dark-mockup-image {
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #121212;
+    }
+  </style>
+</head>
+<body>
+  <h1>GBC CoachIA - Maquettes Mobile</h1>
+  
+  <div class="container">
+    <!-- Splash Screen -->
+    <div class="mockup">
+      <h2>Écran de démarrage</h2>
+      <p>Premier écran affiché au lancement de l'application avec logo, nom et slogan</p>
+      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
+        <!-- Fond dégradé -->
+        <rect width="360" height="640" fill="url(#splash_gradient)"/>
+        
+        <!-- Logo -->
+        <rect x="130" y="220" width="100" height="100" rx="20" fill="white"/>
+        <text x="180" y="285" font-family="Arial" font-size="36" font-weight="bold" fill="#4a6feb" text-anchor="middle">GBC</text>
+        
+        <!-- Titre et sous-titre -->
+        <text x="180" y="370" font-family="Arial" font-size="28" font-weight="bold" fill="white" text-anchor="middle">GBC CoachIA</text>
+        <text x="180" y="400" font-family="Arial" font-size="16" fill="white" text-anchor="middle" opacity="0.9">Votre coach entrepreneurial intelligent</text>
+        
+        <!-- Définition du dégradé -->
+        <defs>
+          <linearGradient id="splash_gradient" x1="0" y1="0" x2="360" y2="640" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#4a6feb"/>
+            <stop offset="1" stop-color="#7d56c5"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    
+    <!-- Dashboard -->
+    <div class="mockup">
+      <h2>Tableau de bord</h2>
+      <p>Vue d'ensemble des tâches, revenus et accès aux principales fonctionnalités</p>
+      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
+        <!-- Fond -->
+        <rect width="360" height="640" fill="#f8f9fa"/>
+        
+        <!-- En-tête -->
+        <rect y="0" width="360" height="80" fill="white"/>
+        <line x1="0" y1="80" x2="360" y2="80" stroke="#eee" stroke-width="1"/>
+        <text x="20" y="30" font-family="Arial" font-size="16" fill="#333">Bonjour,</text>
+        <text x="20" y="55" font-family="Arial" font-size="20" font-weight="bold" fill="#333">Jean Dupont</text>
+        
+        <!-- Avatar -->
+        <circle cx="320" cy="40" r="25" fill="#4a6feb"/>
+        <text x="320" y="48" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">JD</text>
+        
+        <!-- Statistiques -->
+        <rect x="20" y="100" width="155" height="80" rx="10" fill="#f5f5f5"/>
+        <text x="40" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#333">5</text>
+        <text x="40" y="160" font-family="Arial" font-size="14" fill="#666">Tâches</text>
+        
+        <rect x="185" y="100" width="155" height="80" rx="10" fill="#f5f5f5"/>
+        <text x="205" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#333">€2,500</text>
+        <text x="205" y="160" font-family="Arial" font-size="14" fill="#666">Revenus</text>
+        
+        <!-- Actions -->
+        <rect x="20" y="200" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
+        <circle cx="98" cy="235" r="15" fill="#4a6feb20"/>
+        <text x="98" y="240" font-family="Arial" font-size="20" text-anchor="middle">📝</text>
+        <text x="98" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Tâches</text>
+        
+        <rect x="185" y="200" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
+        <circle cx="262" cy="235" r="15" fill="#4a6feb20"/>
+        <text x="262" y="240" font-family="Arial" font-size="20" text-anchor="middle">💬</text>
+        <text x="262" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Assistant</text>
+        
+        <rect x="20" y="310" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
+        <circle cx="98" cy="345" r="15" fill="#4a6feb20"/>
+        <text x="98" y="350" font-family="Arial" font-size="20" text-anchor="middle">📊</text>
+        <text x="98" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Finances</text>
+        
+        <rect x="185" y="310" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
+        <circle cx="262" cy="345" r="15" fill="#4a6feb20"/>
+        <text x="262" y="350" font-family="Arial" font-size="20" text-anchor="middle">📄</text>
+        <text x="262" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Documents</text>
+        
+        <!-- Navigation -->
+        <rect y="580" width="360" height="60" fill="white"/>
+        <line x1="0" y1="580" x2="360" y2="580" stroke="#eee" stroke-width="1"/>
+        
+        <text x="45" y="610" font-family="Arial" font-size="20" text-anchor="middle">🏠</text>
+        <text x="45" y="630" font-family="Arial" font-size="12" fill="#4a6feb" text-anchor="middle">Accueil</text>
+        
+        <text x="135" y="610" font-family="Arial" font-size="20" text-anchor="middle">📅</text>
+        <text x="135" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Planner</text>
+        
+        <text x="225" y="610" font-family="Arial" font-size="20" text-anchor="middle">💬</text>
+        <text x="225" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Chat</text>
+        
+        <text x="315" y="610" font-family="Arial" font-size="20" text-anchor="middle">👤</text>
+        <text x="315" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Profil</text>
+      </svg>
+    </div>
+    
+    <!-- Assistant IA -->
+    <div class="mockup">
+      <h2>Assistant IA</h2>
+      <p>Interface de conversation avec l'IA pour obtenir conseils et assistance</p>
+      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
+        <!-- Fond -->
+        <rect width="360" height="640" fill="#f8f9fa"/>
+        
+        <!-- En-tête -->
+        <rect y="0" width="360" height="60" fill="white"/>
+        <line x1="0" y1="60" x2="360" y2="60" stroke="#eee" stroke-width="1"/>
+        <text x="20" y="38" font-family="Arial" font-size="20" fill="#333">←</text>
+        <text x="60" y="38" font-family="Arial" font-size="18" font-weight="600" fill="#333">Assistant IA</text>
+        
+        <!-- Messages -->
+        <rect x="20" y="80" width="240" height="80" rx="16" fill="#f0f0f0"/>
+        <rect x="20" y="80" width="20" height="20" rx="4" fill="#f0f0f0"/>
+        <text x="30" y="100" font-family="Arial" font-size="14" fill="#333">Bonjour! Je suis votre assistant CoachIA.</text>
+        <text x="30" y="120" font-family="Arial" font-size="14" fill="#333">Comment puis-je vous aider aujourd'hui?</text>
+        
+        <rect x="100" y="180" width="240" height="60" rx="16" fill="#4a6feb"/>
+        <rect x="340" y="180" width="20" height="20" rx="4" fill="#4a6feb"/>
+        <text x="110" y="200" font-family="Arial" font-size="14" fill="white">J'aimerais des conseils pour optimiser</text>
+        <text x="110" y="220" font-family="Arial" font-size="14" fill="white">mon planning hebdomadaire.</text>
+        
+        <rect x="20" y="260" width="240" height="140" rx="16" fill="#f0f0f0"/>
+        <rect x="20" y="260" width="20" height="20" rx="4" fill="#f0f0f0"/>
+        <text x="30" y="280" font-family="Arial" font-size="14" fill="#333">Bien sûr! Pour optimiser votre planning,</text>
+        <text x="30" y="300" font-family="Arial" font-size="14" fill="#333">je vous suggère de:</text>
+        <text x="30" y="330" font-family="Arial" font-size="14" fill="#333">1. Réserver des blocs de temps pour</text>
+        <text x="30" y="350" font-family="Arial" font-size="14" fill="#333">   les tâches importantes</text>
+        <text x="30" y="370" font-family="Arial" font-size="14" fill="#333">2. Prévoir des pauses régulières</text>
+        <text x="30" y="390" font-family="Arial" font-size="14" fill="#333">3. Regrouper les tâches similaires</text>
+        
+        <rect x="100" y="420" width="240" height="60" rx="16" fill="#4a6feb"/>
+        <rect x="340" y="420" width="20" height="20" rx="4" fill="#4a6feb"/>
+        <text x="110" y="440" font-family="Arial" font-size="14" fill="white">Merci pour ces conseils. Peux-tu me</text>
+        <text x="110" y="460" font-family="Arial" font-size="14" fill="white">suggérer un modèle de planning?</text>
+        
+        <!-- Barre de saisie -->
+        <rect y="580" width="360" height="60" fill="white"/>
+        <line x1="0" y1="580" x2="360" y2="580" stroke="#eee" stroke-width="1"/>
+        <rect x="20" y="590" width="280" height="40" rx="20" fill="#f5f5f5"/>
+        <text x="40" y="615" font-family="Arial" font-size="14" fill="#888">Tapez votre message...</text>
+        
+        <circle cx="325" cy="610" r="20" fill="#4a6feb"/>
+        <text x="325" y="615" font-family="Arial" font-size="16" fill="white" text-anchor="middle">→</text>
+      </svg>
+    </div>
+    
+    <!-- Finances -->
+    <div class="mockup">
+      <h2>Gestion financière</h2>
+      <p>Suivi des revenus, dépenses et transactions pour optimiser les finances</p>
+      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
+        <!-- Fond -->
+        <rect width="360" height="640" fill="#f8f9fa"/>
+        
+        <!-- Carte balance -->
+        <rect x="20" y="20" width="320" height="150" rx="12" fill="url(#finance_gradient)"/>
+        
+        <text x="40" y="50" font-family="Arial" font-size="14" fill="white" opacity="0.9">Solde Total</text>
+        <text x="40" y="85" font-family="Arial" font-size="28" font-weight="bold" fill="white">€12,450.00</text>
+        
+        <line x1="40" y1="105" x2="320" y2="105" stroke="white" stroke-width="1" opacity="0.2"/>
+        
+        <text x="80" y="130" font-family="Arial" font-size="12" fill="white" opacity="0.8" text-anchor="middle">Revenus</text>
+        <text x="80" y="150" font-family="Arial" font-size="16" font-weight="600" fill="white" text-anchor="middle">€8,250.00</text>
+        
+        <text x="260" y="130" font-family="Arial" font-size="12" fill="white" opacity="0.8" text-anchor="middle">Dépenses</text>
+        <text x="260" y="150" font-family="Arial" font-size="16" font-weight="600" fill="white" text-anchor="middle">€3,800.00</text>
+        
+        <!-- En-tête Transactions -->
+        <text x="20" y="200" font-family="Arial" font-size="18" font-weight="600" fill="#333">Transactions Récentes</text>
+        <text x="320" y="200" font-family="Arial" font-size="14" fill="#4a6feb" text-anchor="end">Filtrer</text>
+        
+        <!-- Transactions -->
+        <line x1="20" y1="230" x2="340" y2="230" stroke="#eee" stroke-width="1"/>
+        <circle cx="45" cy="260" r="20" fill="#f0f0f0"/>
+        <text x="45" y="265" font-family="Arial" font-size="14" text-anchor="middle">💼</text>
+        <text x="80" y="255" font-family="Arial" font-size="16" font-weight="500" fill="#333">Design de site web</text>
+        <text x="80" y="275" font-family="Arial" font-size="12" fill="#888">2 Avril 2025</text>
+        <text x="320" y="265" font-family="Arial" font-size="14" font-weight="600" fill="#2ecc71" text-anchor="end">+€1,500.00</text>
+        
+        <line x1="20" y1="290" x2="340" y2="290" stroke="#eee" stroke-width="1"/>
+        <circle cx="45" cy="320" r="20" fill="#f0f0f0"/>
+        <text x="45" y="325" font-family="Arial" font-size="14" text-anchor="middle">🖥️</text>
+        <text x="80" y="315" font-family="Arial" font-size="16" font-weight="500" fill="#333">Achat matériel</text>
+        <text x="80" y="335" font-family="Arial" font-size="12" fill="#888">1 Avril 2025</text>
+        <text x="320" y="325" font-family="Arial" font-size="14" font-weight="600" fill="#e74c3c" text-anchor="end">-€800.00</text>
+        
+        <line x1="20" y1="350" x2="340" y2="350" stroke="#eee" stroke-width="1"/>
+        <circle cx="45" cy="380" r="20" fill="#f0f0f0"/>
+        <text x="45" y="385" font-family="Arial" font-size="14" text-anchor="middle">📊</text>
+        <text x="80" y="375" font-family="Arial" font-size="16" font-weight="500" fill="#333">Consultation marketing</text>
+        <text x="80" y="395" font-family="Arial" font-size="12" fill="#888">28 Mars 2025</text>
+        <text x="320" y="385" font-family="Arial" font-size="14" font-weight="600" fill="#2ecc71" text-anchor="end">+€750.00</text>
+        
+        <line x1="20" y1="410" x2="340" y2="410" stroke="#eee" stroke-width="1"/>
+        <circle cx="45" cy="440" r="20" fill="#f0f0f0"/>
+        <text x="45" y="445" font-family="Arial" font-size="14" text-anchor="middle">🏢</text>
+        <text x="80" y="435" font-family="Arial" font-size="16" font-weight="500" fill="#333">Loyer bureau</text>
+        <text x="80" y="455" font-family="Arial" font-size="12" fill="#888">27 Mars 2025</text>
+        <text x="320" y="445" font-family="Arial" font-size="14" font-weight="600" fill="#e74c3c" text-anchor="end">-€450.00</text>
+        
+        <!-- Navigation -->
+        <rect y="580" width="360" height="60" fill="white"/>
+        <line x1="0" y1="580" x2="360" y2="580" stroke="#eee" stroke-width="1"/>
+        
+        <text x="45" y="610" font-family="Arial" font-size="20" text-anchor="middle">🏠</text>
+        <text x="45" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Accueil</text>
+        
+        <text x="135" y="610" font-family="Arial" font-size="20" text-anchor="middle">📅</text>
+        <text x="135" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Planner</text>
+        
+        <text x="225" y="610" font-family="Arial" font-size="20" text-anchor="middle">💬</text>
+        <text x="225" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Chat</text>
+        
+        <text x="315" y="610" font-family="Arial" font-size="20" text-anchor="middle">👤</text>
+        <text x="315" y="630" font-family="Arial" font-size="12" fill="#4a6feb" text-anchor="middle">Profil</text>
+        
+        <!-- Définition du dégradé -->
+        <defs>
+          <linearGradient id="finance_gradient" x1="20" y1="20" x2="340" y2="170" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#4a6feb"/>
+            <stop offset="1" stop-color="#7d56c5"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    
+    <!-- Mode Sombre -->
+    <div class="mockup">
+      <h2>Mode sombre</h2>
+      <p>Interface adaptée pour une utilisation nocturne avec thème sombre</p>
+      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="dark-mockup-image">
+        <!-- Fond -->
+        <rect width="360" height="640" fill="#121212"/>
+        
+        <!-- En-tête -->
+        <rect y="0" width="360" height="80" fill="#1e1e1e"/>
+        <line x1="0" y1="80" x2="360" y2="80" stroke="#333" stroke-width="1"/>
+        <text x="20" y="30" font-family="Arial" font-size="16" fill="#eee">Bonjour,</text>
+        <text x="20" y="55" font-family="Arial" font-size="20" font-weight="bold" fill="#fff">Jean Dupont</text>
+        
+        <!-- Avatar -->
+        <circle cx="320" cy="40" r="25" fill="#7d56c5"/>
+        <text x="320" y="48" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">JD</text>
+        
+        <!-- Statistiques -->
+        <rect x="20" y="100" width="155" height="80" rx="10" fill="#2a2a2a"/>
+        <text x="40" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#fff">5</text>
+        <text x="40" y="160" font-family="Arial" font-size="14" fill="#aaa">Tâches</text>
+        
+        <rect x="185" y="100" width="155" height="80" rx="10" fill="#2a2a2a"/>
+        <text x="205" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#fff">€2,500</text>
+        <text x="205" y="160" font-family="Arial" font-size="14" fill="#aaa">Revenus</text>
+        
+        <!-- Actions -->
+        <rect x="20" y="200" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
+        <circle cx="98" cy="235" r="15" fill="#7d56c520"/>
+        <text x="98" y="240" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📝</text>
+        <text x="98" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Tâches</text>
+        
+        <rect x="185" y="200" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
+        <circle cx="262" cy="235" r="15" fill="#7d56c520"/>
+        <text x="262" y="240" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">💬</text>
+        <text x="262" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Assistant</text>
+        
+        <rect x="20" y="310" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
+        <circle cx="98" cy="345" r="15" fill="#7d56c520"/>
+        <text x="98" y="350" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📊</text>
+        <text x="98" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Finances</text>
+        
+        <rect x="185" y="310" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
+        <circle cx="262" cy="345" r="15" fill="#7d56c520"/>
+        <text x="262" y="350" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📄</text>
+        <text x="262" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Documents</text>
+        
+        <!-- Mode sombre indicateur -->
+        <text x="180" y="460" font-family="Arial" font-size="16" font-weight="bold" fill="#7d56c5" text-anchor="middle">Mode sombre activé</text>
+        <circle cx="180" cy="490" r="20" fill="#7d56c5"/>
+        <text x="180" y="496" font-family="Arial" font-size="16" fill="white" text-anchor="middle">🌙</text>
+        
+        <!-- Navigation -->
+        <rect y="580" width="360" height="60" fill="#1e1e1e"/>
+        <line x1="0" y1="580" x2="360" y2="580" stroke="#333" stroke-width="1"/>
+        
+        <text x="45" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">🏠</text>
+        <text x="45" y="630" font-family="Arial" font-size="12" fill="#7d56c5" text-anchor="middle">Accueil</text>
+        
+        <text x="135" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📅</text>
+        <text x="135" y="630" font-family="Arial" font-size="12" fill="#777" text-anchor="middle">Planner</text>
+        
+        <text x="225" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">💬</text>
+        <text x="225" y="630" font-family="Arial" font-size="12" fill="#777" text-anchor="middle">Chat</text>
+        
+        <text x="315" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">👤</text>
+        <text x="315" y="630" font-family="Arial" font-size="12" fill="#777" text-anchor="middle">Profil</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

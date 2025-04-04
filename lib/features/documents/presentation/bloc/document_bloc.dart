@@ -1,334 +1,405 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachia/features/documents/domain/entities/document_template.dart';
-import 'package:gbc_coachia/features/documents/domain/repositories/document_repository.dart';
+import 'dart:io';
 
-// Events
-abstract class DocumentEvent {}
+import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
+import 'package:gbc_coachai/features/documents/domain/repositories/document_repository.dart';
 
-class LoadDocuments extends DocumentEvent {}
+part 'document_event.dart';
+part 'document_state.dart';
 
-class LoadDocumentById extends DocumentEvent {
-  final String id;
-  
-  LoadDocumentById(this.id);
-}
-
-class CreateDocument extends DocumentEvent {
-  final Document document;
-  
-  CreateDocument(this.document);
-}
-
-class UpdateDocument extends DocumentEvent {
-  final Document document;
-  
-  UpdateDocument(this.document);
-}
-
-class DeleteDocument extends DocumentEvent {
-  final String id;
-  
-  DeleteDocument(this.id);
-}
-
-class ChangeDocumentStatus extends DocumentEvent {
-  final String id;
-  final DocumentStatus status;
-  
-  ChangeDocumentStatus(this.id, this.status);
-}
-
-class LoadTemplates extends DocumentEvent {}
-
-class LoadTemplateById extends DocumentEvent {
-  final String id;
-  
-  LoadTemplateById(this.id);
-}
-
-class CreateTemplate extends DocumentEvent {
-  final DocumentTemplate template;
-  
-  CreateTemplate(this.template);
-}
-
-class UpdateTemplate extends DocumentEvent {
-  final DocumentTemplate template;
-  
-  UpdateTemplate(this.template);
-}
-
-class DeleteTemplate extends DocumentEvent {
-  final String id;
-  
-  DeleteTemplate(this.id);
-}
-
-class GenerateDocumentFromTemplate extends DocumentEvent {
-  final String templateId;
-  final Map<String, dynamic> data;
-  final String title;
-  
-  GenerateDocumentFromTemplate({
-    required this.templateId,
-    required this.data,
-    required this.title,
-  });
-}
-
-class FilterDocumentsByType extends DocumentEvent {
-  final DocumentType type;
-  
-  FilterDocumentsByType(this.type);
-}
-
-class FilterDocumentsByStatus extends DocumentEvent {
-  final DocumentStatus status;
-  
-  FilterDocumentsByStatus(this.status);
-}
-
-class FilterTemplatesByType extends DocumentEvent {
-  final DocumentType type;
-  
-  FilterTemplatesByType(this.type);
-}
-
-// States
-abstract class DocumentState {}
-
-class DocumentsInitial extends DocumentState {}
-
-class DocumentsLoading extends DocumentState {}
-
-class DocumentsLoaded extends DocumentState {
-  final List<Document> documents;
-  
-  DocumentsLoaded(this.documents);
-}
-
-class DocumentLoaded extends DocumentState {
-  final Document document;
-  
-  DocumentLoaded(this.document);
-}
-
-class DocumentsError extends DocumentState {
-  final String message;
-  
-  DocumentsError(this.message);
-}
-
-class TemplatesLoading extends DocumentState {}
-
-class TemplatesLoaded extends DocumentState {
-  final List<DocumentTemplate> templates;
-  
-  TemplatesLoaded(this.templates);
-}
-
-class TemplateLoaded extends DocumentState {
-  final DocumentTemplate template;
-  
-  TemplateLoaded(this.template);
-}
-
-class TemplatesError extends DocumentState {
-  final String message;
-  
-  TemplatesError(this.message);
-}
-
-class DocumentGenerationLoading extends DocumentState {}
-
-class DocumentGenerated extends DocumentState {
-  final Document document;
-  
-  DocumentGenerated(this.document);
-}
-
-class DocumentGenerationError extends DocumentState {
-  final String message;
-  
-  DocumentGenerationError(this.message);
-}
-
-// BLoC
 class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   final DocumentRepository repository;
-  
-  DocumentBloc({required this.repository}) : super(DocumentsInitial()) {
+
+  DocumentBloc({required this.repository}) : super(DocumentInitial()) {
     on<LoadDocuments>(_onLoadDocuments);
-    on<LoadDocumentById>(_onLoadDocumentById);
-    on<CreateDocument>(_onCreateDocument);
+    on<LoadDocumentsByType>(_onLoadDocumentsByType);
+    on<LoadDocumentsByTag>(_onLoadDocumentsByTag);
+    on<LoadDocumentsByEntityId>(_onLoadDocumentsByEntityId);
+    on<LoadFavoriteDocuments>(_onLoadFavoriteDocuments);
+    on<SearchDocuments>(_onSearchDocuments);
+    on<AddDocument>(_onAddDocument);
     on<UpdateDocument>(_onUpdateDocument);
     on<DeleteDocument>(_onDeleteDocument);
-    on<ChangeDocumentStatus>(_onChangeDocumentStatus);
-    on<LoadTemplates>(_onLoadTemplates);
-    on<LoadTemplateById>(_onLoadTemplateById);
-    on<CreateTemplate>(_onCreateTemplate);
-    on<UpdateTemplate>(_onUpdateTemplate);
-    on<DeleteTemplate>(_onDeleteTemplate);
-    on<GenerateDocumentFromTemplate>(_onGenerateDocumentFromTemplate);
-    on<FilterDocumentsByType>(_onFilterDocumentsByType);
-    on<FilterDocumentsByStatus>(_onFilterDocumentsByStatus);
-    on<FilterTemplatesByType>(_onFilterTemplatesByType);
+    on<ToggleFavorite>(_onToggleFavorite);
+    on<ViewDocument>(_onViewDocument);
+    
+    // Événements de dossiers
+    on<LoadFolders>(_onLoadFolders);
+    on<LoadRootFolders>(_onLoadRootFolders);
+    on<LoadSubfolders>(_onLoadSubfolders);
+    on<LoadDocumentsInFolder>(_onLoadDocumentsInFolder);
+    on<CreateFolder>(_onCreateFolder);
+    on<UpdateFolder>(_onUpdateFolder);
+    on<DeleteFolder>(_onDeleteFolder);
+    on<AddDocumentToFolder>(_onAddDocumentToFolder);
+    on<RemoveDocumentFromFolder>(_onRemoveDocumentFromFolder);
   }
-  
-  void _onLoadDocuments(LoadDocuments event, Emitter<DocumentState> emit) async {
+
+  Future<void> _onLoadDocuments(
+    LoadDocuments event,
+    Emitter<DocumentState> emit,
+  ) async {
     emit(DocumentsLoading());
     try {
       final documents = await repository.getDocuments();
-      emit(DocumentsLoaded(documents));
+      emit(DocumentsLoaded(documents: documents));
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onLoadDocumentById(LoadDocumentById event, Emitter<DocumentState> emit) async {
+
+  Future<void> _onLoadDocumentsByType(
+    LoadDocumentsByType event,
+    Emitter<DocumentState> emit,
+  ) async {
     emit(DocumentsLoading());
     try {
-      final document = await repository.getDocumentById(event.id);
-      emit(DocumentLoaded(document));
+      final documents = await repository.getDocumentsByType(event.type);
+      emit(DocumentsLoaded(
+        documents: documents,
+        activeFilter: 'Type: ${event.type.toString().split('.').last}',
+      ));
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onCreateDocument(CreateDocument event, Emitter<DocumentState> emit) async {
+
+  Future<void> _onLoadDocumentsByTag(
+    LoadDocumentsByTag event,
+    Emitter<DocumentState> emit,
+  ) async {
     emit(DocumentsLoading());
     try {
-      final document = await repository.createDocument(event.document);
-      emit(DocumentLoaded(document));
+      final documents = await repository.getDocumentsByTag(event.tag);
+      emit(DocumentsLoaded(
+        documents: documents,
+        activeFilter: 'Tag: ${event.tag}',
+      ));
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onUpdateDocument(UpdateDocument event, Emitter<DocumentState> emit) async {
+
+  Future<void> _onLoadDocumentsByEntityId(
+    LoadDocumentsByEntityId event,
+    Emitter<DocumentState> emit,
+  ) async {
     emit(DocumentsLoading());
     try {
-      final document = await repository.updateDocument(event.document);
-      emit(DocumentLoaded(document));
+      final documents = await repository.getDocumentsByEntityId(event.entityId);
+      emit(DocumentsLoaded(
+        documents: documents,
+        activeFilter: 'Associated Entity',
+      ));
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onDeleteDocument(DeleteDocument event, Emitter<DocumentState> emit) async {
+
+  Future<void> _onLoadFavoriteDocuments(
+    LoadFavoriteDocuments event,
+    Emitter<DocumentState> emit,
+  ) async {
     emit(DocumentsLoading());
+    try {
+      final documents = await repository.getFavoriteDocuments();
+      emit(DocumentsLoaded(
+        documents: documents,
+        activeFilter: 'Favoris',
+      ));
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onSearchDocuments(
+    SearchDocuments event,
+    Emitter<DocumentState> emit,
+  ) async {
+    emit(DocumentsLoading());
+    try {
+      if (event.query.isEmpty) {
+        final documents = await repository.getDocuments();
+        emit(DocumentsLoaded(documents: documents));
+      } else {
+        final documents = await repository.searchDocuments(event.query);
+        emit(DocumentsLoaded(
+          documents: documents,
+          activeFilter: 'Recherche: ${event.query}',
+        ));
+      }
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAddDocument(
+    AddDocument event,
+    Emitter<DocumentState> emit,
+  ) async {
+    emit(DocumentUploading());
+    try {
+      final document = await repository.addDocument(
+        name: event.name,
+        description: event.description,
+        file: event.file,
+        type: event.type,
+        tags: event.tags,
+        associatedEntityId: event.associatedEntityId,
+      );
+      
+      // Si un folderId est fourni, ajouter le document au dossier
+      if (event.folderId != null) {
+        await repository.addDocumentToFolder(document.id, event.folderId!);
+      }
+      
+      emit(DocumentUploaded(document: document));
+      
+      // Recharger les documents pour mettre à jour la liste
+      add(LoadDocuments());
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateDocument(
+    UpdateDocument event,
+    Emitter<DocumentState> emit,
+  ) async {
+    try {
+      await repository.updateDocument(event.document);
+      
+      emit(DocumentUpdated(document: event.document));
+      
+      // Recharger les documents pour mettre à jour la liste
+      add(LoadDocuments());
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteDocument(
+    DeleteDocument event,
+    Emitter<DocumentState> emit,
+  ) async {
     try {
       await repository.deleteDocument(event.id);
-      final documents = await repository.getDocuments();
-      emit(DocumentsLoaded(documents));
+      
+      emit(DocumentDeleted(id: event.id));
+      
+      // Recharger les documents pour mettre à jour la liste
+      add(LoadDocuments());
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onChangeDocumentStatus(ChangeDocumentStatus event, Emitter<DocumentState> emit) async {
+
+  Future<void> _onToggleFavorite(
+    ToggleFavorite event,
+    Emitter<DocumentState> emit,
+  ) async {
+    try {
+      await repository.toggleFavorite(event.id, event.isFavorite);
+      
+      if (state is DocumentsLoaded) {
+        final currentState = state as DocumentsLoaded;
+        final updatedDocuments = currentState.documents.map((document) {
+          if (document.id == event.id) {
+            return document.copyWith(isFavorite: event.isFavorite);
+          }
+          return document;
+        }).toList();
+        
+        emit(DocumentsLoaded(
+          documents: updatedDocuments,
+          activeFilter: currentState.activeFilter,
+        ));
+      }
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onViewDocument(
+    ViewDocument event,
+    Emitter<DocumentState> emit,
+  ) async {
+    emit(DocumentLoading(id: event.id));
+    try {
+      final document = await repository.getDocumentById(event.id);
+      final file = await repository.getDocumentFile(event.id);
+      
+      if (document != null && file != null) {
+        emit(DocumentLoaded(document: document, file: file));
+      } else {
+        emit(DocumentsError(message: 'Document not found'));
+      }
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  // Gestion des dossiers
+
+  Future<void> _onLoadFolders(
+    LoadFolders event,
+    Emitter<DocumentState> emit,
+  ) async {
+    emit(FoldersLoading());
+    try {
+      final folders = await repository.getFolders();
+      emit(FoldersLoaded(folders: folders));
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onLoadRootFolders(
+    LoadRootFolders event,
+    Emitter<DocumentState> emit,
+  ) async {
+    emit(FoldersLoading());
+    try {
+      final folders = await repository.getRootFolders();
+      emit(FoldersLoaded(folders: folders));
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onLoadSubfolders(
+    LoadSubfolders event,
+    Emitter<DocumentState> emit,
+  ) async {
+    emit(FoldersLoading());
+    try {
+      final subfolders = await repository.getSubfolders(event.folderId);
+      emit(FoldersLoaded(
+        folders: subfolders,
+        parentFolderId: event.folderId,
+      ));
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onLoadDocumentsInFolder(
+    LoadDocumentsInFolder event,
+    Emitter<DocumentState> emit,
+  ) async {
     emit(DocumentsLoading());
     try {
-      final document = await repository.changeDocumentStatus(event.id, event.status);
-      emit(DocumentLoaded(document));
+      final documents = await repository.getDocumentsInFolder(event.folderId);
+      final folder = await repository.getFolderById(event.folderId);
+      
+      if (folder != null) {
+        emit(DocumentsInFolderLoaded(
+          documents: documents,
+          folder: folder,
+        ));
+      } else {
+        emit(DocumentsError(message: 'Folder not found'));
+      }
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onLoadTemplates(LoadTemplates event, Emitter<DocumentState> emit) async {
-    emit(TemplatesLoading());
+
+  Future<void> _onCreateFolder(
+    CreateFolder event,
+    Emitter<DocumentState> emit,
+  ) async {
     try {
-      final templates = await repository.getTemplates();
-      emit(TemplatesLoaded(templates));
-    } catch (e) {
-      emit(TemplatesError(e.toString()));
-    }
-  }
-  
-  void _onLoadTemplateById(LoadTemplateById event, Emitter<DocumentState> emit) async {
-    emit(TemplatesLoading());
-    try {
-      final template = await repository.getTemplateById(event.id);
-      emit(TemplateLoaded(template));
-    } catch (e) {
-      emit(TemplatesError(e.toString()));
-    }
-  }
-  
-  void _onCreateTemplate(CreateTemplate event, Emitter<DocumentState> emit) async {
-    emit(TemplatesLoading());
-    try {
-      final template = await repository.createTemplate(event.template);
-      emit(TemplateLoaded(template));
-    } catch (e) {
-      emit(TemplatesError(e.toString()));
-    }
-  }
-  
-  void _onUpdateTemplate(UpdateTemplate event, Emitter<DocumentState> emit) async {
-    emit(TemplatesLoading());
-    try {
-      final template = await repository.updateTemplate(event.template);
-      emit(TemplateLoaded(template));
-    } catch (e) {
-      emit(TemplatesError(e.toString()));
-    }
-  }
-  
-  void _onDeleteTemplate(DeleteTemplate event, Emitter<DocumentState> emit) async {
-    emit(TemplatesLoading());
-    try {
-      await repository.deleteTemplate(event.id);
-      final templates = await repository.getTemplates();
-      emit(TemplatesLoaded(templates));
-    } catch (e) {
-      emit(TemplatesError(e.toString()));
-    }
-  }
-  
-  void _onGenerateDocumentFromTemplate(GenerateDocumentFromTemplate event, Emitter<DocumentState> emit) async {
-    emit(DocumentGenerationLoading());
-    try {
-      final document = await repository.generateDocumentFromTemplate(
-        templateId: event.templateId,
-        data: event.data,
-        title: event.title,
+      final folder = await repository.createFolder(
+        event.name,
+        parentId: event.parentId,
       );
-      emit(DocumentGenerated(document));
+      
+      emit(FolderCreated(folder: folder));
+      
+      // Recharger les dossiers pour mettre à jour la liste
+      if (event.parentId != null) {
+        add(LoadSubfolders(folderId: event.parentId!));
+      } else {
+        add(LoadRootFolders());
+      }
     } catch (e) {
-      emit(DocumentGenerationError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onFilterDocumentsByType(FilterDocumentsByType event, Emitter<DocumentState> emit) async {
-    emit(DocumentsLoading());
+
+  Future<void> _onUpdateFolder(
+    UpdateFolder event,
+    Emitter<DocumentState> emit,
+  ) async {
     try {
-      final documents = await repository.filterDocumentsByType(event.type);
-      emit(DocumentsLoaded(documents));
+      await repository.updateFolder(event.folder);
+      
+      emit(FolderUpdated(folder: event.folder));
+      
+      // Recharger les dossiers pour mettre à jour la liste
+      if (event.folder.parentId != null) {
+        add(LoadSubfolders(folderId: event.folder.parentId!));
+      } else {
+        add(LoadRootFolders());
+      }
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onFilterDocumentsByStatus(FilterDocumentsByStatus event, Emitter<DocumentState> emit) async {
-    emit(DocumentsLoading());
+
+  Future<void> _onDeleteFolder(
+    DeleteFolder event,
+    Emitter<DocumentState> emit,
+  ) async {
     try {
-      final documents = await repository.filterDocumentsByStatus(event.status);
-      emit(DocumentsLoaded(documents));
+      final folder = await repository.getFolderById(event.id);
+      
+      if (folder != null) {
+        await repository.deleteFolder(event.id);
+        
+        emit(FolderDeleted(id: event.id));
+        
+        // Recharger les dossiers pour mettre à jour la liste
+        if (folder.parentId != null) {
+          add(LoadSubfolders(folderId: folder.parentId!));
+        } else {
+          add(LoadRootFolders());
+        }
+      } else {
+        emit(DocumentsError(message: 'Folder not found'));
+      }
     } catch (e) {
-      emit(DocumentsError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
     }
   }
-  
-  void _onFilterTemplatesByType(FilterTemplatesByType event, Emitter<DocumentState> emit) async {
-    emit(TemplatesLoading());
+
+  Future<void> _onAddDocumentToFolder(
+    AddDocumentToFolder event,
+    Emitter<DocumentState> emit,
+  ) async {
     try {
-      final templates = await repository.filterTemplatesByType(event.type);
-      emit(TemplatesLoaded(templates));
+      await repository.addDocumentToFolder(event.documentId, event.folderId);
+      
+      // Recharger les documents dans le dossier
+      add(LoadDocumentsInFolder(folderId: event.folderId));
     } catch (e) {
-      emit(TemplatesError(e.toString()));
+      emit(DocumentsError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onRemoveDocumentFromFolder(
+    RemoveDocumentFromFolder event,
+    Emitter<DocumentState> emit,
+  ) async {
+    try {
+      await repository.removeDocumentFromFolder(event.documentId, event.folderId);
+      
+      // Recharger les documents dans le dossier
+      add(LoadDocumentsInFolder(folderId: event.folderId));
+    } catch (e) {
+      emit(DocumentsError(message: e.toString()));
     }
   }
 }

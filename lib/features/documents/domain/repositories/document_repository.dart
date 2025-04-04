@@ -1,54 +1,83 @@
-import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachia/features/documents/domain/entities/document_template.dart';
+import 'dart:io';
 
-/// Contrat pour le repository de documents
+import 'package:gbc_coachai/features/documents/domain/entities/document.dart';
+
 abstract class DocumentRepository {
-  /// Obtient la liste des documents
+  /// Récupère tous les documents
   Future<List<Document>> getDocuments();
   
-  /// Obtient un document par son ID
-  Future<Document> getDocumentById(String id);
+  /// Récupère un document par son ID
+  Future<Document?> getDocumentById(String id);
   
-  /// Crée un nouveau document
-  Future<Document> createDocument(Document document);
+  /// Ajoute un nouveau document
+  Future<Document> addDocument({
+    required String name,
+    required String description,
+    required File file,
+    required DocumentType type,
+    List<String> tags = const [],
+    String? associatedEntityId,
+  });
   
   /// Met à jour un document existant
-  Future<Document> updateDocument(Document document);
+  Future<void> updateDocument(Document document);
   
   /// Supprime un document
   Future<void> deleteDocument(String id);
   
-  /// Change le statut d'un document
-  Future<Document> changeDocumentStatus(String id, DocumentStatus status);
+  /// Récupère les documents par type
+  Future<List<Document>> getDocumentsByType(DocumentType type);
   
-  /// Obtient la liste des modèles de documents
-  Future<List<DocumentTemplate>> getTemplates();
+  /// Récupère les documents par tag
+  Future<List<Document>> getDocumentsByTag(String tag);
   
-  /// Obtient un modèle de document par son ID
-  Future<DocumentTemplate> getTemplateById(String id);
+  /// Récupère les documents associés à une entité
+  Future<List<Document>> getDocumentsByEntityId(String entityId);
   
-  /// Crée un nouveau modèle de document
-  Future<DocumentTemplate> createTemplate(DocumentTemplate template);
+  /// Marque un document comme favori
+  Future<void> toggleFavorite(String id, bool isFavorite);
   
-  /// Met à jour un modèle de document existant
-  Future<DocumentTemplate> updateTemplate(DocumentTemplate template);
+  /// Récupère les documents favoris
+  Future<List<Document>> getFavoriteDocuments();
   
-  /// Supprime un modèle de document
-  Future<void> deleteTemplate(String id);
+  /// Recherche des documents par mot-clé
+  Future<List<Document>> searchDocuments(String query);
   
-  /// Génère un document à partir d'un modèle
-  Future<Document> generateDocumentFromTemplate({
-    required String templateId,
-    required Map<String, dynamic> data,
-    required String title,
-  });
+  /// Récupère le fichier local d'un document
+  Future<File?> getDocumentFile(String id);
   
-  /// Filtre les documents par type
-  Future<List<Document>> filterDocumentsByType(DocumentType type);
+  /// Génère une miniature pour un document (si applicable)
+  Future<String?> generateThumbnail(File file, DocumentType type);
   
-  /// Filtre les documents par statut
-  Future<List<Document>> filterDocumentsByStatus(DocumentStatus status);
+  // Gestion des dossiers
   
-  /// Filtre les modèles par type
-  Future<List<DocumentTemplate>> filterTemplatesByType(DocumentType type);
+  /// Récupère tous les dossiers
+  Future<List<DocumentFolder>> getFolders();
+  
+  /// Récupère un dossier par son ID
+  Future<DocumentFolder?> getFolderById(String id);
+  
+  /// Crée un nouveau dossier
+  Future<DocumentFolder> createFolder(String name, {String? parentId});
+  
+  /// Met à jour un dossier existant
+  Future<void> updateFolder(DocumentFolder folder);
+  
+  /// Supprime un dossier
+  Future<void> deleteFolder(String id);
+  
+  /// Récupère les dossiers racines
+  Future<List<DocumentFolder>> getRootFolders();
+  
+  /// Récupère les sous-dossiers d'un dossier
+  Future<List<DocumentFolder>> getSubfolders(String folderId);
+  
+  /// Récupère les documents d'un dossier
+  Future<List<Document>> getDocumentsInFolder(String folderId);
+  
+  /// Ajoute un document à un dossier
+  Future<void> addDocumentToFolder(String documentId, String folderId);
+  
+  /// Supprime un document d'un dossier
+  Future<void> removeDocumentFromFolder(String documentId, String folderId);
 }

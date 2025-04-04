@@ -26,6 +26,12 @@ import 'package:gbc_coachai/features/planner/data/sources/event_local_source.dar
 import 'package:gbc_coachai/features/planner/domain/repositories/event_repository.dart';
 import 'package:gbc_coachai/features/planner/presentation/bloc/planner_bloc.dart';
 
+// Documents
+import 'package:gbc_coachai/features/documents/data/repositories/document_repository_impl.dart';
+import 'package:gbc_coachai/features/documents/data/sources/document_local_source.dart';
+import 'package:gbc_coachai/features/documents/domain/repositories/document_repository.dart';
+import 'package:gbc_coachai/features/documents/presentation/bloc/document_bloc.dart';
+
 final serviceLocator = GetIt.instance;
 
 Future<void> initServiceLocator() async {
@@ -110,6 +116,25 @@ Future<void> initServiceLocator() async {
   
   serviceLocator.registerFactory<PlannerBloc>(
     () => PlannerBloc(
+      repository: serviceLocator(),
+    ),
+  );
+  
+  // Documents
+  serviceLocator.registerLazySingleton<DocumentLocalSource>(
+    () => DocumentLocalSourceImpl(
+      sharedPreferences: serviceLocator(),
+    ),
+  );
+  
+  serviceLocator.registerLazySingleton<DocumentRepository>(
+    () => DocumentRepositoryImpl(
+      localSource: serviceLocator(),
+    ),
+  );
+  
+  serviceLocator.registerFactory<DocumentBloc>(
+    () => DocumentBloc(
       repository: serviceLocator(),
     ),
   );

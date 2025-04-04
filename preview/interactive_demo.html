@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBC CoachIA - Démo Interactive</title>
+    <style>
+        :root {
+            --primary-color: #B87333; /* Cuivre/Bronze */
+            --secondary-color: #FFD700; /* Or */
+            --text-on-primary: #FFFFFF;
+            --text-primary: #333333;
+            --background-light: #FFFFFF;
+            --background-dark: #F5F5F5;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: #E0E0E0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background-color: #111;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border: 10px solid #222;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            color: var(--text-on-primary);
+            font-size: 14px;
+        }
+        
+        .app-bar {
+            height: 60px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: var(--text-on-primary);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .app-bar h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .menu-icon, .notification-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            cursor: pointer;
+        }
+        
+        .menu-icon div {
+            height: 2px;
+            background-color: var(--text-on-primary);
+            width: 100%;
+        }
+        
+        .app-content {
+            height: calc(100% - 144px);
+            background-color: var(--background-light);
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .bottom-nav {
+            height: 60px;
+            background-color: var(--background-light);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -2px 4px var(--shadow-color);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+            cursor: pointer;
+        }
+        
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-icon {
+            height: 24px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .screen {
+            display: none;
+            height: 100%;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        /* Dashboard Screen */
+        .welcome-section {
+            margin-bottom: 24px;
+        }
+        
+        .welcome-text {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .date-text {
+            color: #777;
+            font-size: 14px;
+        }
+        
+        .quick-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        
+        .stat-card {
+            background-color: var(--primary-color);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 150px;
+            color: var(--text-on-primary);
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px 16px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: var(--text-on-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+        
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .feature-desc {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        /* Chatbot Screen */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-bottom: 16px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message.bot {
+            background-color: #F0F0F0;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.user {
+            background-color: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 8px;
+            padding: 12px 0;
+        }
+        
+        .chat-input input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border: 1px solid #DDD;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .chat-input button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        /* Planner Screen */
+        .planner-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #EEE;
+            padding-bottom: 8px;
+        }
+        
+        .planner-tab {
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #F0F0F0;
+        }
+        
+        .planner-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .calendar-view {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .calendar-month {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        
+        .calendar-day {
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .calendar-day.today {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .calendar-day-name {
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .task-item {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .task-checkbox.checked {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .task-details {
+            flex-grow: 1;
+        }
+        
+        .task-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .task-time {
+            font-size: 13px;
+            color: #777;
+        }
+        
+        /* Finance Screen */
+        .finance-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .finance-header-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .finance-balance {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .finance-stats {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .finance-stat {
+            flex: 1;
+        }
+        
+        .finance-stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .finance-stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .transactions-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .transactions-filter {
+            font-size: 14px;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .transaction-item {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .transaction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background-color: #F0F0F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .transaction-icon.income {
+            color: #4CAF50;
+        }
+        
+        .transaction-icon.expense {
+            color: #F44336;
+        }
+        
+        .transaction-details {
+            flex-grow: 1;
+        }
+        
+        .transaction-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .transaction-date {
+            font-size: 13px;
+            color: #777;
+        }
+        
+        .transaction-amount {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .transaction-amount.income {
+            color: #4CAF50;
+        }
+        
+        .transaction-amount.expense {
+            color: #F44336;
+        }
+        
+        /* Documents Screen */
+        .documents-header {
+            margin-bottom: 20px;
+        }
+        
+        .document-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #EEE;
+            padding-bottom: 8px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .document-tab {
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #F0F0F0;
+        }
+        
+        .document-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .document-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .document-item {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .document-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .document-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .document-details {
+            flex-grow: 1;
+        }
+        
+        .document-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .document-info {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .document-date, .document-size {
+            font-size: 13px;
+            color: #777;
+        }
+        
+        .add-button {
+            position: fixed;
+            bottom: 76px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .document-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 24px 16px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .document-actions.show {
+            transform: translateY(0);
+        }
+        
+        .document-actions-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .document-actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 0;
+            cursor: pointer;
+        }
+        
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background-color: #F0F0F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+        
+        .action-text {
+            font-size: 16px;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Profile Screen */
+        .profile-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 16px;
+            border: 4px solid white;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .profile-email {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .profile-section {
+            margin-bottom: 24px;
+        }
+        
+        .profile-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #EEE;
+        }
+        
+        .profile-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 0;
+            gap: 16px;
+            cursor: pointer;
+        }
+        
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        .menu-text {
+            flex-grow: 1;
+            font-size: 16px;
+        }
+        
+        .menu-arrow {
+            color: #999;
+        }
+        
+        .sidenav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 80%;
+            max-width: 300px;
+            background-color: white;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+            overflow-y: auto;
+        }
+        
+        .sidenav.open {
+            transform: translateX(0);
+        }
+        
+        .sidenav-header {
+            height: 200px;
+            background-color: var(--primary-color);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: white;
+        }
+        
+        .sidenav-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .sidenav-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: white;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .sidenav-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .sidenav-email {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .sidenav-menu {
+            padding: 16px;
+        }
+        
+        .sidenav-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            gap: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        
+        .sidenav-item:hover {
+            background-color: #F5F5F5;
+        }
+        
+        .sidenav-item.active {
+            background-color: #F0F0F0;
+            color: var(--primary-color);
+        }
+        
+        .sidenav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: inherit;
+        }
+        
+        .sidenav-text {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="status-bar">
+            <span>13:37</span>
+            <span>4G</span>
+        </div>
+        
+        <div class="app-bar">
+            <h1>GBC CoachIA</h1>
+            <div class="menu-icon" id="menu-toggle">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+        
+        <div class="app-content">
+            <!-- Dashboard Screen -->
+            <div class="screen active" id="dashboard-screen">
+                <div class="welcome-section">
+                    <div class="welcome-text">Bonjour, Thomas!</div>
+                    <div class="date-text">Jeudi, 04 Avril 2025</div>
+                </div>
+                
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-title">Trésorerie</div>
+                        <div class="stat-value">5 240 €</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Tâches</div>
+                        <div class="stat-value">5/8</div>
+                    </div>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature-card" data-screen="chatbot">
+                        <div class="feature-icon">💬</div>
+                        <div class="feature-title">ChatBot IA</div>
+                        <div class="feature-desc">Assistant virtuel pour vos questions</div>
+                    </div>
+                    <div class="feature-card" data-screen="planner">
+                        <div class="feature-icon">📅</div>
+                        <div class="feature-title">Planificateur</div>
+                        <div class="feature-desc">Gérez votre emploi du temps</div>
+                    </div>
+                    <div class="feature-card" data-screen="finance">
+                        <div class="feature-icon">💰</div>
+                        <div class="feature-title">Finances</div>
+                        <div class="feature-desc">Suivi des revenus et dépenses</div>
+                    </div>
+                    <div class="feature-card" data-screen="documents">
+                        <div class="feature-icon">📄</div>
+                        <div class="feature-title">Documents</div>
+                        <div class="feature-desc">Contrats et factures</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chatbot Screen -->
+            <div class="screen" id="chatbot-screen">
+                <div class="chat-container">
+                    <div class="chat-messages">
+                        <div class="message bot">
+                            Bonjour ! Comment puis-je vous aider aujourd'hui ?
+                        </div>
+                        <div class="message user">
+                            J'ai besoin d'aide pour créer un contrat de freelance
+                        </div>
+                        <div class="message bot">
+                            Bien sûr, je peux vous aider avec ça ! Quel type de service allez-vous fournir en tant que freelance ?
+                        </div>
+                        <div class="message user">
+                            Je suis développeur web et je vais créer un site e-commerce
+                        </div>
+                        <div class="message bot">
+                            Parfait. Je vous recommande d'inclure les éléments suivants dans votre contrat :
+                            <br>1. Définition précise du périmètre (fonctionnalités, pages)
+                            <br>2. Calendrier de livraison avec jalons clairs
+                            <br>3. Processus de validation et révisions
+                            <br>4. Modalités de paiement (acompte, paiements partiels)
+                            <br>5. Clauses de propriété intellectuelle
+                            <br><br>Souhaitez-vous que je génère un modèle de contrat avec ces éléments ?
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Tapez votre message...">
+                        <button>➤</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Planner Screen -->
+            <div class="screen" id="planner-screen">
+                <div class="planner-tabs">
+                    <div class="planner-tab active">Aujourd'hui</div>
+                    <div class="planner-tab">Calendrier</div>
+                    <div class="planner-tab">Tâches</div>
+                </div>
+                
+                <div class="calendar-view">
+                    <div class="calendar-header">
+                        <div class="calendar-month">Avril 2025</div>
+                        <div style="display: flex; gap: 16px;">
+                            <span>◀</span>
+                            <span>▶</span>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-days">
+                        <div class="calendar-grid">
+                            <div class="calendar-day-name">Lu</div>
+                            <div class="calendar-day-name">Ma</div>
+                            <div class="calendar-day-name">Me</div>
+                            <div class="calendar-day-name">Je</div>
+                            <div class="calendar-day-name">Ve</div>
+                            <div class="calendar-day-name">Sa</div>
+                            <div class="calendar-day-name">Di</div>
+                        </div>
+                        
+                        <div class="calendar-grid">
+                            <div class="calendar-day">1</div>
+                            <div class="calendar-day">2</div>
+                            <div class="calendar-day">3</div>
+                            <div class="calendar-day today">4</div>
+                            <div class="calendar-day">5</div>
+                            <div class="calendar-day">6</div>
+                            <div class="calendar-day">7</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="task-list">
+                    <div class="task-item">
+                        <div class="task-checkbox"></div>
+                        <div class="task-details">
+                            <div class="task-title">Appel client Dupont & Fils</div>
+                            <div class="task-time">10:00 - 11:00</div>
+                        </div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox checked">✓</div>
+                        <div class="task-details">
+                            <div class="task-title">Rédiger proposition commerciale</div>
+                            <div class="task-time">11:30 - 13:00</div>
+                        </div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox"></div>
+                        <div class="task-details">
+                            <div class="task-title">Réviser maquettes design</div>
+                            <div class="task-time">14:30 - 16:00</div>
+                        </div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-checkbox"></div>
+                        <div class="task-details">
+                            <div class="task-title">Envoyer facture client Martin</div>
+                            <div class="task-time">16:30 - 17:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finance Screen -->
+            <div class="screen" id="finance-screen">
+                <div class="finance-header">
+                    <div class="finance-header-title">Solde total</div>
+                    <div class="finance-balance">5 240,00 €</div>
+                    <div class="finance-stats">
+                        <div class="finance-stat">
+                            <div class="finance-stat-value">+2 100 €</div>
+                            <div class="finance-stat-label">Revenus (Avril)</div>
+                        </div>
+                        <div class="finance-stat">
+                            <div class="finance-stat-value">-850 €</div>
+                            <div class="finance-stat-label">Dépenses (Avril)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="transactions-header">
+                    <div class="transactions-title">Transactions récentes</div>
+                    <div class="transactions-filter">Filtrer</div>
+                </div>
+                
+                <div class="transaction-list">
+                    <div class="transaction-item">
+                        <div class="transaction-icon income">↑</div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Paiement Client ABC</div>
+                            <div class="transaction-date">04 avril 2025</div>
+                        </div>
+                        <div class="transaction-amount income">+1 500 €</div>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon expense">↓</div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Abonnement SaaS</div>
+                            <div class="transaction-date">02 avril 2025</div>
+                        </div>
+                        <div class="transaction-amount expense">-39,99 €</div>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon expense">↓</div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Matériel informatique</div>
+                            <div class="transaction-date">01 avril 2025</div>
+                        </div>
+                        <div class="transaction-amount expense">-249,99 €</div>
+                    </div>
+                    <div class="transaction-item">
+                        <div class="transaction-icon income">↑</div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">Paiement Client XYZ</div>
+                            <div class="transaction-date">28 mars 2025</div>
+                        </div>
+                        <div class="transaction-amount income">+600 €</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Screen -->
+            <div class="screen" id="documents-screen">
+                <div class="documents-header">
+                    <div class="document-tabs">
+                        <div class="document-tab active">Tous</div>
+                        <div class="document-tab">Contrats</div>
+                        <div class="document-tab">Factures</div>
+                        <div class="document-tab">Propositions</div>
+                    </div>
+                </div>
+                
+                <div class="document-list">
+                    <div class="document-item" onclick="toggleDocumentActions()">
+                        <div class="document-icon">📄</div>
+                        <div class="document-details">
+                            <div class="document-title">Contrat - Client Dupont</div>
+                            <div class="document-info">
+                                <div class="document-date">Modifié le 02/04/2025</div>
+                                <div class="document-size">245 Ko</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="document-item" onclick="toggleDocumentActions()">
+                        <div class="document-icon">📄</div>
+                        <div class="document-details">
+                            <div class="document-title">Facture #F25-042</div>
+                            <div class="document-info">
+                                <div class="document-date">Modifié le 01/04/2025</div>
+                                <div class="document-size">127 Ko</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="document-item" onclick="toggleDocumentActions()">
+                        <div class="document-icon">📄</div>
+                        <div class="document-details">
+                            <div class="document-title">Proposition - Refonte site web</div>
+                            <div class="document-info">
+                                <div class="document-date">Modifié le 28/03/2025</div>
+                                <div class="document-size">318 Ko</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="document-item" onclick="toggleDocumentActions()">
+                        <div class="document-icon">📄</div>
+                        <div class="document-details">
+                            <div class="document-title">Facture #F25-041</div>
+                            <div class="document-info">
+                                <div class="document-date">Modifié le 22/03/2025</div>
+                                <div class="document-size">131 Ko</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="add-button">+</div>
+                
+                <div class="document-actions" id="document-actions">
+                    <div class="document-actions-title">Actions</div>
+                    <div class="document-actions-list">
+                        <div class="action-item">
+                            <div class="action-icon">👁️</div>
+                            <div class="action-text">Voir le document</div>
+                        </div>
+                        <div class="action-item">
+                            <div class="action-icon">✏️</div>
+                            <div class="action-text">Modifier</div>
+                        </div>
+                        <div class="action-item">
+                            <div class="action-icon">📤</div>
+                            <div class="action-text">Partager</div>
+                        </div>
+                        <div class="action-item">
+                            <div class="action-icon">📥</div>
+                            <div class="action-text">Télécharger</div>
+                        </div>
+                        <div class="action-item">
+                            <div class="action-icon">🗑️</div>
+                            <div class="action-text">Supprimer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Screen -->
+            <div class="screen" id="profile-screen">
+                <div class="profile-header">
+                    <div class="profile-avatar">👤</div>
+                    <div class="profile-name">Thomas Dupont</div>
+                    <div class="profile-email">thomas.dupont@email.com</div>
+                </div>
+                
+                <div class="profile-section">
+                    <div class="profile-section-title">Paramètres du compte</div>
+                    <div class="profile-menu">
+                        <div class="menu-item">
+                            <div class="menu-icon">👤</div>
+                            <div class="menu-text">Informations personnelles</div>
+                            <div class="menu-arrow">▶</div>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">🔒</div>
+                            <div class="menu-text">Sécurité et confidentialité</div>
+                            <div class="menu-arrow">▶</div>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">🔔</div>
+                            <div class="menu-text">Notifications</div>
+                            <div class="menu-arrow">▶</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <div class="profile-section-title">Préférences</div>
+                    <div class="profile-menu">
+                        <div class="menu-item">
+                            <div class="menu-icon">🌙</div>
+                            <div class="menu-text">Thème sombre</div>
+                            <div class="menu-arrow">⚪</div>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">🌐</div>
+                            <div class="menu-text">Langue</div>
+                            <div class="menu-arrow">Français ▶</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <div class="profile-section-title">Support</div>
+                    <div class="profile-menu">
+                        <div class="menu-item">
+                            <div class="menu-icon">❓</div>
+                            <div class="menu-text">Centre d'aide</div>
+                            <div class="menu-arrow">▶</div>
+                        </div>
+                        <div class="menu-item">
+                            <div class="menu-icon">📞</div>
+                            <div class="menu-text">Nous contacter</div>
+                            <div class="menu-arrow">▶</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <div class="profile-menu">
+                        <div class="menu-item" style="color: #F44336;">
+                            <div class="menu-icon">🚪</div>
+                            <div class="menu-text">Déconnexion</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom-nav">
+            <div class="nav-item active" data-screen="dashboard">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-text">Accueil</div>
+            </div>
+            <div class="nav-item" data-screen="chatbot">
+                <div class="nav-icon">💬</div>
+                <div class="nav-text">Chatbot</div>
+            </div>
+            <div class="nav-item" data-screen="planner">
+                <div class="nav-icon">📅</div>
+                <div class="nav-text">Agenda</div>
+            </div>
+            <div class="nav-item" data-screen="finance">
+                <div class="nav-icon">💰</div>
+                <div class="nav-text">Finances</div>
+            </div>
+            <div class="nav-item" data-screen="documents">
+                <div class="nav-icon">📄</div>
+                <div class="nav-text">Documents</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidenav Menu -->
+    <div class="sidenav" id="sidenav">
+        <div class="sidenav-header">
+            <div class="sidenav-user">
+                <div class="sidenav-avatar">👤</div>
+                <div>
+                    <div class="sidenav-name">Thomas Dupont</div>
+                    <div class="sidenav-email">thomas.dupont@email.com</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidenav-menu">
+            <div class="sidenav-item active" data-screen="dashboard">
+                <div class="sidenav-icon">🏠</div>
+                <div class="sidenav-text">Accueil</div>
+            </div>
+            <div class="sidenav-item" data-screen="chatbot">
+                <div class="sidenav-icon">💬</div>
+                <div class="sidenav-text">Chatbot IA</div>
+            </div>
+            <div class="sidenav-item" data-screen="planner">
+                <div class="sidenav-icon">📅</div>
+                <div class="sidenav-text">Planificateur</div>
+            </div>
+            <div class="sidenav-item" data-screen="finance">
+                <div class="sidenav-icon">💰</div>
+                <div class="sidenav-text">Finances</div>
+            </div>
+            <div class="sidenav-item" data-screen="documents">
+                <div class="sidenav-icon">📄</div>
+                <div class="sidenav-text">Documents</div>
+            </div>
+            <div class="sidenav-item" data-screen="profile">
+                <div class="sidenav-icon">👤</div>
+                <div class="sidenav-text">Profil</div>
+            </div>
+            <hr style="margin: 16px 0; border: none; border-top: 1px solid #EEE;">
+            <div class="sidenav-item">
+                <div class="sidenav-icon">⚙️</div>
+                <div class="sidenav-text">Paramètres</div>
+            </div>
+            <div class="sidenav-item">
+                <div class="sidenav-icon">❓</div>
+                <div class="sidenav-text">Aide</div>
+            </div>
+            <div class="sidenav-item" style="color: #F44336;">
+                <div class="sidenav-icon">🚪</div>
+                <div class="sidenav-text">Déconnexion</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+    
+    <script>
+        // Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const sidenavItems = document.querySelectorAll('.sidenav-item');
+        const screens = document.querySelectorAll('.screen');
+        const featureCards = document.querySelectorAll('.feature-card');
+        
+        function navigateTo(screenId) {
+            // Hide all screens
+            screens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenId + '-screen').classList.add('active');
+            
+            // Update nav items
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.screen === screenId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update sidenav items
+            sidenavItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.screen === screenId) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Close sidenav if open
+            closeSidenav();
+            
+            // Close document actions if open
+            closeDocumentActions();
+        }
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navigateTo(item.dataset.screen);
+            });
+        });
+        
+        sidenavItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (item.dataset.screen) {
+                    navigateTo(item.dataset.screen);
+                }
+            });
+        });
+        
+        featureCards.forEach(card => {
+            card.addEventListener('click', () => {
+                navigateTo(card.dataset.screen);
+            });
+        });
+        
+        // Sidenav Toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidenav = document.getElementById('sidenav');
+        const overlay = document.getElementById('overlay');
+        
+        function openSidenav() {
+            sidenav.classList.add('open');
+            overlay.classList.add('show');
+        }
+        
+        function closeSidenav() {
+            sidenav.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+        
+        menuToggle.addEventListener('click', openSidenav);
+        overlay.addEventListener('click', closeSidenav);
+        
+        // Document Actions
+        const documentActions = document.getElementById('document-actions');
+        
+        function toggleDocumentActions() {
+            documentActions.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+        
+        function closeDocumentActions() {
+            documentActions.classList.remove('show');
+            overlay.classList.remove('show');
+        }
+        
+        // Chat Input
+        const chatInput = document.querySelector('.chat-input input');
+        const chatSendButton = document.querySelector('.chat-input button');
+        const chatMessages = document.querySelector('.chat-messages');
+        
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'message user';
+                userMessageDiv.textContent = message;
+                chatMessages.appendChild(userMessageDiv);
+                
+                // Clear input
+                chatInput.value = '';
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Simulate bot response after a delay
+                setTimeout(() => {
+                    const botMessageDiv = document.createElement('div');
+                    botMessageDiv.className = 'message bot';
+                    botMessageDiv.textContent = "Je travaille sur votre demande. Pouvez-vous me donner plus de détails ?";
+                    chatMessages.appendChild(botMessageDiv);
+                    
+                    // Scroll to bottom
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+        
+        chatSendButton.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+        
+        // Task Checkboxes
+        const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+        
+        taskCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('click', () => {
+                checkbox.classList.toggle('checked');
+                if (checkbox.classList.contains('checked')) {
+                    checkbox.innerHTML = '✓';
+                } else {
+                    checkbox.innerHTML = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

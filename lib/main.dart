@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
 import 'config/di/service_locator.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 
 void main() async {
+  // Initialiser Flutter
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Verrouiller l'orientation en mode portrait uniquement
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-
-  // Configurer le service locator
+  
+  // Charger les variables d'environnement
+  await dotenv.load(fileName: '.env');
+  
+  // Configurer les services
   await setupServiceLocator();
-
-  runApp(const App());
+  
+  // Lancer l'application
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (context) => serviceLocator<AuthBloc>()
+            ..add(const AuthCheckRequested()),
+        ),
+        BlocProvider<OnboardingBloc>(
+          create: (context) => OnboardingBloc()
+            ..add(const OnboardingStatusRequested()),
+        ),
+      ],
+      child: const App(),
+    ),
+  );
 }

@@ -1,351 +1,222 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../onboarding/presentation/bloc/onboarding_bloc.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
+  State<SettingsPage> createState() => _SettingsPageState();
+}
 
+class _SettingsPageState extends State<SettingsPage> {
+  bool _darkMode = false;
+  bool _notificationsEnabled = true;
+  
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Paramètres'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+      ),
+      body: ListView(
+        children: [
+          // Section Apparence
+          _buildSectionHeader(context, 'Apparence'),
+          SwitchListTile(
+            title: const Text('Mode sombre'),
+            subtitle: const Text('Activer le thème sombre'),
+            value: _darkMode,
+            onChanged: (value) {
+              setState(() {
+                _darkMode = value;
+              });
+              // Implémenter le changement de thème
+            },
+            secondary: const Icon(Icons.dark_mode),
+          ),
+          
+          // Section Notifications
+          _buildSectionHeader(context, 'Notifications'),
+          SwitchListTile(
+            title: const Text('Activer les notifications'),
+            subtitle: const Text('Recevoir des alertes et des rappels'),
+            value: _notificationsEnabled,
+            onChanged: (value) {
+              setState(() {
+                _notificationsEnabled = value;
+              });
+              // Implémenter la gestion des notifications
+            },
+            secondary: const Icon(Icons.notifications),
+          ),
+          
+          // Section Langue
+          _buildSectionHeader(context, 'Langue'),
+          ListTile(
+            title: const Text('Langue de l\'application'),
+            subtitle: const Text('Français'),
+            leading: const Icon(Icons.language),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Ouvrir la sélection de langue
+              _showLanguageDialog();
+            },
+          ),
+          
+          // Section Compte
+          _buildSectionHeader(context, 'Compte'),
+          ListTile(
+            title: const Text('Informations personnelles'),
+            leading: const Icon(Icons.person),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Naviguer vers la page d'informations personnelles
+            },
+          ),
+          ListTile(
+            title: const Text('Mot de passe'),
+            leading: const Icon(Icons.lock),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Naviguer vers la page de changement de mot de passe
+            },
+          ),
+          
+          // Section Assistance
+          _buildSectionHeader(context, 'Assistance'),
+          ListTile(
+            title: const Text('Centre d\'aide'),
+            leading: const Icon(Icons.help),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Ouvrir le centre d'aide
+            },
+          ),
+          ListTile(
+            title: const Text('Nous contacter'),
+            leading: const Icon(Icons.mail),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Ouvrir la page de contact
+            },
+          ),
+          
+          // Section À propos
+          _buildSectionHeader(context, 'À propos'),
+          ListTile(
+            title: const Text('Version de l\'application'),
+            subtitle: const Text('1.0.0'),
+            leading: const Icon(Icons.info),
+          ),
+          ListTile(
+            title: const Text('Conditions d\'utilisation'),
+            leading: const Icon(Icons.description),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Ouvrir les conditions d'utilisation
+            },
+          ),
+          ListTile(
+            title: const Text('Politique de confidentialité'),
+            leading: const Icon(Icons.privacy_tip),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Ouvrir la politique de confidentialité
+            },
+          ),
+          
+          // Bouton de déconnexion
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                _showLogoutDialog();
+              },
+              icon: const Icon(Icons.logout),
+              label: const Text('Se déconnecter'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            // Section du profil
-            ListTile(
-              leading: CircleAvatar(
-                backgroundColor: primaryColor.withOpacity(0.2),
-                child: Icon(
-                  Icons.person,
-                  color: primaryColor,
-                ),
-              ),
-              title: const Text('Profil utilisateur'),
-              subtitle: const Text('Modifier vos informations personnelles'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                // Navigation vers la page de profil
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : édition du profil'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
+    );
+  }
+
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Choisir une langue'),
+        children: [
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context);
+              // Définir la langue en français
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('Français'),
             ),
-            const Divider(),
-            
-            // Section Apparence
-            const ListTile(
-              title: Text(
-                'Apparence',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              Navigator.pop(context);
+              // Définir la langue en anglais
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Text('English'),
             ),
-            SwitchListTile(
-              title: const Text('Mode sombre'),
-              subtitle: const Text('Activer le thème sombre'),
-              value: false, // À connecter au state manager pour le thème
-              onChanged: (value) {
-                // Changer le thème
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : changement de thème'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-              secondary: Icon(
-                Icons.dark_mode,
-                color: primaryColor,
-              ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Se déconnecter'),
+        content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<AuthBloc>().add(const AuthLoggedOut());
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
-            ListTile(
-              leading: Icon(
-                Icons.language,
-                color: primaryColor,
-              ),
-              title: const Text('Langue'),
-              subtitle: const Text('Français'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                // Changer la langue
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : changement de langue'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-            const Divider(),
-            
-            // Section Notifications
-            const ListTile(
-              title: Text(
-                'Notifications',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            SwitchListTile(
-              title: const Text('Notifications Push'),
-              subtitle: const Text('Recevoir des alertes sur votre appareil'),
-              value: true, // À connecter au state manager pour les notifications
-              onChanged: (value) {
-                // Activer/désactiver les notifications
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : gestion des notifications'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-              secondary: Icon(
-                Icons.notifications,
-                color: primaryColor,
-              ),
-            ),
-            SwitchListTile(
-              title: const Text('Emails'),
-              subtitle: const Text('Recevoir des rapports par email'),
-              value: true, // À connecter au state manager pour les emails
-              onChanged: (value) {
-                // Activer/désactiver les emails
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : gestion des emails'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-              secondary: Icon(
-                Icons.email,
-                color: primaryColor,
-              ),
-            ),
-            const Divider(),
-            
-            // Section Sécurité
-            const ListTile(
-              title: Text(
-                'Sécurité',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.lock,
-                color: primaryColor,
-              ),
-              title: const Text('Changer le mot de passe'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                // Changer le mot de passe
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : changement de mot de passe'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-            SwitchListTile(
-              title: const Text('Authentification biométrique'),
-              subtitle: const Text('Utiliser votre empreinte ou visage'),
-              value: false, // À connecter au state manager pour la biométrie
-              onChanged: (value) {
-                // Activer/désactiver la biométrie
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : authentification biométrique'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-              secondary: Icon(
-                Icons.fingerprint,
-                color: primaryColor,
-              ),
-            ),
-            const Divider(),
-            
-            // Section Support
-            const ListTile(
-              title: Text(
-                'Support',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.help,
-                color: primaryColor,
-              ),
-              title: const Text('Centre d\'aide'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                // Ouvrir le centre d'aide
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : centre d\'aide'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.feedback,
-                color: primaryColor,
-              ),
-              title: const Text('Envoyer des commentaires'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                // Envoyer des commentaires
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Fonctionnalité à venir : envoi de commentaires'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-            const Divider(),
-            
-            // Section Avancée
-            const ListTile(
-              title: Text(
-                'Avancé',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
-              title: const Text('Effacer les données'),
-              subtitle: const Text('Supprimer toutes vos données de l\'application'),
-              onTap: () {
-                // Demander confirmation puis effacer les données
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Effacer les données?'),
-                    content: const Text(
-                      'Cette action supprimera toutes vos données et est irréversible. Voulez-vous continuer?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Annuler'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          // Effacer les données
-                          context.read<OnboardingBloc>().add(const OnboardingReset());
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Données effacées avec succès'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          'Effacer',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.logout,
-                color: Colors.red,
-              ),
-              title: const Text('Déconnexion'),
-              onTap: () {
-                // Déconnexion
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Déconnexion'),
-                    content: const Text('Êtes-vous sûr de vouloir vous déconnecter?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Annuler'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          context.read<AuthBloc>().add(const AuthLoggedOut());
-                        },
-                        child: const Text('Déconnexion'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            
-            const SizedBox(height: 40),
-            
-            // Version de l'application
-            const Center(
-              child: Text(
-                'Version 1.0.0',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Center(
-              child: Text(
-                '© 2025 GBC CoachIA',
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
+            child: const Text('Se déconnecter'),
+          ),
+        ],
       ),
     );
   }

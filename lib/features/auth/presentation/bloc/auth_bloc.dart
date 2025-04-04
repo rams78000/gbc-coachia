@@ -226,7 +226,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final statusMap = jsonDecode(statusJson) as Map<String, dynamic>;
       
       return AuthStatus(
-        state: AuthState.values[statusMap['state'] as int],
+        state: AuthState.values.elementAt(statusMap['state'] as int),
         userId: statusMap['userId'] as String?,
         lastAuthTime: statusMap['lastAuthTime'] != null 
             ? DateTime.parse(statusMap['lastAuthTime'] as String)

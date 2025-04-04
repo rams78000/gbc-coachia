@@ -14,175 +14,117 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  final int _numPages = 5;
-
+  
   final List<OnboardingStep> _steps = [
     OnboardingStep(
       title: 'Bienvenue sur GBC CoachIA',
-      description: 'Votre assistant IA de gestion d\'entreprise pour entrepreneurs et freelances.',
-      imagePath: 'assets/images/onboarding/welcome.svg',
+      description: 'Votre assistant intelligent pour optimiser la gestion de votre entreprise',
+      icon: Icons.rocket_launch,
     ),
     OnboardingStep(
-      title: 'Assistant IA Intelligent',
-      description: 'Posez vos questions, obtenez des conseils personnalisés et des réponses précises.',
-      imagePath: 'assets/images/onboarding/chatbot.svg',
+      title: 'Assistant IA Personnel',
+      description: 'Obtenez des réponses à toutes vos questions business et des conseils personnalisés',
+      icon: Icons.chat,
     ),
     OnboardingStep(
-      title: 'Planifiez efficacement',
-      description: 'Gérez votre emploi du temps, fixez des objectifs et suivez vos progrès.',
-      imagePath: 'assets/images/onboarding/planner.svg',
+      title: 'Gestion Financière',
+      description: 'Suivez vos revenus, dépenses et analysez vos performances financières',
+      icon: Icons.bar_chart,
     ),
     OnboardingStep(
-      title: 'Suivez vos finances',
-      description: 'Visualisez vos revenus, dépenses et obtenez des insights pour optimiser votre rentabilité.',
-      imagePath: 'assets/images/onboarding/finance.svg',
-    ),
-    OnboardingStep(
-      title: 'Tout est prêt !',
-      description: 'Vous êtes maintenant prêt à utiliser toutes les fonctionnalités de GBC CoachIA.',
-      imagePath: 'assets/images/onboarding/complete.svg',
+      title: 'Planification Intelligente',
+      description: 'Organisez votre agenda et maximisez votre productivité',
+      icon: Icons.calendar_today,
     ),
   ];
 
-  void _nextPage() {
-    if (_currentPage < _numPages - 1) {
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onNextPage() {
+    if (_currentPage < _steps.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      // Dernière page, aller à l'accueil
-      _completeOnboarding();
+      // Dernière page, marquer l'onboarding comme terminé
+      context.read<OnboardingBloc>().add(const OnboardingCompleted());
+      
+      // Rediriger vers la page de connexion
+      context.go('/login');
     }
-  }
-
-  void _previousPage() {
-    if (_currentPage > 0) {
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  void _skipOnboarding() {
-    _completeOnboarding();
-  }
-
-  void _completeOnboarding() {
-    // Marquer l'onboarding comme terminé via le bloc
-    context.read<OnboardingBloc>().add(const OnboardingCompleted());
-    
-    // Naviguer vers le tableau de bord
-    context.go('/');
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
-    
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Skip button at top
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextButton(
-                  onPressed: _skipOnboarding,
-                  child: Text(
-                    'Passer',
-                    style: TextStyle(
-                      color: primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+            // Indicateur de progression
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: LinearProgressIndicator(
+                value: (_currentPage + 1) / _steps.length,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFB87333)),
+                borderRadius: BorderRadius.circular(8),
+                minHeight: 8,
               ),
             ),
             
-            // Main content
+            // Contenu des pages
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
                 itemCount: _steps.length,
-                onPageChanged: (int page) {
+                onPageChanged: (index) {
                   setState(() {
-                    _currentPage = page;
+                    _currentPage = index;
                   });
                 },
                 itemBuilder: (context, index) {
-                  return _buildOnboardingStep(_steps[index], primaryColor);
+                  final step = _steps[index];
+                  return _buildOnboardingPage(context, step);
                 },
               ),
             ),
             
-            // Pagination indicators
+            // Boutons de navigation
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 30.0),
+              padding: const EdgeInsets.all(24),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  _numPages,
-                  (index) => _buildPageIndicator(index == _currentPage, primaryColor),
-                ),
-              ),
-            ),
-            
-            // Navigation buttons
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-              child: _currentPage == _numPages - 1
-                  ? SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _completeOnboarding,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: const Text(
-                          'Commencer',
-                          style: TextStyle(fontSize: 16),
-                        ),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Bouton Passer
+                  TextButton(
+                    onPressed: () {
+                      // Marquer l'onboarding comme terminé et aller à la page de connexion
+                      context.read<OnboardingBloc>().add(const OnboardingCompleted());
+                      context.go('/login');
+                    },
+                    child: const Text('Passer'),
+                  ),
+                  
+                  // Bouton Suivant ou Commencer
+                  ElevatedButton(
+                    onPressed: _onNextPage,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
                       ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _currentPage > 0
-                            ? OutlinedButton(
-                                onPressed: _previousPage,
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: primaryColor,
-                                  side: BorderSide(color: primaryColor),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: const Text('Précédent'),
-                              )
-                            : const SizedBox(width: 30), // Espace vide pour aligner les boutons
-                        ElevatedButton(
-                          onPressed: _nextPage,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: const Text('Suivant'),
-                        ),
-                      ],
                     ),
+                    child: Text(
+                      _currentPage == _steps.length - 1 ? 'Commencer' : 'Suivant',
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -190,59 +132,45 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Widget _buildOnboardingStep(OnboardingStep step, Color primaryColor) {
+  Widget _buildOnboardingPage(BuildContext context, OnboardingStep step) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: 200,
-            child: Image.asset(
-              step.imagePath,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                // Afficher une icône par défaut en cas d'erreur de chargement d'image
-                return Icon(
-                  Icons.image_not_supported_outlined,
-                  size: 100,
-                  color: Colors.grey[400],
-                );
-              },
+          // Icône
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: const Color(0xFFB87333).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              step.icon,
+              size: 60,
+              color: const Color(0xFFB87333),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 32),
+          
+          // Titre
           Text(
             step.title,
-            style: TextStyle(
-              fontSize: 24,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: primaryColor,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
+          
+          // Description
           Text(
             step.description,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPageIndicator(bool isActive, Color primaryColor) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-      height: 8.0,
-      width: isActive ? 24.0 : 8.0,
-      decoration: BoxDecoration(
-        color: isActive ? primaryColor : Colors.grey[300],
-        borderRadius: BorderRadius.circular(4),
       ),
     );
   }
@@ -251,11 +179,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
 class OnboardingStep {
   final String title;
   final String description;
-  final String imagePath;
+  final IconData icon;
 
   OnboardingStep({
     required this.title,
     required this.description,
-    required this.imagePath,
+    required this.icon,
   });
 }

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="#F5F5F5" />
+  <rect x="70" y="80" width="160" height="120" fill="#3F51B5" rx="10" ry="10" />
+  <rect x="90" y="100" width="120" height="20" fill="white" rx="5" ry="5" />
+  <rect x="90" y="130" width="120" height="20" fill="white" rx="5" ry="5" />
+  <rect x="90" y="160" width="120" height="20" fill="white" rx="5" ry="5" />
+  <circle cx="150" cy="230" r="30" fill="#FF9800" />
+  <text x="150" y="250" font-family="Arial" font-size="20" text-anchor="middle" fill="#333">Planification</text>
+</svg>

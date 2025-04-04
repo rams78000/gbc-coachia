@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="#F5F5F5" />
+  <rect x="50" y="100" width="200" height="150" fill="#3F51B5" rx="10" ry="10" />
+  <rect x="70" y="120" width="160" height="30" fill="white" rx="5" ry="5" />
+  <rect x="70" y="160" width="160" height="30" fill="white" rx="5" ry="5" />
+  <rect x="70" y="200" width="160" height="30" fill="white" rx="5" ry="5" />
+  <circle cx="150" cy="50" r="30" fill="#FF9800" />
+  <text x="150" y="270" font-family="Arial" font-size="20" text-anchor="middle" fill="white">Finances</text>
+</svg>

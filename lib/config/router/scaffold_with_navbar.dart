@@ -1,79 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Widget Scaffold avec une barre de navigation en bas
-class ScaffoldWithNavbar extends StatelessWidget {
-  /// Constructeur
-  const ScaffoldWithNavbar({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
+/// Scaffold avec barre de navigation
+class ScaffoldWithNavBar extends StatelessWidget {
+  /// Shell de navigation
+  final StatefulNavigationShell navigationShell;
 
-  /// L'enfant à afficher dans le corps du scaffold
-  final Widget child;
+  /// Constructeur
+  const ScaffoldWithNavBar({
+    Key? key,
+    required this.navigationShell,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Déterminez la section active en fonction de l'emplacement actuel
-    final location = GoRouterState.of(context).location;
-    int currentIndex = 0;
-    
-    if (location.startsWith('/dashboard')) {
-      currentIndex = 0;
-    } else if (location.startsWith('/chatbot')) {
-      currentIndex = 1;
-    } else if (location.startsWith('/planner')) {
-      currentIndex = 2;
-    } else if (location.startsWith('/finance')) {
-      currentIndex = 3;
-    } else if (location.startsWith('/profile')) {
-      currentIndex = 4;
-    }
-
     return Scaffold(
-      body: child,
+      body: navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
+        selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {
-          // Naviguez vers la page correspondante
-          switch (index) {
-            case 0:
-              context.go('/dashboard');
-              break;
-            case 1:
-              context.go('/chatbot');
-              break;
-            case 2:
-              context.go('/planner');
-              break;
-            case 3:
-              context.go('/finance');
-              break;
-            case 4:
-              context.go('/profile');
-              break;
-          }
+          navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          );
         },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard),
-            label: 'Accueil',
+            label: 'Tableau de bord',
           ),
           NavigationDestination(
             icon: Icon(Icons.chat_outlined),
             selectedIcon: Icon(Icons.chat),
-            label: 'Assistant',
+            label: 'ChatIA',
           ),
           NavigationDestination(
-            icon: Icon(Icons.event_note_outlined),
-            selectedIcon: Icon(Icons.event_note),
-            label: 'Planifier',
+            icon: Icon(Icons.calendar_today_outlined),
+            selectedIcon: Icon(Icons.calendar_today),
+            label: 'Planificateur',
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet),
-            label: 'Finances',
+            icon: Icon(Icons.attach_money_outlined),
+            selectedIcon: Icon(Icons.attach_money),
+            label: 'Finance',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

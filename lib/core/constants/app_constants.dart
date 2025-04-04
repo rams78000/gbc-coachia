@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// App constants
 class AppConstants {
   /// App name

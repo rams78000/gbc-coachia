@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#3F51B5" rx="20" ry="20" />
+  <text x="100" y="100" font-family="Arial" font-size="40" text-anchor="middle" alignment-baseline="middle" fill="white">GBC</text>
+  <text x="100" y="140" font-family="Arial" font-size="30" text-anchor="middle" alignment-baseline="middle" fill="white">CoachIA</text>
+</svg>

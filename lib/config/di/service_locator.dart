@@ -1,43 +1,20 @@
 import 'package:get_it/get_it.dart';
-import 'package:gbc_coachia/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
-import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
-import 'package:gbc_coachia/features/documents/data/repositories/mock_document_repository.dart';
-import 'package:gbc_coachia/features/documents/domain/repositories/document_repository.dart';
-import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
-import 'package:gbc_coachia/features/finance/data/repositories/mock_finance_repository.dart';
-import 'package:gbc_coachia/features/finance/domain/repositories/finance_repository.dart';
-import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
-import 'package:gbc_coachia/features/planner/data/repositories/mock_planner_repository.dart';
-import 'package:gbc_coachia/features/planner/domain/repositories/planner_repository.dart';
-import 'package:gbc_coachia/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Service locator pour l'injection de dépendances
-final serviceLocator = GetIt.instance;
+import '../../features/settings/data/repositories/mock_settings_repository.dart';
+import '../../features/settings/domain/repositories/settings_repository.dart';
 
-/// Initialisation des dépendances de l'application
-Future<void> initDependencies() async {
-  // Blocs
-  serviceLocator.registerFactory(() => ChatbotBloc());
-  serviceLocator.registerFactory(() => PlannerBloc(
-    repository: serviceLocator(),
-  ));
-  serviceLocator.registerFactory(() => FinanceBloc(
-    repository: serviceLocator(),
-  ));
-  serviceLocator.registerFactory(() => DocumentBloc(
-    repository: serviceLocator(),
-  ));
+final GetIt getIt = GetIt.instance;
+
+Future<void> initServiceLocator() async {
+  // Services externes
+  final sharedPreferences = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(sharedPreferences);
   
   // Repositories
-  serviceLocator.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
-  serviceLocator.registerLazySingleton<PlannerRepository>(() => MockPlannerRepository());
-  serviceLocator.registerLazySingleton<FinanceRepository>(() => MockFinanceRepository());
-  serviceLocator.registerLazySingleton<DocumentRepository>(() => MockDocumentRepository());
+  getIt.registerLazySingleton<SettingsRepository>(
+    () => MockSettingsRepository(getIt<SharedPreferences>()),
+  );
   
-  // Datasources
-  
-  // Services
-  
-  // Utilitaires
+  // BLoCs seront enregistrés au niveau des écrans pour une gestion de cycle de vie appropriée
 }

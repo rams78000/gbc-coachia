@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachia/features/documents/domain/entities/document_extensions.dart';
+import 'package:intl/intl.dart';
 
-/// Carte représentant un document dans une liste
+/// Widget pour afficher un document sous forme de carte
 class DocumentCard extends StatelessWidget {
   final Document document;
   final VoidCallback onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-
+  
   const DocumentCard({
     Key? key,
     required this.document,
@@ -16,224 +16,269 @@ class DocumentCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
   }) : super(key: key);
-
+  
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final dateFormat = DateFormat('dd/MM/yyyy');
+    final formattedDate = dateFormat.format(document.createdAt);
+    
+    // Formater le montant s'il existe
+    String? formattedAmount;
+    if (document.amount != null && document.currency != null) {
+      final numberFormat = NumberFormat.currency(
+        symbol: _getCurrencySymbol(document.currency!),
+        decimalDigits: 2,
+      );
+      formattedAmount = numberFormat.format(document.amount);
+    }
     
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      clipBehavior: Clip.antiAlias,
-      elevation: 1.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      elevation: 1,
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // En-tête avec titre et actions
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // En-tête avec type et statut
+              Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      document.title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: document.type.color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4.0),
                     ),
-                  ),
-                  if (onEdit != null || onDelete != null)
-                    _buildPopupMenu(context),
-                ],
-              ),
-            ),
-            
-            // Infos du document
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Type et statut
-                  Row(
-                    children: [
-                      // Type
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: Color(document.type.color).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          document.type.icon,
+                          size: 16.0,
+                          color: document.type.color,
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.description,
-                              size: 14.0,
-                              color: Color(document.type.color),
-                            ),
-                            const SizedBox(width: 4.0),
-                            Text(
-                              document.type.displayName,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Color(document.type.color),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(width: 8.0),
-                      
-                      // Statut
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: Color(document.status.color),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Text(
-                          document.status.displayName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
+                        const SizedBox(width: 4.0),
+                        Text(
+                          document.type.displayName,
+                          style: TextStyle(
+                            fontSize: 12.0,
                             fontWeight: FontWeight.bold,
+                            color: document.type.color,
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(width: 8.0),
+                  
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: document.status.color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          document.status.icon,
+                          size: 16.0,
+                          color: document.status.color,
+                        ),
+                        const SizedBox(width: 4.0),
+                        Text(
+                          document.status.displayName,
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.bold,
+                            color: document.status.color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const Spacer(),
+                  
+                  // Menu d'options
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, size: 20.0),
+                    onSelected: (value) {
+                      switch (value) {
+                        case 'edit':
+                          onEdit?.call();
+                          break;
+                        case 'delete':
+                          onDelete?.call();
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: ListTile(
+                          leading: Icon(Icons.edit),
+                          title: Text('Modifier'),
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                        ),
                       ),
-                      
-                      const Spacer(),
-                      
-                      // Date de création
-                      Row(
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: ListTile(
+                          leading: Icon(Icons.delete, color: Colors.red),
+                          title: Text('Supprimer'),
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 16.0),
+              
+              // Titre du document
+              Text(
+                document.title,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              
+              const SizedBox(height: 8.0),
+              
+              // Informations complémentaires
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Client
+                  if (document.clientName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Row(
                         children: [
                           const Icon(
-                            Icons.calendar_today,
-                            size: 14.0,
+                            Icons.person,
+                            size: 16.0,
                             color: Colors.grey,
                           ),
                           const SizedBox(width: 4.0),
-                          Text(
-                            document.formattedCreatedAt,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
+                          Expanded(
+                            child: Text(
+                              document.clientName!,
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[700],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 12.0),
-                  
-                  // Contenu du document (aperçu)
-                  if (document.contentPreview.isNotEmpty) ...[
-                    Text(
-                      document.contentPreview,
-                      style: theme.textTheme.bodyMedium,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 12.0),
-                  ],
                   
-                  // Destinataire si présent
-                  if (document.hasRecipient) ...[
-                    Row(
+                  // Montant
+                  if (formattedAmount != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.monetization_on,
+                            size: 16.0,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4.0),
+                          Text(
+                            formattedAmount,
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  
+                  // Date de création
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: Row(
                       children: [
                         const Icon(
-                          Icons.person,
-                          size: 14.0,
+                          Icons.calendar_today,
+                          size: 16.0,
                           color: Colors.grey,
                         ),
                         const SizedBox(width: 4.0),
-                        Expanded(
-                          child: Text(
-                            '${document.recipientName}${document.recipientEmail.isNotEmpty ? ' <${document.recipientEmail}>' : ''}',
-                            style: theme.textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          'Créé le $formattedDate',
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.grey[700],
                           ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                   
-                  // Date d'expiration si présente
-                  if (document.expiryDate != null) ...[
-                    const SizedBox(height: 4.0),
+                  // Date d'expiration
+                  if (document.expiresAt != null)
                     Row(
                       children: [
-                        Icon(
-                          Icons.timer,
-                          size: 14.0,
-                          color: document.isExpired ? Colors.red : Colors.orange,
+                        const Icon(
+                          Icons.timelapse,
+                          size: 16.0,
+                          color: Colors.grey,
                         ),
                         const SizedBox(width: 4.0),
                         Text(
-                          document.isExpired
-                              ? 'Expiré le ${document.formattedExpiryDate}'
-                              : 'Expire le ${document.formattedExpiryDate}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: document.isExpired ? Colors.red : Colors.orange,
-                            fontWeight: document.isExpired ? FontWeight.bold : null,
+                          'Expire le ${dateFormat.format(document.expiresAt!)}',
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            color: _isExpired(document.expiresAt!) ? Colors.red : Colors.grey[700],
+                            fontWeight: _isExpired(document.expiresAt!) ? FontWeight.bold : null,
                           ),
                         ),
                       ],
                     ),
-                  ],
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-
-  // Construit le menu popup
-  Widget _buildPopupMenu(BuildContext context) {
-    return PopupMenuButton<String>(
-      onSelected: (value) {
-        switch (value) {
-          case 'edit':
-            onEdit?.call();
-            break;
-          case 'delete':
-            onDelete?.call();
-            break;
-        }
-      },
-      itemBuilder: (context) => [
-        if (onEdit != null)
-          const PopupMenuItem<String>(
-            value: 'edit',
-            child: Row(
-              children: [
-                Icon(Icons.edit),
-                SizedBox(width: 8.0),
-                Text('Modifier'),
-              ],
-            ),
-          ),
-        if (onDelete != null)
-          PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                Icon(Icons.delete, color: Colors.red),
-                const SizedBox(width: 8.0),
-                const Text('Supprimer', style: TextStyle(color: Colors.red)),
-              ],
-            ),
-          ),
-      ],
-    );
+  
+  // Vérifie si une date est expirée
+  bool _isExpired(DateTime date) {
+    return date.isBefore(DateTime.now());
+  }
+  
+  // Obtient le symbole de la devise
+  String _getCurrencySymbol(String currency) {
+    switch (currency) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '\$';
+      case 'GBP':
+        return '£';
+      case 'CAD':
+        return 'CA\$';
+      default:
+        return currency;
+    }
   }
 }

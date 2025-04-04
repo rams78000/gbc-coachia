@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="920px" height="720px" viewBox="0 0 920 720" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        text {
+            font-family: 'Inter', 'Arial', sans-serif;
+            fill: #2E2E2E;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            fill: #B87333;
+        }
+        .subtitle {
+            font-size: 18px;
+            font-weight: bold;
+            fill: #B87333;
+        }
+        .layer-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .box {
+            fill: white;
+            stroke: #B87333;
+            stroke-width: 2;
+            rx: 10;
+            ry: 10;
+        }
+        .module-box {
+            fill: #FFF9E6;
+            stroke: #B87333;
+            stroke-width: 2;
+            rx: 10;
+            ry: 10;
+        }
+        .entity-box {
+            fill: #F0F8FF;
+            stroke: #B87333;
+            stroke-width: 2;
+            rx: 10;
+            ry: 10;
+        }
+        .repo-box {
+            fill: #F0FFF0;
+            stroke: #B87333;
+            stroke-width: 2;
+            rx: 10;
+            ry: 10;
+        }
+        .bloc-box {
+            fill: #FFF0F5;
+            stroke: #B87333;
+            stroke-width: 2;
+            rx: 10;
+            ry: 10;
+        }
+        .page-box {
+            fill: #F5F5DC;
+            stroke: #B87333;
+            stroke-width: 2;
+            rx: 10;
+            ry: 10;
+        }
+        .widget-box {
+            fill: #F0FFFF;
+            stroke: #B87333;
+            stroke-width: 2;
+            rx: 10;
+            ry: 10;
+        }
+        .arrow {
+            stroke: #B87333;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        .label {
+            font-size: 12px;
+            text-anchor: middle;
+        }
+        .divider {
+            stroke: #B87333;
+            stroke-width: 1;
+            stroke-dasharray: 5, 5;
+        }
+    </style>
+    
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#B87333" />
+        </marker>
+    </defs>
+    
+    <rect width="100%" height="100%" fill="#F8F9FA" />
+    
+    <text x="460" y="40" class="title" text-anchor="middle">Architecture du Module de Paramètres</text>
+    <text x="460" y="70" text-anchor="middle">Application GBC CoachIA</text>
+    
+    <!-- Trois couches d'architecture -->
+    <line x1="150" y1="90" x2="770" y2="90" class="divider" />
+    
+    <!-- Couche Domaine -->
+    <text x="100" y="120" class="layer-title">Couche Domaine</text>
+    
+    <!-- Entités -->
+    <rect x="150" y="100" width="160" height="120" class="entity-box" />
+    <text x="230" y="120" class="subtitle" text-anchor="middle">Entités</text>
+    <text x="230" y="145" text-anchor="middle">UserProfile</text>
+    <text x="230" y="170" text-anchor="middle">AppSettings</text>
+    <text x="230" y="195" text-anchor="middle">ThemeMode, NotificationLevel</text>
+    
+    <!-- Repository Interface -->
+    <rect x="350" y="100" width="160" height="120" class="repo-box" />
+    <text x="430" y="120" class="subtitle" text-anchor="middle">Repositories</text>
+    <text x="430" y="145" text-anchor="middle">SettingsRepository</text>
+    <text x="430" y="170" text-anchor="middle">(Interface)</text>
+    
+    <!-- Couche Données -->
+    <line x1="150" y1="240" x2="770" y2="240" class="divider" />
+    <text x="100" y="270" class="layer-title">Couche Données</text>
+    
+    <!-- Repository Implementation -->
+    <rect x="350" y="250" width="160" height="120" class="repo-box" />
+    <text x="430" y="270" class="subtitle" text-anchor="middle">Implémentation</text>
+    <text x="430" y="295" text-anchor="middle">MockSettingsRepository</text>
+    <text x="430" y="320" text-anchor="middle">(SharedPreferences)</text>
+    
+    <!-- Couche Présentation -->
+    <line x1="150" y1="390" x2="770" y2="390" class="divider" />
+    <text x="100" y="420" class="layer-title">Couche Présentation</text>
+    
+    <!-- BLoC -->
+    <rect x="150" y="400" width="160" height="120" class="bloc-box" />
+    <text x="230" y="420" class="subtitle" text-anchor="middle">BLoC</text>
+    <text x="230" y="445" text-anchor="middle">SettingsBloc</text>
+    <text x="230" y="470" text-anchor="middle">Events, States</text>
+    <text x="230" y="495" text-anchor="middle">(Gestion d'état)</text>
+    
+    <!-- Pages -->
+    <rect x="350" y="400" width="340" height="120" class="page-box" />
+    <text x="520" y="420" class="subtitle" text-anchor="middle">Pages</text>
+    <text x="430" y="445" text-anchor="middle">SettingsPage</text>
+    <text x="430" y="470" text-anchor="middle">ProfileSettingsPage</text>
+    <text x="430" y="495" text-anchor="middle">ApiSettingsPage</text>
+    <text x="610" y="445" text-anchor="middle">NotificationSettingsPage</text>
+    <text x="610" y="470" text-anchor="middle">PrivacySettingsPage</text>
+    
+    <!-- Widgets -->
+    <rect x="150" y="540" width="540" height="120" class="widget-box" />
+    <text x="420" y="560" class="subtitle" text-anchor="middle">Widgets</text>
+    <text x="230" y="590" text-anchor="middle">SettingsItem</text>
+    <text x="230" y="615" text-anchor="middle">SettingsSwitchItem</text>
+    <text x="420" y="590" text-anchor="middle">SettingsSection</text>
+    <text x="420" y="615" text-anchor="middle">ProfileForm</text>
+    <text x="610" y="590" text-anchor="middle">ApiKeyForm</text>
+    
+    <!-- Flèches -->
+    <!-- Domain to Data -->
+    <path d="M 430 220 L 430 250" class="arrow" />
+    <text x="445" y="235" class="label">implémente</text>
+    
+    <!-- Entities to BLoC -->
+    <path d="M 230 220 C 230 310 230 310 230 400" class="arrow" />
+    <text x="245" y="310" class="label">utilise</text>
+    
+    <!-- Repository to BLoC -->
+    <path d="M 350 160 C 250 160 250 310 250 410" class="arrow" />
+    <text x="290" y="160" class="label">dépend</text>
+    
+    <!-- BLoC to Pages -->
+    <path d="M 310 460 L 350 460" class="arrow" />
+    <text x="330" y="445" class="label">fournit</text>
+    
+    <!-- Pages to Widgets -->
+    <path d="M 520 520 L 520 540" class="arrow" />
+    <text x="535" y="530" class="label">utilise</text>
+</svg>

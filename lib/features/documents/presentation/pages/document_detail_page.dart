@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
-import 'package:gbc_coachia/features/documents/domain/entities/document_extensions.dart';
 import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
-import 'package:gbc_coachia/features/documents/presentation/widgets/document_preview.dart';
-import 'package:gbc_coachia/features/shared/presentation/widgets/main_scaffold.dart';
+import 'package:intl/intl.dart';
 
-/// Page affichant le détail d'un document
+/// Page de détail d'un document
 class DocumentDetailPage extends StatefulWidget {
   final String documentId;
-
+  
   const DocumentDetailPage({
     Key? key,
     required this.documentId,
@@ -20,103 +18,59 @@ class DocumentDetailPage extends StatefulWidget {
 }
 
 class _DocumentDetailPageState extends State<DocumentDetailPage> {
-  late Document _document;
-  bool _isLoaded = false;
-  
   @override
   void initState() {
     super.initState();
-    
     // Charger le document
     context.read<DocumentBloc>().add(LoadDocumentById(widget.documentId));
   }
 
   @override
   Widget build(BuildContext context) {
-    return MainScaffold(
-      title: _isLoaded ? _document.title : 'Détail du document',
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.pop(context);
-        },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Détail du document'),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              // TODO: Implémenter le partage
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Partage non implémenté'),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () {
+              _showOptionsBottomSheet(context);
+            },
+          ),
+        ],
       ),
-      actions: _isLoaded ? [
-        PopupMenuButton<String>(
-          onSelected: (value) {
-            switch (value) {
-              case 'edit':
-                _editDocument();
-                break;
-              case 'delete':
-                _showDeleteConfirmationDialog();
-                break;
-              case 'status':
-                _showStatusChangeDialog();
-                break;
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem<String>(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit),
-                  SizedBox(width: 8.0),
-                  Text('Modifier'),
-                ],
+      body: BlocConsumer<DocumentBloc, DocumentState>(
+        listener: (context, state) {
+          if (state is DocumentsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Erreur: ${state.message}'),
+                backgroundColor: Colors.red,
               ),
-            ),
-            const PopupMenuItem<String>(
-              value: 'status',
-              child: Row(
-                children: [
-                  Icon(Icons.sync),
-                  SizedBox(width: 8.0),
-                  Text('Changer le statut'),
-                ],
-              ),
-            ),
-            PopupMenuItem<String>(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  const SizedBox(width: 8.0),
-                  const Text('Supprimer', style: TextStyle(color: Colors.red)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ] : null,
-      body: BlocBuilder<DocumentBloc, DocumentState>(
+            );
+          }
+        },
         builder: (context, state) {
+          if (state is DocumentLoaded) {
+            final document = state.document;
+            return _buildDocumentDetails(context, document);
+          }
+          
           if (state is DocumentsLoading) {
             return const Center(
               child: CircularProgressIndicator(),
-            );
-          } else if (state is DocumentLoaded) {
-            // Stocker le document pour l'accès dans d'autres méthodes
-            _document = state.document;
-            _isLoaded = true;
-            
-            return _buildDocumentDetail();
-          } else if (state is DocumentsError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Erreur: ${state.message}'),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<DocumentBloc>().add(LoadDocumentById(widget.documentId));
-                    },
-                    child: const Text('Réessayer'),
-                  ),
-                ],
-              ),
             );
           }
           
@@ -127,277 +81,605 @@ class _DocumentDetailPageState extends State<DocumentDetailPage> {
       ),
     );
   }
-
-  // Construit le détail du document
-  Widget _buildDocumentDetail() {
-    final theme = Theme.of(context);
+  
+  // Construit le contenu de la page
+  Widget _buildDocumentDetails(BuildContext context, Document document) {
+    final dateFormat = DateFormat('dd/MM/yyyy');
     
-    return Column(
-      children: [
-        // En-tête avec informations principales
-        Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Color(_document.type.color).withOpacity(0.1),
-            border: Border(
-              bottom: BorderSide(
-                color: theme.dividerColor,
-                width: 1.0,
-              ),
+    // Formater le montant s'il existe
+    String? formattedAmount;
+    if (document.amount != null && document.currency != null) {
+      final numberFormat = NumberFormat.currency(
+        symbol: _getCurrencySymbol(document.currency!),
+        decimalDigits: 2,
+      );
+      formattedAmount = numberFormat.format(document.amount);
+    }
+    
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // En-tête avec couleur du type de document
+          Container(
+            width: double.infinity,
+            color: document.type.color.withOpacity(0.1),
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Type et statut
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: document.type.color.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            document.type.icon,
+                            size: 16.0,
+                            color: document.type.color,
+                          ),
+                          const SizedBox(width: 4.0),
+                          Text(
+                            document.type.displayName,
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                              color: document.type.color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 8.0),
+                    
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color: document.status.color.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            document.status.icon,
+                            size: 16.0,
+                            color: document.status.color,
+                          ),
+                          const SizedBox(width: 4.0),
+                          Text(
+                            document.status.displayName,
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.bold,
+                              color: document.status.color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 12.0),
+                
+                // Titre du document
+                Text(
+                  document.title,
+                  style: const TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                
+                const SizedBox(height: 12.0),
+                
+                // Informations de base
+                if (document.clientName != null)
+                  _buildInfoRow(
+                    context,
+                    Icons.person,
+                    'Client:',
+                    document.clientName!,
+                  ),
+                
+                if (formattedAmount != null)
+                  _buildInfoRow(
+                    context,
+                    Icons.monetization_on,
+                    'Montant:',
+                    formattedAmount,
+                  ),
+                
+                _buildInfoRow(
+                  context,
+                  Icons.calendar_today,
+                  'Créé le:',
+                  dateFormat.format(document.createdAt),
+                ),
+                
+                if (document.updatedAt != null)
+                  _buildInfoRow(
+                    context,
+                    Icons.update,
+                    'Mis à jour le:',
+                    dateFormat.format(document.updatedAt!),
+                  ),
+                
+                if (document.expiresAt != null)
+                  _buildInfoRow(
+                    context,
+                    Icons.timelapse,
+                    'Expire le:',
+                    dateFormat.format(document.expiresAt!),
+                    textColor: _isExpired(document.expiresAt!) ? Colors.red : null,
+                  ),
+              ],
             ),
           ),
-          child: Column(
-            children: [
-              // Type et statut
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.description,
-                        color: Color(_document.type.color),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        _document.type.displayName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Color(_document.type.color),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                    decoration: BoxDecoration(
-                      color: Color(_document.status.color),
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    child: Text(
-                      _document.status.displayName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 16.0),
-              
-              // Dates
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInfoItem(
-                      context,
-                      icon: Icons.calendar_today,
-                      label: 'Créé le',
-                      value: _document.formattedCreatedAt,
-                    ),
-                  ),
-                  if (_document.updatedAt != null)
-                    Expanded(
-                      child: _buildInfoItem(
-                        context,
-                        icon: Icons.update,
-                        label: 'Mis à jour le',
-                        value: _document.formattedUpdatedAt!,
-                      ),
-                    ),
-                  if (_document.expiryDate != null)
-                    Expanded(
-                      child: _buildInfoItem(
-                        context,
-                        icon: Icons.timer,
-                        label: 'Expire le',
-                        value: _document.formattedExpiryDate!,
-                        isAlert: _document.isExpired,
-                      ),
-                    ),
-                ],
-              ),
-              
-              // Destinataire si présent
-              if (_document.hasRecipient) ...[
-                const SizedBox(height: 16.0),
-                _buildInfoItem(
+          
+          const SizedBox(height: 16.0),
+          
+          // Actions rapides
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildActionButton(
                   context,
-                  icon: Icons.person,
-                  label: 'Destinataire',
-                  value: '${_document.recipientName} <${_document.recipientEmail}>',
+                  Icons.download,
+                  'Télécharger',
+                  onPressed: () {
+                    // TODO: Implémenter le téléchargement
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Téléchargement non implémenté'),
+                      ),
+                    );
+                  },
+                ),
+                
+                _buildActionButton(
+                  context,
+                  Icons.edit,
+                  'Modifier',
+                  onPressed: () {
+                    // TODO: Implémenter la modification
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Modification non implémentée'),
+                      ),
+                    );
+                  },
+                ),
+                
+                _buildActionButton(
+                  context,
+                  Icons.share,
+                  'Partager',
+                  onPressed: () {
+                    // TODO: Implémenter le partage
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Partage non implémenté'),
+                      ),
+                    );
+                  },
+                ),
+                
+                _buildActionButton(
+                  context,
+                  document.status.icon,
+                  'Statut',
+                  onPressed: () {
+                    _showStatusChangeDialog(context, document);
+                  },
                 ),
               ],
-            ],
+            ),
           ),
-        ),
-        
-        // Aperçu du document
-        Expanded(
-          child: DocumentPreview(
-            document: _document,
-            showJsonView: false,
-            onDownload: _downloadDocument,
-            onShare: _shareDocument,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Construit un élément d'information
-  Widget _buildInfoItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    bool isAlert = false,
-  }) {
-    final theme = Theme.of(context);
-    
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 18.0,
-          color: isAlert ? Colors.red : theme.colorScheme.primary,
-        ),
-        const SizedBox(width: 8.0),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+          
+          const SizedBox(height: 24.0),
+          
+          // Aperçu du document
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Aperçu du document',
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            Text(
+          ),
+          
+          const SizedBox(height: 16.0),
+          
+          // Contenu du document (simplifié)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  document.content,
+                  style: const TextStyle(fontSize: 14.0),
+                ),
+                
+                const SizedBox(height: 16.0),
+                
+                // Bouton pour voir le document complet
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      // TODO: Implémenter l'affichage du document complet
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Affichage du document complet non implémenté'),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.visibility),
+                    label: const Text('Voir le document complet'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24.0),
+          
+          // Données du document
+          if (document.data.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Données du document',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16.0),
+            
+            // Liste des données
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  side: BorderSide(color: Colors.grey[300]!),
+                ),
+                child: ListView.separated(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: document.data.entries.length,
+                  separatorBuilder: (context, index) => Divider(color: Colors.grey[300]),
+                  itemBuilder: (context, index) {
+                    final entry = document.data.entries.elementAt(index);
+                    return ListTile(
+                      title: Text(
+                        _formatKey(entry.key),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.0,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _formatValue(entry.value),
+                        style: const TextStyle(fontSize: 14.0),
+                      ),
+                      dense: true,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+          
+          const SizedBox(height: 32.0),
+        ],
+      ),
+    );
+  }
+  
+  // Construit une ligne d'information
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    Color? textColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 16.0,
+            color: Colors.grey[600],
+          ),
+          const SizedBox(width: 8.0),
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
               value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isAlert ? Colors.red : theme.colorScheme.onSurface,
-                fontWeight: isAlert ? FontWeight.bold : null,
+              style: TextStyle(
+                color: textColor ?? Colors.grey[800],
+                fontWeight: textColor != null ? FontWeight.bold : null,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Construit un bouton d'action
+  Widget _buildActionButton(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    required VoidCallback onPressed,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(height: 4.0),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.0,
+                color: Theme.of(context).primaryColor,
               ),
             ),
           ],
         ),
-      ],
-    );
-  }
-
-  // Télécharge le document
-  void _downloadDocument() {
-    // Ici, on implémenterait la logique de téléchargement
-    // Pour l'instant, on affiche juste un snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Téléchargement du document (à implémenter)'),
       ),
     );
   }
-
-  // Partage le document
-  void _shareDocument() {
-    // Ici, on implémenterait la logique de partage
-    // Pour l'instant, on affiche juste un snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Partage du document (à implémenter)'),
-      ),
-    );
-  }
-
-  // Édite le document
-  void _editDocument() {
-    Navigator.pushNamed(
-      context,
-      '/documents/edit',
-      arguments: _document.id,
-    );
-  }
-
-  // Affiche une boîte de dialogue de confirmation pour la suppression
-  void _showDeleteConfirmationDialog() {
+  
+  // Affiche la boîte de dialogue pour changer le statut
+  void _showStatusChangeDialog(BuildContext context, Document document) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmer la suppression'),
-        content: Text('Êtes-vous sûr de vouloir supprimer le document "${_document.title}" ?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              
-              // Supprimer le document
-              context.read<DocumentBloc>().add(DeleteDocument(_document.id));
-              
-              // Retourner à la liste des documents
-              Navigator.pop(context);
-            },
-            child: const Text('Supprimer'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Changer le statut'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: DocumentStatus.values.length,
+              itemBuilder: (context, index) {
+                final status = DocumentStatus.values[index];
+                final isSelected = status == document.status;
+                
+                return ListTile(
+                  leading: Icon(
+                    status.icon,
+                    color: status.color,
+                  ),
+                  title: Text(status.displayName),
+                  trailing: isSelected ? const Icon(Icons.check, color: Colors.green) : null,
+                  onTap: isSelected
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                          
+                          // Mettre à jour le statut
+                          context.read<DocumentBloc>().add(
+                                ChangeDocumentStatus(document.id, status),
+                              );
+                        },
+                );
+              },
             ),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Annuler'),
+            ),
+          ],
+        );
+      },
     );
   }
-
-  // Affiche une boîte de dialogue pour changer le statut du document
-  void _showStatusChangeDialog() {
-    showDialog(
+  
+  // Affiche la feuille d'options
+  void _showOptionsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Changer le statut'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: DocumentStatus.values.length,
-            itemBuilder: (context, index) {
-              final status = DocumentStatus.values[index];
-              final isSelected = status == _document.status;
-              
-              return ListTile(
-                title: Text(status.displayName),
-                leading: CircleAvatar(
-                  backgroundColor: Color(status.color),
-                  radius: 12.0,
-                ),
-                trailing: isSelected ? const Icon(Icons.check, color: Colors.green) : null,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Modifier'),
                 onTap: () {
                   Navigator.pop(context);
-                  
-                  if (!isSelected) {
-                    // Changer le statut du document
-                    context.read<DocumentBloc>().add(ChangeDocumentStatus(_document.id, status));
-                    
-                    // Recharger le document
-                    context.read<DocumentBloc>().add(LoadDocumentById(_document.id));
-                  }
+                  // TODO: Implémenter la modification
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Modification non implémentée'),
+                    ),
+                  );
                 },
-              );
-            },
+              ),
+              ListTile(
+                leading: const Icon(Icons.file_copy),
+                title: const Text('Dupliquer'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implémenter la duplication
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Duplication non implémentée'),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: const Text('Exporter en PDF'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Implémenter l'exportation en PDF
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Exportation en PDF non implémentée'),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmationDialog(context);
+                },
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Annuler'),
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+  
+  // Affiche la boîte de dialogue de confirmation de suppression
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmer la suppression'),
+          content: const Text('Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // Supprimer le document
+                context.read<DocumentBloc>().add(DeleteDocument(widget.documentId));
+                // Retourner à la page précédente
+                Navigator.pop(context);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Supprimer'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  // Vérifie si une date est expirée
+  bool _isExpired(DateTime date) {
+    return date.isBefore(DateTime.now());
+  }
+  
+  // Obtient le symbole de la devise
+  String _getCurrencySymbol(String currency) {
+    switch (currency) {
+      case 'EUR':
+        return '€';
+      case 'USD':
+        return '\$';
+      case 'GBP':
+        return '£';
+      case 'CAD':
+        return 'CA\$';
+      default:
+        return currency;
+    }
+  }
+  
+  // Formate une clé pour l'affichage
+  String _formatKey(String key) {
+    // Convertir camelCase en mots séparés par des espaces avec majuscule
+    final result = key.replaceAllMapped(
+      RegExp(r'([a-z])([A-Z])'),
+      (match) => '${match.group(1)} ${match.group(2)}',
+    );
+    
+    return result.substring(0, 1).toUpperCase() + result.substring(1);
+  }
+  
+  // Formate une valeur pour l'affichage
+  String _formatValue(dynamic value) {
+    if (value == null) {
+      return 'Non spécifié';
+    }
+    
+    if (value is String) {
+      // Si c'est une date ISO 8601
+      if (value.contains('T') && value.contains('-') && value.length > 10) {
+        try {
+          final date = DateTime.parse(value);
+          return DateFormat('dd/MM/yyyy').format(date);
+        } catch (e) {
+          return value;
+        }
+      }
+      return value;
+    }
+    
+    if (value is bool) {
+      return value ? 'Oui' : 'Non';
+    }
+    
+    if (value is Map || value is List) {
+      return '(Données complexes)';
+    }
+    
+    return value.toString();
   }
 }

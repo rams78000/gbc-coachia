@@ -1,962 +1,704 @@
 import 'package:gbc_coachia/features/documents/domain/entities/document.dart';
 import 'package:gbc_coachia/features/documents/domain/entities/document_template.dart';
 import 'package:gbc_coachia/features/documents/domain/repositories/document_repository.dart';
-import 'package:uuid/uuid.dart';
 
-/// Implémentation mock du repository pour les documents
+/// Implémentation simulée du repository de documents
 class MockDocumentRepository implements DocumentRepository {
-  // Liste de documents pour la simulation
+  // Données simulées
   final List<Document> _documents = [];
-  
-  // Liste de modèles de documents pour la simulation
   final List<DocumentTemplate> _templates = [];
-  
-  // Générateur d'ID
-  final _uuid = const Uuid();
   
   // Constructeur
   MockDocumentRepository() {
-    // Initialiser avec des données de test
     _initMockData();
   }
   
-  // Initialise des données de test
+  // Initialisation des données simulées
   void _initMockData() {
-    // Créer quelques modèles de documents
+    // Modèles de documents
+    final invoiceTemplate = DocumentTemplate(
+      id: 'template1',
+      name: 'Facture standard',
+      description: 'Modèle de facture standard pour les clients',
+      type: DocumentType.invoice,
+      sections: [
+        TemplateSection(
+          id: 'section1',
+          title: 'Informations client',
+          description: 'Informations de base sur le client',
+          fields: [
+            TemplateField(
+              id: 'clientName',
+              label: 'Nom du client',
+              type: FieldType.text,
+              placeholder: 'Ex: Entreprise XYZ',
+              required: true,
+            ),
+            TemplateField(
+              id: 'clientEmail',
+              label: 'Email du client',
+              type: FieldType.email,
+              placeholder: 'Ex: contact@xyz.com',
+              required: true,
+            ),
+            TemplateField(
+              id: 'clientAddress',
+              label: 'Adresse du client',
+              type: FieldType.address,
+              placeholder: 'Ex: 123 Rue Principale, Ville',
+              required: true,
+            ),
+          ],
+        ),
+        TemplateSection(
+          id: 'section2',
+          title: 'Détails de la facture',
+          description: 'Informations sur les produits/services facturés',
+          fields: [
+            TemplateField(
+              id: 'invoiceNumber',
+              label: 'Numéro de facture',
+              type: FieldType.text,
+              required: true,
+            ),
+            TemplateField(
+              id: 'invoiceDate',
+              label: 'Date de facturation',
+              type: FieldType.date,
+              required: true,
+              defaultValue: DateTime.now().toIso8601String(),
+            ),
+            TemplateField(
+              id: 'dueDate',
+              label: 'Date d\'échéance',
+              type: FieldType.date,
+              required: true,
+              defaultValue: DateTime.now().add(const Duration(days: 30)).toIso8601String(),
+            ),
+            TemplateField(
+              id: 'amount',
+              label: 'Montant total',
+              type: FieldType.currency,
+              required: true,
+            ),
+            TemplateField(
+              id: 'currency',
+              label: 'Devise',
+              type: FieldType.dropdown,
+              required: true,
+              options: ['EUR', 'USD', 'GBP', 'CAD'],
+              defaultValue: 'EUR',
+            ),
+            TemplateField(
+              id: 'paymentTerms',
+              label: 'Conditions de paiement',
+              type: FieldType.textarea,
+              placeholder: 'Ex: Paiement à 30 jours',
+              required: false,
+            ),
+          ],
+        ),
+      ],
+      content: 'Contenu du modèle de facture avec des placeholders pour les variables',
+      createdAt: DateTime.now().subtract(const Duration(days: 90)),
+      isDefault: true,
+    );
+    
+    final contractTemplate = DocumentTemplate(
+      id: 'template2',
+      name: 'Contrat de prestation',
+      description: 'Modèle de contrat pour les prestations de service',
+      type: DocumentType.contract,
+      sections: [
+        TemplateSection(
+          id: 'section1',
+          title: 'Parties concernées',
+          description: 'Informations sur les parties du contrat',
+          fields: [
+            TemplateField(
+              id: 'clientName',
+              label: 'Nom du client',
+              type: FieldType.text,
+              required: true,
+            ),
+            TemplateField(
+              id: 'clientEmail',
+              label: 'Email du client',
+              type: FieldType.email,
+              required: true,
+            ),
+            TemplateField(
+              id: 'clientAddress',
+              label: 'Adresse du client',
+              type: FieldType.address,
+              required: true,
+            ),
+          ],
+        ),
+        TemplateSection(
+          id: 'section2',
+          title: 'Détails du contrat',
+          description: 'Termes et conditions du contrat',
+          fields: [
+            TemplateField(
+              id: 'contractTitle',
+              label: 'Titre du contrat',
+              type: FieldType.text,
+              required: true,
+            ),
+            TemplateField(
+              id: 'startDate',
+              label: 'Date de début',
+              type: FieldType.date,
+              required: true,
+              defaultValue: DateTime.now().toIso8601String(),
+            ),
+            TemplateField(
+              id: 'endDate',
+              label: 'Date de fin',
+              type: FieldType.date,
+              required: false,
+            ),
+            TemplateField(
+              id: 'amount',
+              label: 'Montant',
+              type: FieldType.currency,
+              required: true,
+            ),
+            TemplateField(
+              id: 'currency',
+              label: 'Devise',
+              type: FieldType.dropdown,
+              required: true,
+              options: ['EUR', 'USD', 'GBP', 'CAD'],
+              defaultValue: 'EUR',
+            ),
+            TemplateField(
+              id: 'terms',
+              label: 'Conditions générales',
+              type: FieldType.textarea,
+              required: true,
+            ),
+          ],
+        ),
+      ],
+      content: 'Contenu du modèle de contrat avec des placeholders pour les variables',
+      createdAt: DateTime.now().subtract(const Duration(days: 60)),
+      isDefault: true,
+    );
+    
+    final proposalTemplate = DocumentTemplate(
+      id: 'template3',
+      name: 'Proposition commerciale',
+      description: 'Modèle de proposition commerciale pour les prospects',
+      type: DocumentType.proposal,
+      sections: [
+        TemplateSection(
+          id: 'section1',
+          title: 'Client potentiel',
+          description: 'Informations sur le prospect',
+          fields: [
+            TemplateField(
+              id: 'clientName',
+              label: 'Nom du prospect',
+              type: FieldType.text,
+              required: true,
+            ),
+            TemplateField(
+              id: 'clientEmail',
+              label: 'Email du prospect',
+              type: FieldType.email,
+              required: true,
+            ),
+          ],
+        ),
+        TemplateSection(
+          id: 'section2',
+          title: 'Détails de l\'offre',
+          description: 'Informations sur l\'offre proposée',
+          fields: [
+            TemplateField(
+              id: 'proposalTitle',
+              label: 'Titre de la proposition',
+              type: FieldType.text,
+              required: true,
+            ),
+            TemplateField(
+              id: 'proposalDate',
+              label: 'Date de la proposition',
+              type: FieldType.date,
+              required: true,
+              defaultValue: DateTime.now().toIso8601String(),
+            ),
+            TemplateField(
+              id: 'validUntil',
+              label: 'Valable jusqu\'au',
+              type: FieldType.date,
+              required: true,
+              defaultValue: DateTime.now().add(const Duration(days: 30)).toIso8601String(),
+            ),
+            TemplateField(
+              id: 'amount',
+              label: 'Montant proposé',
+              type: FieldType.currency,
+              required: true,
+            ),
+            TemplateField(
+              id: 'currency',
+              label: 'Devise',
+              type: FieldType.dropdown,
+              required: true,
+              options: ['EUR', 'USD', 'GBP', 'CAD'],
+              defaultValue: 'EUR',
+            ),
+            TemplateField(
+              id: 'description',
+              label: 'Description de l\'offre',
+              type: FieldType.textarea,
+              required: true,
+            ),
+          ],
+        ),
+      ],
+      content: 'Contenu du modèle de proposition avec des placeholders pour les variables',
+      createdAt: DateTime.now().subtract(const Duration(days: 45)),
+      isDefault: true,
+    );
+    
+    final reportTemplate = DocumentTemplate(
+      id: 'template4',
+      name: 'Rapport d\'activité',
+      description: 'Modèle de rapport d\'activité mensuel',
+      type: DocumentType.report,
+      sections: [
+        TemplateSection(
+          id: 'section1',
+          title: 'Informations générales',
+          description: 'Informations de base sur le rapport',
+          fields: [
+            TemplateField(
+              id: 'reportTitle',
+              label: 'Titre du rapport',
+              type: FieldType.text,
+              required: true,
+            ),
+            TemplateField(
+              id: 'reportPeriod',
+              label: 'Période du rapport',
+              type: FieldType.text,
+              required: true,
+              placeholder: 'Ex: Janvier 2024',
+            ),
+            TemplateField(
+              id: 'author',
+              label: 'Auteur',
+              type: FieldType.text,
+              required: true,
+            ),
+          ],
+        ),
+        TemplateSection(
+          id: 'section2',
+          title: 'Contenu du rapport',
+          description: 'Corps du rapport',
+          fields: [
+            TemplateField(
+              id: 'summary',
+              label: 'Résumé',
+              type: FieldType.textarea,
+              required: true,
+            ),
+            TemplateField(
+              id: 'achievements',
+              label: 'Réalisations',
+              type: FieldType.textarea,
+              required: true,
+            ),
+            TemplateField(
+              id: 'challenges',
+              label: 'Défis rencontrés',
+              type: FieldType.textarea,
+              required: false,
+            ),
+            TemplateField(
+              id: 'nextSteps',
+              label: 'Prochaines étapes',
+              type: FieldType.textarea,
+              required: true,
+            ),
+          ],
+        ),
+      ],
+      content: 'Contenu du modèle de rapport avec des placeholders pour les variables',
+      createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      isDefault: true,
+    );
+    
+    // Ajouter les modèles à la liste
     _templates.addAll([
-      DocumentTemplate(
-        id: '1',
-        name: 'Facture Standard',
-        description: 'Modèle de facture standard pour les prestations de service',
-        type: DocumentType.invoice,
-        thumbnailUrl: 'assets/images/templates/invoice.jpg',
-        templateContent: '''
-        <h1>FACTURE</h1>
-        <p>Date: {{date}}</p>
-        <p>Numéro de facture: {{invoiceNumber}}</p>
-        <p>Client: {{clientName}}</p>
-        
-        <table>
-          <tr>
-            <th>Description</th>
-            <th>Quantité</th>
-            <th>Prix unitaire</th>
-            <th>Total</th>
-          </tr>
-          <tr>
-            <td>{{description}}</td>
-            <td>{{quantity}}</td>
-            <td>{{unitPrice}} €</td>
-            <td>{{total}} €</td>
-          </tr>
-        </table>
-        
-        <p>Total HT: {{totalBeforeTax}} €</p>
-        <p>TVA ({{taxRate}}%): {{taxAmount}} €</p>
-        <p>Total TTC: {{totalAfterTax}} €</p>
-        
-        <p>Conditions de paiement: {{paymentTerms}}</p>
-        <p>Coordonnées bancaires: {{bankDetails}}</p>
-        ''',
-        fields: [
-          DocumentField(
-            id: 'date',
-            label: 'Date de facturation',
-            placeholder: 'JJ/MM/AAAA',
-            required: true,
-            type: DocumentFieldType.date,
-          ),
-          DocumentField(
-            id: 'invoiceNumber',
-            label: 'Numéro de facture',
-            placeholder: 'FAC-001',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'clientName',
-            label: 'Nom du client',
-            placeholder: 'Entreprise XYZ',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'description',
-            label: 'Description de la prestation',
-            placeholder: 'Développement de site web',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'quantity',
-            label: 'Quantité',
-            placeholder: '1',
-            required: true,
-            type: DocumentFieldType.number,
-          ),
-          DocumentField(
-            id: 'unitPrice',
-            label: 'Prix unitaire (€)',
-            placeholder: '1000',
-            required: true,
-            type: DocumentFieldType.currency,
-          ),
-          DocumentField(
-            id: 'total',
-            label: 'Total (€)',
-            placeholder: '1000',
-            required: true,
-            type: DocumentFieldType.currency,
-          ),
-          DocumentField(
-            id: 'totalBeforeTax',
-            label: 'Total HT (€)',
-            placeholder: '1000',
-            required: true,
-            type: DocumentFieldType.currency,
-          ),
-          DocumentField(
-            id: 'taxRate',
-            label: 'Taux de TVA (%)',
-            placeholder: '20',
-            required: true,
-            type: DocumentFieldType.number,
-          ),
-          DocumentField(
-            id: 'taxAmount',
-            label: 'Montant de TVA (€)',
-            placeholder: '200',
-            required: true,
-            type: DocumentFieldType.currency,
-          ),
-          DocumentField(
-            id: 'totalAfterTax',
-            label: 'Total TTC (€)',
-            placeholder: '1200',
-            required: true,
-            type: DocumentFieldType.currency,
-          ),
-          DocumentField(
-            id: 'paymentTerms',
-            label: 'Conditions de paiement',
-            placeholder: '30 jours',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'bankDetails',
-            label: 'Coordonnées bancaires',
-            placeholder: 'IBAN: FR76...',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-        ],
-        isDefault: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 30)),
-      ),
-      DocumentTemplate(
-        id: '2',
-        name: 'Proposition commerciale',
-        description: 'Modèle de proposition commerciale pour présenter vos services',
-        type: DocumentType.proposal,
-        thumbnailUrl: 'assets/images/templates/proposal.jpg',
-        templateContent: '''
-        <h1>PROPOSITION COMMERCIALE</h1>
-        <p>Date: {{date}}</p>
-        <p>Référence: {{reference}}</p>
-        <p>Client: {{clientName}}</p>
-        
-        <h2>Contexte</h2>
-        <p>{{context}}</p>
-        
-        <h2>Solution proposée</h2>
-        <p>{{solution}}</p>
-        
-        <h2>Méthodologie</h2>
-        <p>{{methodology}}</p>
-        
-        <h2>Planning</h2>
-        <p>{{schedule}}</p>
-        
-        <h2>Budget</h2>
-        <p>{{budget}}</p>
-        
-        <h2>Conditions</h2>
-        <p>{{conditions}}</p>
-        ''',
-        fields: [
-          DocumentField(
-            id: 'date',
-            label: 'Date',
-            placeholder: 'JJ/MM/AAAA',
-            required: true,
-            type: DocumentFieldType.date,
-          ),
-          DocumentField(
-            id: 'reference',
-            label: 'Référence',
-            placeholder: 'PROP-001',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'clientName',
-            label: 'Nom du client',
-            placeholder: 'Entreprise XYZ',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'context',
-            label: 'Contexte',
-            placeholder: 'Description du contexte...',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'solution',
-            label: 'Solution proposée',
-            placeholder: 'Description de la solution...',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'methodology',
-            label: 'Méthodologie',
-            placeholder: 'Description de la méthodologie...',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'schedule',
-            label: 'Planning',
-            placeholder: 'Description du planning...',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'budget',
-            label: 'Budget',
-            placeholder: 'Description du budget...',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'conditions',
-            label: 'Conditions',
-            placeholder: 'Description des conditions...',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-        ],
-        isDefault: false,
-        createdAt: DateTime.now().subtract(const Duration(days: 25)),
-      ),
-      DocumentTemplate(
-        id: '3',
-        name: 'Contrat de prestation',
-        description: 'Modèle de contrat de prestation de services',
-        type: DocumentType.contract,
-        thumbnailUrl: 'assets/images/templates/contract.jpg',
-        templateContent: '''
-        <h1>CONTRAT DE PRESTATION DE SERVICES</h1>
-        <p>Entre les soussignés :</p>
-        <p>{{providerName}}, {{providerStatus}}, {{providerAddress}}</p>
-        <p>Ci-après dénommé "le Prestataire",</p>
-        <p>Et</p>
-        <p>{{clientName}}, {{clientStatus}}, {{clientAddress}}</p>
-        <p>Ci-après dénommé "le Client",</p>
-        
-        <h2>Article 1 - Objet du contrat</h2>
-        <p>{{contractObject}}</p>
-        
-        <h2>Article 2 - Durée</h2>
-        <p>{{contractDuration}}</p>
-        
-        <h2>Article 3 - Obligations du Prestataire</h2>
-        <p>{{providerObligations}}</p>
-        
-        <h2>Article 4 - Obligations du Client</h2>
-        <p>{{clientObligations}}</p>
-        
-        <h2>Article 5 - Conditions financières</h2>
-        <p>{{financialConditions}}</p>
-        
-        <h2>Article 6 - Confidentialité</h2>
-        <p>{{confidentiality}}</p>
-        
-        <h2>Article 7 - Résiliation</h2>
-        <p>{{termination}}</p>
-        
-        <h2>Article 8 - Loi applicable et juridiction</h2>
-        <p>{{applicableLaw}}</p>
-        
-        <p>Fait à {{location}}, le {{date}}</p>
-        <p>Pour le Prestataire : {{providerSignature}}</p>
-        <p>Pour le Client : {{clientSignature}}</p>
-        ''',
-        fields: [
-          DocumentField(
-            id: 'providerName',
-            label: 'Nom du Prestataire',
-            placeholder: 'Votre nom ou raison sociale',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'providerStatus',
-            label: 'Statut du Prestataire',
-            placeholder: 'Freelance, SARL, etc.',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'providerAddress',
-            label: 'Adresse du Prestataire',
-            placeholder: 'Votre adresse complète',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'clientName',
-            label: 'Nom du Client',
-            placeholder: 'Nom ou raison sociale du client',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'clientStatus',
-            label: 'Statut du Client',
-            placeholder: 'SARL, SA, etc.',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'clientAddress',
-            label: 'Adresse du Client',
-            placeholder: 'Adresse complète du client',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'contractObject',
-            label: 'Objet du contrat',
-            placeholder: 'Description des services fournis',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'contractDuration',
-            label: 'Durée du contrat',
-            placeholder: 'Ex: Ce contrat est conclu pour une durée de 6 mois à compter de sa signature.',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'providerObligations',
-            label: 'Obligations du Prestataire',
-            placeholder: 'Détail des obligations du prestataire',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'clientObligations',
-            label: 'Obligations du Client',
-            placeholder: 'Détail des obligations du client',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'financialConditions',
-            label: 'Conditions financières',
-            placeholder: 'Tarifs, modalités de paiement, etc.',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'confidentiality',
-            label: 'Clause de confidentialité',
-            placeholder: 'Détail de la clause de confidentialité',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'termination',
-            label: 'Clause de résiliation',
-            placeholder: 'Détail de la clause de résiliation',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'applicableLaw',
-            label: 'Loi applicable',
-            placeholder: 'Ex: Le présent contrat est soumis au droit français.',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'location',
-            label: 'Lieu de signature',
-            placeholder: 'Ex: Paris',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'date',
-            label: 'Date de signature',
-            placeholder: 'JJ/MM/AAAA',
-            required: true,
-            type: DocumentFieldType.date,
-          ),
-          DocumentField(
-            id: 'providerSignature',
-            label: 'Signature du Prestataire',
-            placeholder: 'Nom et signature',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'clientSignature',
-            label: 'Signature du Client',
-            placeholder: 'Nom et signature',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-        ],
-        isDefault: false,
-        createdAt: DateTime.now().subtract(const Duration(days: 20)),
-      ),
-      DocumentTemplate(
-        id: '4',
-        name: 'Rapport d\'activité',
-        description: 'Modèle de rapport d\'activité mensuel',
-        type: DocumentType.report,
-        thumbnailUrl: 'assets/images/templates/report.jpg',
-        templateContent: '''
-        <h1>RAPPORT D'ACTIVITÉ</h1>
-        <p>Période: {{period}}</p>
-        <p>Préparé par: {{author}}</p>
-        <p>Date: {{date}}</p>
-        
-        <h2>Résumé exécutif</h2>
-        <p>{{executiveSummary}}</p>
-        
-        <h2>Activités réalisées</h2>
-        <p>{{activities}}</p>
-        
-        <h2>Résultats obtenus</h2>
-        <p>{{results}}</p>
-        
-        <h2>Défis rencontrés</h2>
-        <p>{{challenges}}</p>
-        
-        <h2>Prochaines étapes</h2>
-        <p>{{nextSteps}}</p>
-        
-        <h2>Budget et ressources</h2>
-        <p>{{budget}}</p>
-        
-        <h2>Annexes</h2>
-        <p>{{appendices}}</p>
-        ''',
-        fields: [
-          DocumentField(
-            id: 'period',
-            label: 'Période du rapport',
-            placeholder: 'Ex: Janvier 2023',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'author',
-            label: 'Auteur du rapport',
-            placeholder: 'Votre nom',
-            required: true,
-            type: DocumentFieldType.text,
-          ),
-          DocumentField(
-            id: 'date',
-            label: 'Date du rapport',
-            placeholder: 'JJ/MM/AAAA',
-            required: true,
-            type: DocumentFieldType.date,
-          ),
-          DocumentField(
-            id: 'executiveSummary',
-            label: 'Résumé exécutif',
-            placeholder: 'Résumé des points clés du rapport',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'activities',
-            label: 'Activités réalisées',
-            placeholder: 'Liste des activités réalisées pendant la période',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'results',
-            label: 'Résultats obtenus',
-            placeholder: 'Description des résultats obtenus',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'challenges',
-            label: 'Défis rencontrés',
-            placeholder: 'Description des défis ou obstacles rencontrés',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'nextSteps',
-            label: 'Prochaines étapes',
-            placeholder: 'Plan d\'action pour la prochaine période',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'budget',
-            label: 'Budget et ressources',
-            placeholder: 'Détail de l\'utilisation du budget et des ressources',
-            required: true,
-            type: DocumentFieldType.multiline,
-          ),
-          DocumentField(
-            id: 'appendices',
-            label: 'Annexes',
-            placeholder: 'Liste des documents annexes',
-            required: false,
-            type: DocumentFieldType.multiline,
-          ),
-        ],
-        isDefault: false,
-        createdAt: DateTime.now().subtract(const Duration(days: 15)),
-      ),
+      invoiceTemplate,
+      contractTemplate,
+      proposalTemplate,
+      reportTemplate,
     ]);
     
-    // Créer quelques documents
+    // Documents
     _documents.addAll([
       Document(
-        id: '1',
-        title: 'Facture - Client ABC - Mars 2023',
+        id: 'doc1',
+        title: 'Facture #2024-001 - Client A',
         type: DocumentType.invoice,
         status: DocumentStatus.sent,
-        createdAt: DateTime.now().subtract(const Duration(days: 45)),
-        updatedAt: DateTime.now().subtract(const Duration(days: 44)),
-        content: '''
-        <h1>FACTURE</h1>
-        <p>Date: 15/03/2023</p>
-        <p>Numéro de facture: FAC-2023-001</p>
-        <p>Client: Entreprise ABC</p>
-        
-        <table>
-          <tr>
-            <th>Description</th>
-            <th>Quantité</th>
-            <th>Prix unitaire</th>
-            <th>Total</th>
-          </tr>
-          <tr>
-            <td>Développement application mobile</td>
-            <td>1</td>
-            <td>5000 €</td>
-            <td>5000 €</td>
-          </tr>
-        </table>
-        
-        <p>Total HT: 5000 €</p>
-        <p>TVA (20%): 1000 €</p>
-        <p>Total TTC: 6000 €</p>
-        
-        <p>Conditions de paiement: 30 jours</p>
-        <p>Coordonnées bancaires: IBAN FR76 1234 5678 9012 3456 7890 123</p>
-        ''',
-        data: {
-          'date': '15/03/2023',
-          'invoiceNumber': 'FAC-2023-001',
-          'clientName': 'Entreprise ABC',
-          'description': 'Développement application mobile',
-          'quantity': '1',
-          'unitPrice': '5000',
-          'total': '5000',
-          'totalBeforeTax': '5000',
-          'taxRate': '20',
-          'taxAmount': '1000',
-          'totalAfterTax': '6000',
-          'paymentTerms': '30 jours',
-          'bankDetails': 'IBAN FR76 1234 5678 9012 3456 7890 123',
-        },
-        recipientEmail: 'contact@abc-company.com',
-        recipientName: 'Entreprise ABC',
-        previewUrl: 'assets/images/documents/invoice_preview.jpg',
-      ),
-      Document(
-        id: '2',
-        title: 'Proposition - Refonte site web XYZ',
-        type: DocumentType.proposal,
-        status: DocumentStatus.draft,
         createdAt: DateTime.now().subtract(const Duration(days: 15)),
-        updatedAt: DateTime.now().subtract(const Duration(days: 14)),
-        content: '''
-        <h1>PROPOSITION COMMERCIALE</h1>
-        <p>Date: 15/05/2023</p>
-        <p>Référence: PROP-2023-002</p>
-        <p>Client: Société XYZ</p>
-        
-        <h2>Contexte</h2>
-        <p>La société XYZ souhaite refondre son site web pour améliorer sa présence en ligne et augmenter ses conversions.</p>
-        
-        <h2>Solution proposée</h2>
-        <p>Nous proposons une refonte complète du site avec un design moderne, une optimisation pour les moteurs de recherche et une expérience utilisateur améliorée.</p>
-        
-        <h2>Méthodologie</h2>
-        <p>Notre approche se fera en 4 phases : analyse, conception, développement et déploiement.</p>
-        
-        <h2>Planning</h2>
-        <p>Le projet se déroulera sur 3 mois à partir de la validation de cette proposition.</p>
-        
-        <h2>Budget</h2>
-        <p>Le budget total pour ce projet est de 8000 € HT.</p>
-        
-        <h2>Conditions</h2>
-        <p>Paiement en 3 fois : 30% à la commande, 40% à mi-projet, 30% à la livraison.</p>
-        ''',
+        templateId: 'template1',
         data: {
-          'date': '15/05/2023',
-          'reference': 'PROP-2023-002',
-          'clientName': 'Société XYZ',
-          'context': 'La société XYZ souhaite refondre son site web pour améliorer sa présence en ligne et augmenter ses conversions.',
-          'solution': 'Nous proposons une refonte complète du site avec un design moderne, une optimisation pour les moteurs de recherche et une expérience utilisateur améliorée.',
-          'methodology': 'Notre approche se fera en 4 phases : analyse, conception, développement et déploiement.',
-          'schedule': 'Le projet se déroulera sur 3 mois à partir de la validation de cette proposition.',
-          'budget': 'Le budget total pour ce projet est de 8000 € HT.',
-          'conditions': 'Paiement en 3 fois : 30% à la commande, 40% à mi-projet, 30% à la livraison.',
+          'clientName': 'Client A',
+          'clientEmail': 'clienta@example.com',
+          'clientAddress': '123 Rue du Commerce, 75001 Paris',
+          'invoiceNumber': '2024-001',
+          'invoiceDate': DateTime.now().subtract(const Duration(days: 15)).toIso8601String(),
+          'dueDate': DateTime.now().add(const Duration(days: 15)).toIso8601String(),
+          'amount': 1500.0,
+          'currency': 'EUR',
+          'paymentTerms': 'Paiement à 30 jours',
         },
-        previewUrl: 'assets/images/documents/proposal_preview.jpg',
+        content: 'Contenu de la facture générée',
+        clientName: 'Client A',
+        clientEmail: 'clienta@example.com',
+        amount: 1500.0,
+        currency: 'EUR',
       ),
+      
       Document(
-        id: '3',
-        title: 'Contrat - Mission de conseil DEF',
+        id: 'doc2',
+        title: 'Contrat de prestation - Client B',
         type: DocumentType.contract,
         status: DocumentStatus.signed,
-        createdAt: DateTime.now().subtract(const Duration(days: 60)),
-        updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-        expiryDate: DateTime.now().add(const Duration(days: 305)),
-        content: '''
-        <h1>CONTRAT DE PRESTATION DE SERVICES</h1>
-        <p>Entre les soussignés :</p>
-        <p>MonEntreprise, SARL, 123 rue des Entrepreneurs, 75001 Paris</p>
-        <p>Ci-après dénommé "le Prestataire",</p>
-        <p>Et</p>
-        <p>Société DEF, SA, 456 avenue des Clients, 69002 Lyon</p>
-        <p>Ci-après dénommé "le Client",</p>
-        
-        <h2>Article 1 - Objet du contrat</h2>
-        <p>Le présent contrat a pour objet la réalisation d'une mission de conseil en stratégie digitale.</p>
-        
-        <h2>Article 2 - Durée</h2>
-        <p>Ce contrat est conclu pour une durée de 12 mois à compter de sa signature.</p>
-        
-        <h2>Article 3 - Obligations du Prestataire</h2>
-        <p>Le Prestataire s'engage à fournir un service de qualité et à respecter les délais convenus.</p>
-        
-        <h2>Article 4 - Obligations du Client</h2>
-        <p>Le Client s'engage à fournir toutes les informations nécessaires à la bonne exécution de la mission.</p>
-        
-        <h2>Article 5 - Conditions financières</h2>
-        <p>Les honoraires sont fixés à 1000 € HT par mois, payables à 30 jours fin de mois.</p>
-        
-        <h2>Article 6 - Confidentialité</h2>
-        <p>Les parties s'engagent à respecter la confidentialité des informations échangées.</p>
-        
-        <h2>Article 7 - Résiliation</h2>
-        <p>Le contrat peut être résilié avec un préavis de 2 mois par lettre recommandée.</p>
-        
-        <h2>Article 8 - Loi applicable et juridiction</h2>
-        <p>Le présent contrat est soumis au droit français.</p>
-        
-        <p>Fait à Paris, le 01/02/2023</p>
-        <p>Pour le Prestataire : Jean Dupont</p>
-        <p>Pour le Client : Marie Martin</p>
-        ''',
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 25)),
+        templateId: 'template2',
         data: {
-          'providerName': 'MonEntreprise',
-          'providerStatus': 'SARL',
-          'providerAddress': '123 rue des Entrepreneurs, 75001 Paris',
-          'clientName': 'Société DEF',
-          'clientStatus': 'SA',
-          'clientAddress': '456 avenue des Clients, 69002 Lyon',
-          'contractObject': 'Le présent contrat a pour objet la réalisation d\'une mission de conseil en stratégie digitale.',
-          'contractDuration': 'Ce contrat est conclu pour une durée de 12 mois à compter de sa signature.',
-          'providerObligations': 'Le Prestataire s\'engage à fournir un service de qualité et à respecter les délais convenus.',
-          'clientObligations': 'Le Client s\'engage à fournir toutes les informations nécessaires à la bonne exécution de la mission.',
-          'financialConditions': 'Les honoraires sont fixés à 1000 € HT par mois, payables à 30 jours fin de mois.',
-          'confidentiality': 'Les parties s\'engagent à respecter la confidentialité des informations échangées.',
-          'termination': 'Le contrat peut être résilié avec un préavis de 2 mois par lettre recommandée.',
-          'applicableLaw': 'Le présent contrat est soumis au droit français.',
-          'location': 'Paris',
-          'date': '01/02/2023',
-          'providerSignature': 'Jean Dupont',
-          'clientSignature': 'Marie Martin',
+          'clientName': 'Client B',
+          'clientEmail': 'clientb@example.com',
+          'clientAddress': '456 Avenue des Affaires, 69002 Lyon',
+          'contractTitle': 'Développement de site web',
+          'startDate': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+          'endDate': DateTime.now().add(const Duration(days: 60)).toIso8601String(),
+          'amount': 5000.0,
+          'currency': 'EUR',
+          'terms': 'Le prestataire s\'engage à livrer le site web dans les délais convenus...',
         },
-        recipientEmail: 'contact@def-company.com',
-        recipientName: 'Société DEF',
-        previewUrl: 'assets/images/documents/contract_preview.jpg',
+        content: 'Contenu du contrat généré',
+        clientName: 'Client B',
+        clientEmail: 'clientb@example.com',
+        amount: 5000.0,
+        currency: 'EUR',
+        expiresAt: DateTime.now().add(const Duration(days: 60)),
       ),
+      
       Document(
-        id: '4',
-        title: 'Rapport - Analyse SEO Premier trimestre',
+        id: 'doc3',
+        title: 'Proposition commerciale - Prospect C',
+        type: DocumentType.proposal,
+        status: DocumentStatus.draft,
+        createdAt: DateTime.now().subtract(const Duration(days: 7)),
+        templateId: 'template3',
+        data: {
+          'clientName': 'Prospect C',
+          'clientEmail': 'prospectc@example.com',
+          'proposalTitle': 'Services de conseil en marketing',
+          'proposalDate': DateTime.now().subtract(const Duration(days: 7)).toIso8601String(),
+          'validUntil': DateTime.now().add(const Duration(days: 23)).toIso8601String(),
+          'amount': 2500.0,
+          'currency': 'EUR',
+          'description': 'Cette proposition comprend une analyse complète de votre stratégie marketing...',
+        },
+        content: 'Contenu de la proposition généré',
+        clientName: 'Prospect C',
+        clientEmail: 'prospectc@example.com',
+        amount: 2500.0,
+        currency: 'EUR',
+        expiresAt: DateTime.now().add(const Duration(days: 23)),
+      ),
+      
+      Document(
+        id: 'doc4',
+        title: 'Rapport d\'activité - Janvier 2024',
         type: DocumentType.report,
         status: DocumentStatus.archived,
-        createdAt: DateTime.now().subtract(const Duration(days: 90)),
-        updatedAt: DateTime.now().subtract(const Duration(days: 89)),
-        content: '''
-        <h1>RAPPORT D'ACTIVITÉ</h1>
-        <p>Période: Premier trimestre 2023</p>
-        <p>Préparé par: Jean Dupont</p>
-        <p>Date: 31/03/2023</p>
-        
-        <h2>Résumé exécutif</h2>
-        <p>Ce rapport présente les résultats de l'analyse SEO réalisée au cours du premier trimestre 2023.</p>
-        
-        <h2>Activités réalisées</h2>
-        <p>- Audit technique du site web<br>- Analyse des mots-clés<br>- Optimisation du contenu<br>- Création de backlinks</p>
-        
-        <h2>Résultats obtenus</h2>
-        <p>- Augmentation du trafic organique de 25%<br>- Amélioration des positions dans les SERP<br>- Réduction des erreurs techniques</p>
-        
-        <h2>Défis rencontrés</h2>
-        <p>- Forte concurrence sur les mots-clés principaux<br>- Problèmes techniques liés à la vitesse de chargement</p>
-        
-        <h2>Prochaines étapes</h2>
-        <p>- Renforcer la stratégie de contenu<br>- Optimiser davantage la vitesse du site<br>- Développer de nouveaux partenariats pour les backlinks</p>
-        
-        <h2>Budget et ressources</h2>
-        <p>Le budget alloué de 3000 € a été utilisé à 85%.</p>
-        
-        <h2>Annexes</h2>
-        <p>- Rapport d'analyse détaillé<br>- Tableau des positions des mots-clés</p>
-        ''',
+        createdAt: DateTime.now().subtract(const Duration(days: 60)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 58)),
+        templateId: 'template4',
         data: {
-          'period': 'Premier trimestre 2023',
-          'author': 'Jean Dupont',
-          'date': '31/03/2023',
-          'executiveSummary': 'Ce rapport présente les résultats de l\'analyse SEO réalisée au cours du premier trimestre 2023.',
-          'activities': '- Audit technique du site web\n- Analyse des mots-clés\n- Optimisation du contenu\n- Création de backlinks',
-          'results': '- Augmentation du trafic organique de 25%\n- Amélioration des positions dans les SERP\n- Réduction des erreurs techniques',
-          'challenges': '- Forte concurrence sur les mots-clés principaux\n- Problèmes techniques liés à la vitesse de chargement',
-          'nextSteps': '- Renforcer la stratégie de contenu\n- Optimiser davantage la vitesse du site\n- Développer de nouveaux partenariats pour les backlinks',
-          'budget': 'Le budget alloué de 3000 € a été utilisé à 85%.',
-          'appendices': '- Rapport d\'analyse détaillé\n- Tableau des positions des mots-clés',
+          'reportTitle': 'Rapport d\'activité mensuel',
+          'reportPeriod': 'Janvier 2024',
+          'author': 'John Doe',
+          'summary': 'Ce rapport présente les activités réalisées au cours du mois de janvier 2024...',
+          'achievements': 'Lancement de la nouvelle campagne marketing, Acquisition de 3 nouveaux clients...',
+          'challenges': 'Retards dans le développement du projet X...',
+          'nextSteps': 'Finaliser le projet X, Démarrer la phase 2 du projet Y...',
         },
-        previewUrl: 'assets/images/documents/report_preview.jpg',
+        content: 'Contenu du rapport généré',
+        tags: ['rapport', 'mensuel', 'activité'],
+      ),
+      
+      Document(
+        id: 'doc5',
+        title: 'Facture #2024-002 - Client B',
+        type: DocumentType.invoice,
+        status: DocumentStatus.paid,
+        createdAt: DateTime.now().subtract(const Duration(days: 45)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 30)),
+        templateId: 'template1',
+        data: {
+          'clientName': 'Client B',
+          'clientEmail': 'clientb@example.com',
+          'clientAddress': '456 Avenue des Affaires, 69002 Lyon',
+          'invoiceNumber': '2024-002',
+          'invoiceDate': DateTime.now().subtract(const Duration(days: 45)).toIso8601String(),
+          'dueDate': DateTime.now().subtract(const Duration(days: 15)).toIso8601String(),
+          'amount': 3000.0,
+          'currency': 'EUR',
+          'paymentTerms': 'Paiement à 30 jours',
+        },
+        content: 'Contenu de la facture générée',
+        clientName: 'Client B',
+        clientEmail: 'clientb@example.com',
+        amount: 3000.0,
+        currency: 'EUR',
       ),
     ]);
   }
-
+  
   @override
-  Future<List<Document>> getAllDocuments() async {
+  Future<List<Document>> getDocuments() async {
     // Simuler un délai réseau
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    // Renvoyer une copie de la liste des documents (triés par date de création)
+    final documents = List<Document>.from(_documents);
+    documents.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return documents;
+  }
+  
+  @override
+  Future<Document> getDocumentById(String id) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    return [..._documents];
-  }
-
-  @override
-  Future<Document?> getDocumentById(String id) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _documents.firstWhere((doc) => doc.id == id, orElse: () => throw Exception('Document not found'));
-  }
-
-  @override
-  Future<List<Document>> getDocumentsByType(DocumentType type) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 400));
-    return _documents.where((doc) => doc.type == type).toList();
-  }
-
-  @override
-  Future<List<Document>> getDocumentsByStatus(DocumentStatus status) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 400));
-    return _documents.where((doc) => doc.status == status).toList();
-  }
-
-  @override
-  Future<List<Document>> searchDocuments(String query) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 600));
     
-    final queryLower = query.toLowerCase();
-    return _documents.where((doc) => 
-      doc.title.toLowerCase().contains(queryLower) || 
-      doc.content.toLowerCase().contains(queryLower) ||
-      (doc.recipientName?.toLowerCase().contains(queryLower) ?? false)
-    ).toList();
-  }
-
-  @override
-  Future<Document> addDocument(Document document) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 700));
+    final document = _documents.firstWhere(
+      (doc) => doc.id == id,
+      orElse: () => throw Exception('Document non trouvé avec ID: $id'),
+    );
     
-    final newDoc = document.id.isEmpty 
-        ? document.copyWith(id: _uuid.v4())
-        : document;
-    
-    _documents.add(newDoc);
-    return newDoc;
-  }
-
-  @override
-  Future<Document> updateDocument(Document document) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 700));
-    
-    final index = _documents.indexWhere((doc) => doc.id == document.id);
-    if (index == -1) {
-      throw Exception('Document non trouvé');
-    }
-    
-    _documents[index] = document;
     return document;
   }
-
+  
   @override
-  Future<bool> deleteDocument(String id) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 500));
+  Future<Document> createDocument(Document document) async {
+    await Future.delayed(const Duration(milliseconds: 1000));
     
-    final index = _documents.indexWhere((doc) => doc.id == id);
-    if (index == -1) {
-      return false;
-    }
+    // Ajouter le document à la liste
+    _documents.add(document);
     
-    _documents.removeAt(index);
-    return true;
+    return document;
   }
-
+  
   @override
-  Future<Document> changeDocumentStatus(String id, DocumentStatus newStatus) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 400));
+  Future<Document> updateDocument(Document document) async {
+    await Future.delayed(const Duration(milliseconds: 800));
     
-    final index = _documents.indexWhere((doc) => doc.id == id);
+    // Trouver l'index du document existant
+    final index = _documents.indexWhere((doc) => doc.id == document.id);
     if (index == -1) {
-      throw Exception('Document non trouvé');
+      throw Exception('Document non trouvé avec ID: ${document.id}');
     }
     
-    final updatedDoc = _documents[index].copyWith(
-      status: newStatus,
+    // Mettre à jour le document
+    _documents[index] = document.copyWith(
       updatedAt: DateTime.now(),
     );
     
-    _documents[index] = updatedDoc;
-    return updatedDoc;
+    return _documents[index];
   }
-
+  
   @override
-  Future<List<DocumentTemplate>> getAllTemplates() async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 500));
-    return [..._templates];
-  }
-
-  @override
-  Future<DocumentTemplate?> getTemplateById(String id) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _templates.firstWhere((template) => template.id == id, orElse: () => throw Exception('Template not found'));
-  }
-
-  @override
-  Future<List<DocumentTemplate>> getTemplatesByType(DocumentType type) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 400));
-    return _templates.where((template) => template.type == type).toList();
-  }
-
-  @override
-  Future<DocumentTemplate> addTemplate(DocumentTemplate template) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 700));
+  Future<void> deleteDocument(String id) async {
+    await Future.delayed(const Duration(milliseconds: 600));
     
-    final newTemplate = template.id.isEmpty 
-        ? template.copyWith(id: _uuid.v4())
-        : template;
-    
-    _templates.add(newTemplate);
-    return newTemplate;
-  }
-
-  @override
-  Future<DocumentTemplate> updateTemplate(DocumentTemplate template) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 700));
-    
-    final index = _templates.indexWhere((temp) => temp.id == template.id);
+    // Vérifier si le document existe
+    final index = _documents.indexWhere((doc) => doc.id == id);
     if (index == -1) {
-      throw Exception('Template non trouvé');
+      throw Exception('Document non trouvé avec ID: $id');
     }
     
-    _templates[index] = template;
+    // Supprimer le document
+    _documents.removeAt(index);
+  }
+  
+  @override
+  Future<Document> changeDocumentStatus(String id, DocumentStatus status) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Trouver le document
+    final index = _documents.indexWhere((doc) => doc.id == id);
+    if (index == -1) {
+      throw Exception('Document non trouvé avec ID: $id');
+    }
+    
+    // Mettre à jour le statut
+    final updatedDocument = _documents[index].copyWith(
+      status: status,
+      updatedAt: DateTime.now(),
+    );
+    
+    // Mettre à jour le document dans la liste
+    _documents[index] = updatedDocument;
+    
+    return updatedDocument;
+  }
+  
+  @override
+  Future<List<DocumentTemplate>> getTemplates() async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    // Renvoyer une copie de la liste des modèles
+    return List<DocumentTemplate>.from(_templates);
+  }
+  
+  @override
+  Future<DocumentTemplate> getTemplateById(String id) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    final template = _templates.firstWhere(
+      (template) => template.id == id,
+      orElse: () => throw Exception('Modèle non trouvé avec ID: $id'),
+    );
+    
     return template;
   }
-
+  
   @override
-  Future<bool> deleteTemplate(String id) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 500));
+  Future<DocumentTemplate> createTemplate(DocumentTemplate template) async {
+    await Future.delayed(const Duration(milliseconds: 1000));
     
-    final index = _templates.indexWhere((temp) => temp.id == id);
+    // Ajouter le modèle à la liste
+    _templates.add(template);
+    
+    return template;
+  }
+  
+  @override
+  Future<DocumentTemplate> updateTemplate(DocumentTemplate template) async {
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    // Trouver l'index du modèle existant
+    final index = _templates.indexWhere((t) => t.id == template.id);
     if (index == -1) {
-      return false;
+      throw Exception('Modèle non trouvé avec ID: ${template.id}');
     }
     
-    _templates.removeAt(index);
-    return true;
+    // Mettre à jour le modèle
+    _templates[index] = template.copyWith(
+      updatedAt: DateTime.now(),
+    );
+    
+    return _templates[index];
   }
-
+  
+  @override
+  Future<void> deleteTemplate(String id) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    
+    // Vérifier si le modèle existe
+    final index = _templates.indexWhere((template) => template.id == id);
+    if (index == -1) {
+      throw Exception('Modèle non trouvé avec ID: $id');
+    }
+    
+    // Supprimer le modèle
+    _templates.removeAt(index);
+  }
+  
   @override
   Future<Document> generateDocumentFromTemplate({
     required String templateId,
     required Map<String, dynamic> data,
     required String title,
   }) async {
-    // Simuler un délai réseau
-    await Future.delayed(const Duration(milliseconds: 900));
+    await Future.delayed(const Duration(milliseconds: 1500));
     
-    // Trouver le template
+    // Trouver le modèle
     final template = await getTemplateById(templateId);
-    if (template == null) {
-      throw Exception('Template non trouvé');
-    }
     
-    // Générer le contenu à partir du template et des données
-    String content = template.templateContent;
-    
-    // Remplacer les variables par les valeurs
-    data.forEach((key, value) {
-      content = content.replaceAll('{{$key}}', value.toString());
-    });
-    
-    // Créer le nouveau document
+    // Créer un nouveau document
     final newDocument = Document(
-      id: _uuid.v4(),
+      id: 'doc_${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       type: template.type,
-      status: DocumentStatus.draft,
+      status: DocumentStatus.draft, // Par défaut, le document est un brouillon
       createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      content: content,
-      data: Map<String, dynamic>.from(data),
+      templateId: templateId,
+      data: data,
+      content: _processTemplateContent(template.content, data),
+      clientName: data['clientName'] as String?,
+      clientEmail: data['clientEmail'] as String?,
+      amount: data['amount'] is double ? data['amount'] as double : null,
+      currency: data['currency'] as String?,
+      expiresAt: data['expiresAt'] != null ? DateTime.parse(data['expiresAt'] as String) : null,
     );
     
     // Ajouter le document à la liste
     _documents.add(newDocument);
     
     return newDocument;
+  }
+  
+  @override
+  Future<List<Document>> filterDocumentsByType(DocumentType type) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Filtrer les documents par type
+    final filteredDocuments = _documents.where((doc) => doc.type == type).toList();
+    
+    // Trier par date de création (plus récent d'abord)
+    filteredDocuments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return filteredDocuments;
+  }
+  
+  @override
+  Future<List<Document>> filterDocumentsByStatus(DocumentStatus status) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Filtrer les documents par statut
+    final filteredDocuments = _documents.where((doc) => doc.status == status).toList();
+    
+    // Trier par date de création (plus récent d'abord)
+    filteredDocuments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    return filteredDocuments;
+  }
+  
+  @override
+  Future<List<DocumentTemplate>> filterTemplatesByType(DocumentType type) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Filtrer les modèles par type
+    return _templates.where((template) => template.type == type).toList();
+  }
+  
+  // Méthode utilitaire pour remplacer les variables dans le contenu du modèle
+  String _processTemplateContent(String templateContent, Map<String, dynamic> data) {
+    String processedContent = templateContent;
+    
+    // Remplacer les variables par les valeurs
+    data.forEach((key, value) {
+      if (value != null) {
+        processedContent = processedContent.replaceAll('{{$key}}', value.toString());
+      }
+    });
+    
+    return processedContent;
   }
 }

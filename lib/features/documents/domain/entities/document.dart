@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// Enum représentant les types de document
+/// Enum pour le type de document
 enum DocumentType {
   invoice,
   contract,
   proposal,
   report,
-  letter,
   other;
   
   /// Nom d'affichage du type
@@ -20,74 +19,111 @@ enum DocumentType {
         return 'Proposition';
       case DocumentType.report:
         return 'Rapport';
-      case DocumentType.letter:
-        return 'Lettre';
       case DocumentType.other:
         return 'Autre';
     }
   }
   
   /// Couleur associée au type
-  int get color {
+  Color get color {
     switch (this) {
       case DocumentType.invoice:
-        return Colors.blue.value;
+        return Colors.green;
       case DocumentType.contract:
-        return Colors.purple.value;
+        return Colors.blue;
       case DocumentType.proposal:
-        return Colors.orange.value;
+        return Colors.purple;
       case DocumentType.report:
-        return Colors.teal.value;
-      case DocumentType.letter:
-        return Colors.indigo.value;
+        return Colors.orange;
       case DocumentType.other:
-        return Colors.grey.value;
+        return Colors.grey;
+    }
+  }
+  
+  /// Icône associée au type
+  IconData get icon {
+    switch (this) {
+      case DocumentType.invoice:
+        return Icons.receipt;
+      case DocumentType.contract:
+        return Icons.assignment;
+      case DocumentType.proposal:
+        return Icons.description;
+      case DocumentType.report:
+        return Icons.summarize;
+      case DocumentType.other:
+        return Icons.article;
     }
   }
 }
 
-/// Enum représentant les statuts de document
+/// Enum pour le statut d'un document
 enum DocumentStatus {
   draft,
-  pending,
-  approved,
+  sent,
+  signed,
+  paid,
   rejected,
   expired,
-  completed;
+  archived;
   
   /// Nom d'affichage du statut
   String get displayName {
     switch (this) {
       case DocumentStatus.draft:
         return 'Brouillon';
-      case DocumentStatus.pending:
-        return 'En attente';
-      case DocumentStatus.approved:
-        return 'Approuvé';
+      case DocumentStatus.sent:
+        return 'Envoyé';
+      case DocumentStatus.signed:
+        return 'Signé';
+      case DocumentStatus.paid:
+        return 'Payé';
       case DocumentStatus.rejected:
         return 'Rejeté';
       case DocumentStatus.expired:
         return 'Expiré';
-      case DocumentStatus.completed:
-        return 'Terminé';
+      case DocumentStatus.archived:
+        return 'Archivé';
     }
   }
   
   /// Couleur associée au statut
-  int get color {
+  Color get color {
     switch (this) {
       case DocumentStatus.draft:
-        return Colors.grey.value;
-      case DocumentStatus.pending:
-        return Colors.orange.value;
-      case DocumentStatus.approved:
-        return Colors.green.value;
+        return Colors.grey;
+      case DocumentStatus.sent:
+        return Colors.blue;
+      case DocumentStatus.signed:
+        return Colors.green;
+      case DocumentStatus.paid:
+        return Colors.purple;
       case DocumentStatus.rejected:
-        return Colors.red.value;
+        return Colors.red;
       case DocumentStatus.expired:
-        return Colors.redAccent.value;
-      case DocumentStatus.completed:
-        return Colors.blue.value;
+        return Colors.orange;
+      case DocumentStatus.archived:
+        return Colors.brown;
+    }
+  }
+  
+  /// Icône associée au statut
+  IconData get icon {
+    switch (this) {
+      case DocumentStatus.draft:
+        return Icons.edit;
+      case DocumentStatus.sent:
+        return Icons.send;
+      case DocumentStatus.signed:
+        return Icons.check_circle;
+      case DocumentStatus.paid:
+        return Icons.paid;
+      case DocumentStatus.rejected:
+        return Icons.cancel;
+      case DocumentStatus.expired:
+        return Icons.timer_off;
+      case DocumentStatus.archived:
+        return Icons.archive;
     }
   }
 }
@@ -98,36 +134,36 @@ class Document {
   final String title;
   final DocumentType type;
   final DocumentStatus status;
-  final String content;
-  final String contentPreview;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  final DateTime? expiryDate;
-  final String recipientName;
-  final String recipientEmail;
-  final String templateId;
+  final DateTime? expiresAt;
+  final String? templateId;
   final Map<String, dynamic> data;
-  
-  /// Indique si le document a un destinataire
-  bool get hasRecipient => recipientName.isNotEmpty || recipientEmail.isNotEmpty;
-  
-  /// Indique si le document est expiré
-  bool get isExpired => expiryDate != null && expiryDate!.isBefore(DateTime.now());
+  final String content;
+  final String? clientName;
+  final String? clientEmail;
+  final double? amount;
+  final String? currency;
+  final String? notes;
+  final List<String>? tags;
   
   Document({
     required this.id,
     required this.title,
     required this.type,
     required this.status,
-    required this.content,
-    this.contentPreview = '',
     required this.createdAt,
     this.updatedAt,
-    this.expiryDate,
-    this.recipientName = '',
-    this.recipientEmail = '',
-    required this.templateId,
+    this.expiresAt,
+    this.templateId,
     required this.data,
+    required this.content,
+    this.clientName,
+    this.clientEmail,
+    this.amount,
+    this.currency,
+    this.notes,
+    this.tags,
   });
   
   /// Copie le document avec de nouvelles valeurs
@@ -136,30 +172,36 @@ class Document {
     String? title,
     DocumentType? type,
     DocumentStatus? status,
-    String? content,
-    String? contentPreview,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? expiryDate,
-    String? recipientName,
-    String? recipientEmail,
+    DateTime? expiresAt,
     String? templateId,
     Map<String, dynamic>? data,
+    String? content,
+    String? clientName,
+    String? clientEmail,
+    double? amount,
+    String? currency,
+    String? notes,
+    List<String>? tags,
   }) {
     return Document(
       id: id ?? this.id,
       title: title ?? this.title,
       type: type ?? this.type,
       status: status ?? this.status,
-      content: content ?? this.content,
-      contentPreview: contentPreview ?? this.contentPreview,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      expiryDate: expiryDate ?? this.expiryDate,
-      recipientName: recipientName ?? this.recipientName,
-      recipientEmail: recipientEmail ?? this.recipientEmail,
+      expiresAt: expiresAt ?? this.expiresAt,
       templateId: templateId ?? this.templateId,
       data: data ?? this.data,
+      content: content ?? this.content,
+      clientName: clientName ?? this.clientName,
+      clientEmail: clientEmail ?? this.clientEmail,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      notes: notes ?? this.notes,
+      tags: tags ?? this.tags,
     );
   }
 }

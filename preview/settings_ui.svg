@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="720px" height="1000px" viewBox="0 0 720 1000" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        text {
+            font-family: 'Inter', 'Arial', sans-serif;
+            fill: #2E2E2E;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            fill: #B87333;
+        }
+        .subtitle {
+            font-size: 18px;
+            font-weight: bold;
+            fill: #B87333;
+        }
+        .screen-title {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .phone {
+            fill: white;
+            stroke: #333;
+            stroke-width: 2;
+            rx: 20;
+            ry: 20;
+        }
+        .screen {
+            fill: #F8F9FA;
+            stroke: #B87333;
+            stroke-width: 1;
+        }
+        .header {
+            fill: #B87333;
+        }
+        .item {
+            fill: white;
+            stroke: #DDD;
+            stroke-width: 1;
+            rx: 5;
+            ry: 5;
+        }
+        .item-highlight {
+            fill: #FFF9E6;
+            stroke: #FFD700;
+            stroke-width: 1;
+            rx: 5;
+            ry: 5;
+        }
+        .icon-placeholder {
+            fill: #B87333;
+            rx: 5;
+            ry: 5;
+        }
+        .text-placeholder {
+            fill: #333;
+            font-size: 10px;
+        }
+        .button {
+            fill: #B87333;
+            rx: 5;
+            ry: 5;
+        }
+        .button-text {
+            fill: white;
+            font-size: 12px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+    </style>
+    
+    <rect width="100%" height="100%" fill="white" />
+    
+    <text x="360" y="40" class="title" text-anchor="middle">Interfaces du Module de Paramètres</text>
+    <text x="360" y="70" text-anchor="middle">Application GBC CoachIA</text>
+    
+    <!-- Phone 1: Settings Main -->
+    <rect x="50" y="100" width="200" height="400" rx="20" ry="20" class="phone" />
+    <rect x="60" y="120" width="180" height="360" class="screen" />
+    <rect x="60" y="120" width="180" height="50" class="header" />
+    <text x="150" y="150" text-anchor="middle" fill="white" font-weight="bold">Paramètres</text>
+    
+    <!-- Settings Items -->
+    <rect x="70" y="180" width="160" height="40" class="item" />
+    <rect x="80" y="190" width="20" height="20" class="icon-placeholder" />
+    <text x="110" y="205" class="text-placeholder">Profil utilisateur</text>
+    
+    <rect x="70" y="230" width="160" height="40" class="item" />
+    <rect x="80" y="240" width="20" height="20" class="icon-placeholder" />
+    <text x="110" y="255" class="text-placeholder">Thème et apparence</text>
+    
+    <rect x="70" y="280" width="160" height="40" class="item" />
+    <rect x="80" y="290" width="20" height="20" class="icon-placeholder" />
+    <text x="110" y="305" class="text-placeholder">Notifications</text>
+    
+    <rect x="70" y="330" width="160" height="40" class="item" />
+    <rect x="80" y="340" width="20" height="20" class="icon-placeholder" />
+    <text x="110" y="355" class="text-placeholder">Clés API</text>
+    
+    <rect x="70" y="380" width="160" height="40" class="item" />
+    <rect x="80" y="390" width="20" height="20" class="icon-placeholder" />
+    <text x="110" y="405" class="text-placeholder">Confidentialité</text>
+    
+    <text x="150" y="520" class="screen-title" text-anchor="middle">Écran principal Paramètres</text>
+    
+    <!-- Phone 2: Profile -->
+    <rect x="270" y="100" width="200" height="400" rx="20" ry="20" class="phone" />
+    <rect x="280" y="120" width="180" height="360" class="screen" />
+    <rect x="280" y="120" width="180" height="50" class="header" />
+    <text x="370" y="150" text-anchor="middle" fill="white" font-weight="bold">Profil Utilisateur</text>
+    
+    <!-- Profile Form -->
+    <text x="300" y="190" class="text-placeholder">Nom</text>
+    <rect x="300" y="200" width="140" height="30" class="item" />
+    
+    <text x="300" y="250" class="text-placeholder">Adresse e-mail</text>
+    <rect x="300" y="260" width="140" height="30" class="item" />
+    
+    <text x="300" y="310" class="text-placeholder">Profession</text>
+    <rect x="300" y="320" width="140" height="30" class="item" />
+    
+    <rect x="320" y="370" width="100" height="30" class="button" />
+    <text x="370" y="385" class="button-text">Enregistrer</text>
+    
+    <text x="370" y="520" class="screen-title" text-anchor="middle">Modification du profil</text>
+    
+    <!-- Phone 3: Theme Settings -->
+    <rect x="490" y="100" width="200" height="400" rx="20" ry="20" class="phone" />
+    <rect x="500" y="120" width="180" height="360" class="screen" />
+    <rect x="500" y="120" width="180" height="50" class="header" />
+    <text x="590" y="150" text-anchor="middle" fill="white" font-weight="bold">Thème et apparence</text>
+    
+    <!-- Theme Settings -->
+    <text x="520" y="190" class="text-placeholder">Mode d'affichage</text>
+    
+    <rect x="520" y="200" width="140" height="40" class="item-highlight" />
+    <text x="550" y="225" class="text-placeholder">Mode clair</text>
+    
+    <rect x="520" y="250" width="140" height="40" class="item" />
+    <text x="550" y="275" class="text-placeholder">Mode sombre</text>
+    
+    <rect x="520" y="300" width="140" height="40" class="item" />
+    <text x="550" y="325" class="text-placeholder">Système</text>
+    
+    <text x="590" y="520" class="screen-title" text-anchor="middle">Paramètres de thème</text>
+    
+    <!-- Phone 4: API Settings -->
+    <rect x="50" y="550" width="200" height="400" rx="20" ry="20" class="phone" />
+    <rect x="60" y="570" width="180" height="360" class="screen" />
+    <rect x="60" y="570" width="180" height="50" class="header" />
+    <text x="150" y="600" text-anchor="middle" fill="white" font-weight="bold">Configuration API</text>
+    
+    <!-- API Settings -->
+    <text x="80" y="640" class="text-placeholder">OpenAI API Key</text>
+    <rect x="80" y="650" width="140" height="30" class="item" />
+    
+    <text x="80" y="700" class="text-placeholder">Deepseek API Key</text>
+    <rect x="80" y="710" width="140" height="30" class="item" />
+    
+    <text x="80" y="760" class="text-placeholder">Gemini 2.5 Pro API Key</text>
+    <rect x="80" y="770" width="140" height="30" class="item" />
+    
+    <rect x="100" y="820" width="100" height="30" class="button" />
+    <text x="150" y="835" class="button-text">Enregistrer</text>
+    
+    <text x="150" y="970" class="screen-title" text-anchor="middle">Configuration des API</text>
+    
+    <!-- Phone 5: Notifications -->
+    <rect x="270" y="550" width="200" height="400" rx="20" ry="20" class="phone" />
+    <rect x="280" y="570" width="180" height="360" class="screen" />
+    <rect x="280" y="570" width="180" height="50" class="header" />
+    <text x="370" y="600" text-anchor="middle" fill="white" font-weight="bold">Notifications</text>
+    
+    <!-- Notification Settings -->
+    <rect x="290" y="630" width="160" height="40" class="item" />
+    <text x="320" y="655" class="text-placeholder">Notifications push</text>
+    <rect x="430" y="640" width="15" height="15" class="icon-placeholder" />
+    
+    <rect x="290" y="680" width="160" height="40" class="item" />
+    <text x="320" y="705" class="text-placeholder">Alertes email</text>
+    <rect x="430" y="690" width="15" height="15" class="icon-placeholder" />
+    
+    <rect x="290" y="730" width="160" height="40" class="item" />
+    <text x="320" y="755" class="text-placeholder">Rappels</text>
+    <rect x="430" y="740" width="15" height="15" class="icon-placeholder" />
+    
+    <rect x="290" y="780" width="160" height="40" class="item" />
+    <text x="320" y="805" class="text-placeholder">Mises à jour</text>
+    <rect x="430" y="790" width="15" height="15" class="icon-placeholder" />
+    
+    <text x="370" y="970" class="screen-title" text-anchor="middle">Paramètres de notifications</text>
+    
+    <!-- Phone 6: Privacy -->
+    <rect x="490" y="550" width="200" height="400" rx="20" ry="20" class="phone" />
+    <rect x="500" y="570" width="180" height="360" class="screen" />
+    <rect x="500" y="570" width="180" height="50" class="header" />
+    <text x="590" y="600" text-anchor="middle" fill="white" font-weight="bold">Confidentialité</text>
+    
+    <!-- Privacy Settings -->
+    <rect x="510" y="630" width="160" height="40" class="item" />
+    <text x="540" y="655" class="text-placeholder">Partage de données</text>
+    <rect x="650" y="640" width="15" height="15" class="icon-placeholder" />
+    
+    <rect x="510" y="680" width="160" height="40" class="item" />
+    <text x="540" y="705" class="text-placeholder">Stockage local</text>
+    <rect x="650" y="690" width="15" height="15" class="icon-placeholder" />
+    
+    <rect x="510" y="730" width="160" height="40" class="item" />
+    <text x="540" y="755" class="text-placeholder">Supprimer les données</text>
+    
+    <rect x="510" y="780" width="160" height="40" class="item-highlight" />
+    <text x="540" y="805" class="text-placeholder">Conditions d'utilisation</text>
+    
+    <text x="590" y="970" class="screen-title" text-anchor="middle">Paramètres de confidentialité</text>
+</svg>

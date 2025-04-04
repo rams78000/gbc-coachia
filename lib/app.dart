@@ -1,53 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gbc_coachia/config/di/service_locator.dart';
-import 'package:gbc_coachia/config/router/app_router.dart';
-import 'package:gbc_coachia/config/theme/app_theme.dart';
-import 'package:gbc_coachia/features/auth/domain/repositories/auth_repository.dart';
-import 'package:gbc_coachia/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:gbc_coachia/features/chatbot/presentation/bloc/chatbot_bloc.dart';
-import 'package:gbc_coachia/features/documents/presentation/bloc/document_bloc.dart';
-import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
-import 'package:gbc_coachia/features/planner/presentation/bloc/planner_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Application principale
-class App extends StatelessWidget {
-  const App({super.key});
+import 'config/router/app_router.dart';
+import 'config/theme/app_theme.dart';
+
+class GBCCoachIAApp extends StatelessWidget {
+  const GBCCoachIAApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<AuthBloc>(
-          create: (context) => AuthBloc(),
-        ),
-        BlocProvider<ChatbotBloc>(
-          create: (context) => serviceLocator<ChatbotBloc>(),
-        ),
-        BlocProvider<PlannerBloc>(
-          create: (context) => serviceLocator<PlannerBloc>(),
-        ),
-        BlocProvider<FinanceBloc>(
-          create: (context) => serviceLocator<FinanceBloc>(),
-        ),
-        BlocProvider<DocumentBloc>(
-          create: (context) => serviceLocator<DocumentBloc>(),
-        ),
-      ],
-      child: Builder(
-        builder: (context) {
-          final router = AppRouter.router(context);
-          
-          return MaterialApp.router(
-            title: 'GBC CoachIA',
-            theme: AppTheme.lightTheme(),
-            darkTheme: AppTheme.darkTheme(),
-            themeMode: ThemeMode.system,
-            debugShowCheckedModeBanner: false,
-            routerConfig: router,
-          );
-        },
-      ),
+    return MaterialApp.router(
+      title: 'GBC CoachIA',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system, // A remplacer par les préférences de l'utilisateur
+      routerConfig: appRouter,
     );
   }
 }

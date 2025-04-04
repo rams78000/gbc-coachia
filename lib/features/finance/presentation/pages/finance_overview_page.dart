@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gbc_coachia/features/finance/domain/entities/financial_summary.dart';
 import 'package:gbc_coachia/features/finance/domain/entities/transaction.dart';
 import 'package:gbc_coachia/features/finance/presentation/bloc/finance_bloc.dart';
+import 'package:gbc_coachia/features/finance/presentation/widgets/cash_flow_chart.dart';
+import 'package:gbc_coachia/features/finance/presentation/widgets/interactive_category_chart.dart';
+import 'package:gbc_coachia/features/finance/presentation/widgets/financial_trend_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -111,27 +115,36 @@ class _FinanceOverviewPageState extends State<FinanceOverviewPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Résumé financier (carte en haut)
             _buildFinancialSummary(context),
             const SizedBox(height: 24),
-            const Text(
-              'Revenus vs Dépenses',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: _buildChart(context, transactions),
-            ),
+            
+            // Section des graphiques interactifs
+            _buildChartsSection(context, transactions),
+            
+            // Section des transactions récentes
             const SizedBox(height: 24),
-            const Text(
-              'Transactions récentes',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Transactions récentes',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Naviguer vers la liste complète des transactions
+                  },
+                  child: const Text('Voir tout'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 32),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             ...transactions
@@ -139,19 +152,137 @@ class _FinanceOverviewPageState extends State<FinanceOverviewPage> {
                 .map((transaction) =>
                     _buildTransactionItem(context, transaction, screenWidth))
                 .toList(),
-            const SizedBox(height: 16),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  // TODO: Naviguer vers la liste complète des transactions
-                },
-                child: const Text('Voir toutes les transactions'),
-              ),
-            ),
           ],
         ),
       ),
     );
+  }
+  
+  /// Construit la section des graphiques financiers interactifs
+  Widget _buildChartsSection(BuildContext context, List<Transaction> transactions) {
+    return BlocBuilder<FinanceBloc, FinanceState>(
+      builder: (context, state) {
+        if (state is FinancialSummaryLoaded) {
+          // Récupérer les résumés financiers
+          final List<FinancialSummary> summaries = state.summaries ?? [];
+          
+          // Regrouper les transactions par catégorie
+          final Map<TransactionCategory, double> expensesByCategory = 
+              _groupTransactionsByCategory(transactions, TransactionType.expense);
+          
+          final Map<TransactionCategory, double> incomesByCategory =
+              _groupTransactionsByCategory(transactions, TransactionType.income);
+          
+          // Calculer les totaux
+          final double totalIncome = state.totalIncome;
+          final double totalExpenses = state.totalExpenses;
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Flux de trésorerie (revenus vs dépenses vs solde)
+              if (summaries.isNotEmpty)
+                CashFlowChart(
+                  summaries: summaries, 
+                  period: FinancialPeriod.monthly,
+                  onPeriodSelected: (selectedSummary) {
+                    // TODO: Afficher les détails de la période sélectionnée
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Période: ${DateFormat('MMMM yyyy', 'fr').format(selectedSummary.startDate)}'
+                        ),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+              
+              const SizedBox(height: 16),
+              
+              // Graphiques de répartition par catégorie
+              Row(
+                children: [
+                  // Répartition des dépenses
+                  if (expensesByCategory.isNotEmpty)
+                    Expanded(
+                      child: InteractiveCategoryChart(
+                        categoriesAmount: expensesByCategory,
+                        type: TransactionType.expense,
+                        totalAmount: totalExpenses,
+                        onCategorySelected: (category) {
+                          // TODO: Filtrer les transactions par catégorie
+                        },
+                      ),
+                    ),
+                  
+                  // Répartition des revenus (si disponible)
+                  if (incomesByCategory.isNotEmpty)
+                    Expanded(
+                      child: InteractiveCategoryChart(
+                        categoriesAmount: incomesByCategory,
+                        type: TransactionType.income,
+                        totalAmount: totalIncome,
+                        onCategorySelected: (category) {
+                          // TODO: Filtrer les transactions par catégorie
+                        },
+                      ),
+                    ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Tendances financières
+              if (summaries.isNotEmpty)
+                FinancialTrendChart(
+                  summaries: summaries, 
+                  period: FinancialPeriod.monthly,
+                  onPeriodSelected: (selectedSummary) {
+                    // TODO: Afficher les détails de la période sélectionnée
+                  },
+                ),
+            ],
+          );
+        } else {
+          // Afficher le graphique de base si les résumés ne sont pas disponibles
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Revenus vs Dépenses',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 200,
+                child: _buildChart(context, transactions),
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+  
+  /// Regroupe les transactions par catégorie pour un type donné
+  Map<TransactionCategory, double> _groupTransactionsByCategory(
+    List<Transaction> transactions,
+    TransactionType type,
+  ) {
+    final Map<TransactionCategory, double> result = {};
+    
+    for (final transaction in transactions) {
+      if (transaction.type == type) {
+        final currentAmount = result[transaction.category] ?? 0.0;
+        result[transaction.category] = currentAmount + transaction.amount;
+      }
+    }
+    
+    return result;
   }
 
   Widget _buildFinancialSummary(BuildContext context) {

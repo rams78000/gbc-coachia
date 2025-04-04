@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="#F5F5F5" />
+  <rect x="50" y="50" width="90" height="90" fill="#3F51B5" rx="10" ry="10" />
+  <rect x="160" y="50" width="90" height="90" fill="#FF9800" rx="10" ry="10" />
+  <rect x="50" y="160" width="90" height="90" fill="#FF9800" rx="10" ry="10" />
+  <rect x="160" y="160" width="90" height="90" fill="#3F51B5" rx="10" ry="10" />
+  <text x="95" y="95" font-family="Arial" font-size="15" text-anchor="middle" fill="white">Dashboard</text>
+  <text x="205" y="95" font-family="Arial" font-size="15" text-anchor="middle" fill="white">Chatbot</text>
+  <text x="95" y="205" font-family="Arial" font-size="15" text-anchor="middle" fill="white">Finance</text>
+  <text x="205" y="205" font-family="Arial" font-size="15" text-anchor="middle" fill="white">Planner</text>
+</svg>

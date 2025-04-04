@@ -14,12 +14,6 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "archive",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/archive-3.6.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
       "name": "args",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/args-2.7.0",
       "packageUri": "lib/",
@@ -128,18 +122,6 @@
       "languageVersion": "2.18"
     },
     {
-      "name": "connectivity_plus",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/connectivity_plus-5.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "connectivity_plus_platform_interface",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/connectivity_plus_platform_interface-1.2.4",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "convert",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/convert-3.1.2",
       "packageUri": "lib/",
@@ -150,6 +132,12 @@
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/coverage-1.11.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "cross_file",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/cross_file-0.3.4+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "crypto",
@@ -170,40 +158,10 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "dbus",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/dbus-0.7.11",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
-      "name": "device_info_plus",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/device_info_plus-9.1.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "device_info_plus_platform_interface",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/device_info_plus_platform_interface-7.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
       "name": "diff_match_patch",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/diff_match_patch-0.4.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
-    },
-    {
-      "name": "dio",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/dio-5.8.0+1",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "dio_web_adapter",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/dio_web_adapter-2.1.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
     },
     {
       "name": "equatable",
@@ -230,6 +188,36 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "file_picker",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/file_picker-6.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
+      "name": "file_selector_linux",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/file_selector_linux-0.9.3+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "file_selector_macos",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/file_selector_macos-0.9.4+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "file_selector_platform_interface",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/file_selector_platform_interface-2.6.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "file_selector_windows",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/file_selector_windows-0.9.3+4",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "fixnum",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/fixnum-1.1.1",
       "packageUri": "lib/",
@@ -237,9 +225,9 @@
     },
     {
       "name": "fl_chart",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/fl_chart-0.65.0",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/fl_chart-0.66.2",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.2"
     },
     {
       "name": "flutter",
@@ -255,9 +243,51 @@
     },
     {
       "name": "flutter_lints",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_lints-2.0.3",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2",
       "packageUri": "lib/",
-      "languageVersion": "2.19"
+      "languageVersion": "3.1"
+    },
+    {
+      "name": "flutter_plugin_android_lifecycle",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.22",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "flutter_secure_storage",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_secure_storage-9.2.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_linux",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_secure_storage_linux-1.2.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_macos",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_secure_storage_macos-3.1.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_platform_interface",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_secure_storage_platform_interface-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_web",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_secure_storage_web-1.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_secure_storage_windows",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/flutter_secure_storage_windows-3.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "flutter_svg",
@@ -332,6 +362,54 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "image_picker",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker-1.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "image_picker_android",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+12",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_for_web",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker_for_web-3.0.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_ios",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker_ios-0.8.12+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_linux",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker_linux-0.2.1+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_macos",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker_macos-0.2.1+2",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_platform_interface",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker_platform_interface-2.10.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
+      "name": "image_picker_windows",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/image_picker_windows-0.2.1+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
       "name": "intl",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/intl-0.19.0",
       "packageUri": "lib/",
@@ -375,27 +453,15 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/lints-2.1.1",
+      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/lints-3.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
-    },
-    {
-      "name": "logger",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/logger-2.5.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
     },
     {
       "name": "logging",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/logging-1.3.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
-    },
-    {
-      "name": "lottie",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/lottie-2.7.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.1"
     },
     {
       "name": "matcher",
@@ -440,12 +506,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "nm",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/nm-0.5.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "node_preamble",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/node_preamble-2.0.2",
       "packageUri": "lib/",
@@ -456,18 +516,6 @@
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/package_config-2.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.4"
-    },
-    {
-      "name": "package_info_plus",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/package_info_plus-4.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "package_info_plus_platform_interface",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/package_info_plus_platform_interface-2.0.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "path",
@@ -626,12 +674,6 @@
       "languageVersion": "2.17"
     },
     {
-      "name": "shimmer",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/shimmer-3.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
-    },
-    {
       "name": "sky_engine",
       "rootUri": "file:///nix/store/yk06k2xi481mkz7lbnqip2178l547ihl-flutter-wrapped-3.22.0-sdk-links/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
@@ -660,12 +702,6 @@
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/source_span-1.10.0",
       "packageUri": "lib/",
       "languageVersion": "2.18"
-    },
-    {
-      "name": "sprintf",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/sprintf-7.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "stack_trace",
@@ -776,12 +812,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "uuid",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/uuid-4.5.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
       "name": "vector_graphics",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/vector_graphics-1.1.18",
       "packageUri": "lib/",
@@ -842,12 +872,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "win32_registry",
-      "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/win32_registry-1.1.5",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
-    },
-    {
       "name": "xdg_directories",
       "rootUri": "file:///home/runner/.pub-cache/hosted/pub.dev/xdg_directories-1.1.0",
       "packageUri": "lib/",
@@ -869,10 +893,10 @@
       "name": "gbc_coachia",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.3"
     }
   ],
-  "generated": "2025-04-04T16:27:45.408947Z",
+  "generated": "2025-04-04T18:16:25.980089Z",
   "generator": "pub",
   "generatorVersion": "3.4.0",
   "flutterRoot": "file:///nix/store/yk06k2xi481mkz7lbnqip2178l547ihl-flutter-wrapped-3.22.0-sdk-links",

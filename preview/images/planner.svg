@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="#F5F5F5" />
+  <rect x="70" y="70" width="160" height="160" fill="#3F51B5" rx="10" ry="10" />
+  <rect x="70" y="70" width="160" height="30" fill="#757DE8" rx="10" ry="10" />
+  <line x1="110" y1="120" x2="110" y2="210" stroke="white" stroke-width="2" />
+  <line x1="150" y1="120" x2="150" y2="210" stroke="white" stroke-width="2" />
+  <line x1="190" y1="120" x2="190" y2="210" stroke="white" stroke-width="2" />
+  <line x1="90" y1="140" x2="210" y2="140" stroke="white" stroke-width="2" />
+  <line x1="90" y1="170" x2="210" y2="170" stroke="white" stroke-width="2" />
+  <circle cx="150" cy="170" r="10" fill="#FF9800" />
+  <text x="150" y="250" font-family="Arial" font-size="20" text-anchor="middle" fill="#333">Planification</text>
+</svg>

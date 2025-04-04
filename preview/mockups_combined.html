@@ -1,360 +1,721 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GBC CoachIA - Maquettes Mobile</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 30px;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-    .mockup {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: transform 0.3s;
-      margin-bottom: 30px;
-    }
-    .mockup:hover {
-      transform: translateY(-5px);
-    }
-    .mockup h2 {
-      margin-top: 10px;
-      color: #4a6feb;
-    }
-    .mockup p {
-      color: #666;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .mockup-image {
-      border: 1px solid #eee;
-      border-radius: 8px;
-      background: white;
-    }
-    .dark-mockup-image {
-      border: 1px solid #333;
-      border-radius: 8px;
-      background: #121212;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBC CoachIA - Maquettes</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #B87333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        h2 {
+            color: #B87333;
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        .mockup-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            padding: 20px;
+        }
+        .mockup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .mockup-item {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: #fafafa;
+        }
+        .mockup-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #B87333;
+            text-align: center;
+        }
+        .mockup-image {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .feature-description {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        .phone-container {
+            width: 280px;
+            height: 570px;
+            background-color: #111;
+            border-radius: 36px;
+            padding: 10px;
+            margin: 0 auto;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        .phone-navbar {
+            height: 60px;
+            background-color: #B87333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .phone-content {
+            padding: 15px;
+            height: calc(100% - 130px);
+            overflow-y: auto;
+        }
+        .phone-bottombar {
+            height: 70px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+        }
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 50%;
+            margin-bottom: 4px;
+        }
+        .active .nav-icon {
+            background-color: #B87333;
+        }
+        .active {
+            color: #B87333;
+            font-weight: bold;
+        }
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .btn {
+            background-color: #B87333;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .message {
+            background-color: #FFF9C4;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 5px 15px;
+            background-color: #f0f0f0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .tab.active {
+            background-color: #B87333;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-  <h1>GBC CoachIA - Maquettes Mobile</h1>
-  
-  <div class="container">
-    <!-- Splash Screen -->
-    <div class="mockup">
-      <h2>Écran de démarrage</h2>
-      <p>Premier écran affiché au lancement de l'application avec logo, nom et slogan</p>
-      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
-        <!-- Fond dégradé -->
-        <rect width="360" height="640" fill="url(#splash_gradient)"/>
-        
-        <!-- Logo -->
-        <rect x="130" y="220" width="100" height="100" rx="20" fill="white"/>
-        <text x="180" y="285" font-family="Arial" font-size="36" font-weight="bold" fill="#4a6feb" text-anchor="middle">GBC</text>
-        
-        <!-- Titre et sous-titre -->
-        <text x="180" y="370" font-family="Arial" font-size="28" font-weight="bold" fill="white" text-anchor="middle">GBC CoachIA</text>
-        <text x="180" y="400" font-family="Arial" font-size="16" fill="white" text-anchor="middle" opacity="0.9">Votre coach entrepreneurial intelligent</text>
-        
-        <!-- Définition du dégradé -->
-        <defs>
-          <linearGradient id="splash_gradient" x1="0" y1="0" x2="360" y2="640" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#4a6feb"/>
-            <stop offset="1" stop-color="#7d56c5"/>
-          </linearGradient>
-        </defs>
-      </svg>
+    <header>
+        <h1>GBC CoachIA - Maquettes</h1>
+    </header>
+
+    <div class="container">
+        <div class="message">
+            Cette page présente les maquettes des différentes interfaces de l'application GBC CoachIA.
+        </div>
+
+        <h2>1. Onboarding (Tutoriel)</h2>
+        <div class="mockup-section">
+            <p>Le processus d'onboarding guide les nouveaux utilisateurs à travers les principales fonctionnalités de l'application.</p>
+            <div class="mockup-grid">
+                <div class="mockup-item">
+                    <div class="mockup-title">Écran 1: Bienvenue</div>
+                    <div class="phone-container">
+                        <div class="phone-screen">
+                            <div style="height: 100%; display: flex; flex-direction: column;">
+                                <div style="padding: 15px; display: flex; justify-content: flex-end;">
+                                    <div style="color: #B87333; font-weight: bold;">Passer</div>
+                                </div>
+                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px;">
+                                    <img src="images/onboarding/welcome.svg" alt="Bienvenue" style="width: 150px; height: 150px; margin-bottom: 30px;">
+                                    <div style="font-weight: bold; font-size: 18px; color: #B87333; margin-bottom: 15px; text-align: center;">Bienvenue sur GBC CoachIA</div>
+                                    <div style="text-align: center; color: #666; font-size: 14px;">Votre assistant IA de gestion d'entreprise pour entrepreneurs et freelances.</div>
+                                </div>
+                                <div style="padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                                    <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                                        <div style="width: 24px; height: 8px; background-color: #B87333; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                                        <div style="width: 30px;"></div> <!-- Espace pour équilibrer -->
+                                        <button class="btn">Suivant</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-description">
+                        Premier écran d'onboarding présentant l'application.
+                    </div>
+                </div>
+
+                <div class="mockup-item">
+                    <div class="mockup-title">Écran 2: Assistant IA</div>
+                    <div class="phone-container">
+                        <div class="phone-screen">
+                            <div style="height: 100%; display: flex; flex-direction: column;">
+                                <div style="padding: 15px; display: flex; justify-content: flex-end;">
+                                    <div style="color: #B87333; font-weight: bold;">Passer</div>
+                                </div>
+                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px;">
+                                    <img src="images/onboarding/chatbot.svg" alt="Assistant IA" style="width: 150px; height: 150px; margin-bottom: 30px;">
+                                    <div style="font-weight: bold; font-size: 18px; color: #B87333; margin-bottom: 15px; text-align: center;">Assistant IA Intelligent</div>
+                                    <div style="text-align: center; color: #666; font-size: 14px;">Posez vos questions, obtenez des conseils personnalisés et des réponses précises.</div>
+                                </div>
+                                <div style="padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                                    <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 24px; height: 8px; background-color: #B87333; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                                        <button style="border: 1px solid #B87333; color: #B87333; background: none; border-radius: 20px; padding: 8px 15px; font-size: 12px;">Précédent</button>
+                                        <button class="btn">Suivant</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-description">
+                        Présentation de la fonctionnalité d'assistant IA.
+                    </div>
+                </div>
+
+                <div class="mockup-item">
+                    <div class="mockup-title">Écran final: Tout est prêt</div>
+                    <div class="phone-container">
+                        <div class="phone-screen">
+                            <div style="height: 100%; display: flex; flex-direction: column;">
+                                <div style="padding: 15px; display: flex; justify-content: flex-end;">
+                                    <div style="color: #B87333; font-weight: bold;">Passer</div>
+                                </div>
+                                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px;">
+                                    <img src="images/onboarding/complete.svg" alt="Prêt" style="width: 150px; height: 150px; margin-bottom: 30px;">
+                                    <div style="font-weight: bold; font-size: 18px; color: #B87333; margin-bottom: 15px; text-align: center;">Tout est prêt !</div>
+                                    <div style="text-align: center; color: #666; font-size: 14px; margin-bottom: 20px;">Vous êtes maintenant prêt à utiliser toutes les fonctionnalités de GBC CoachIA.</div>
+                                    <button class="btn" style="padding: 10px 30px; font-size: 14px;">Commencer</button>
+                                </div>
+                                <div style="padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                                    <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 8px; height: 8px; background-color: #ddd; border-radius: 4px;"></div>
+                                        <div style="width: 24px; height: 8px; background-color: #B87333; border-radius: 4px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-description">
+                        Écran final d'onboarding invitant l'utilisateur à commencer.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>2. Tableau de bord (Dashboard)</h2>
+        <div class="mockup-section">
+            <p>Le tableau de bord est l'écran principal de l'application, présentant un aperçu des principales fonctionnalités et activités récentes.</p>
+            <div class="mockup-grid">
+                <div class="mockup-item">
+                    <div class="mockup-title">Écran d'accueil</div>
+                    <div class="phone-container">
+                        <div class="phone-screen">
+                            <div class="phone-navbar">
+                                <div>Tableau de bord</div>
+                                <div style="position: absolute; right: 15px;">
+                                    <div style="width: 24px; height: 24px; background-color: white; opacity: 0.7; border-radius: 50%;"></div>
+                                </div>
+                            </div>
+                            <div class="phone-content">
+                                <div class="card">
+                                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                        <div style="width: 48px; height: 48px; background-color: #B87333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">JD</div>
+                                        <div>
+                                            <div style="font-weight: bold;">Bonjour, Jean Dupont</div>
+                                            <div style="font-size: 12px; color: #666;">Bienvenue sur GBC CoachIA</div>
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 13px; margin-bottom: 15px;">Votre assistant IA est prêt à vous aider dans la gestion de votre entreprise.</div>
+                                    <button class="btn" style="display: flex; align-items: center; gap: 5px;">
+                                        <div style="width: 14px; height: 14px; background-color: white; border-radius: 50%;"></div>
+                                        <div>Discuter avec l'IA</div>
+                                    </button>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                                    <div class="card" style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+                                        <div style="width: 30px; height: 30px; background-color: #B8733333; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                                            <div style="width: 15px; height: 15px; background-color: #B87333; border-radius: 50%;"></div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 12px;">Chat IA</div>
+                                        <div style="font-size: 10px; color: #666; text-align: center;">Posez vos questions</div>
+                                    </div>
+                                    <div class="card" style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+                                        <div style="width: 30px; height: 30px; background-color: #33669933; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                                            <div style="width: 15px; height: 15px; background-color: #336699; border-radius: 50%;"></div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 12px;">Planning</div>
+                                        <div style="font-size: 10px; color: #666; text-align: center;">Gérez votre agenda</div>
+                                    </div>
+                                    <div class="card" style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+                                        <div style="width: 30px; height: 30px; background-color: #66993333; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                                            <div style="width: 15px; height: 15px; background-color: #669933; border-radius: 50%;"></div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 12px;">Finances</div>
+                                        <div style="font-size: 10px; color: #666; text-align: center;">Suivez vos revenus</div>
+                                    </div>
+                                    <div class="card" style="display: flex; flex-direction: column; align-items: center; padding: 10px;">
+                                        <div style="width: 30px; height: 30px; background-color: #99336633; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                                            <div style="width: 15px; height: 15px; background-color: #993366; border-radius: 50%;"></div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 12px;">Documents</div>
+                                        <div style="font-size: 10px; color: #666; text-align: center;">Générez des docs</div>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 20px;">
+                                    <div style="font-weight: bold; margin-bottom: 10px;">Activité récente</div>
+                                    <div class="card" style="padding: 10px;">
+                                        <div style="display: flex; gap: 10px;">
+                                            <div style="width: 36px; height: 36px; background-color: #B8733322; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                <div style="width: 18px; height: 18px; background-color: #B87333; border-radius: 50%;"></div>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <div style="font-size: 13px; font-weight: bold;">Discussion IA</div>
+                                                <div style="font-size: 11px; color: #666;">Comment optimiser ma TVA ?</div>
+                                            </div>
+                                            <div style="font-size: 10px; color: #999;">Il y a 2h</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="phone-bottombar">
+                                <div class="nav-item active">
+                                    <div class="nav-icon"></div>
+                                    <div>Accueil</div>
+                                </div>
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Chat IA</div>
+                                </div>
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Planning</div>
+                                </div>
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Finances</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-description">
+                        Le tableau de bord principal avec tous les accès rapides.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>3. Assistant IA (Chatbot)</h2>
+        <div class="mockup-section">
+            <p>L'assistant IA permet d'avoir des conversations et d'obtenir des réponses à des questions professionnelles.</p>
+            <div class="mockup-grid">
+                <div class="mockup-item">
+                    <div class="mockup-title">Interface de chat</div>
+                    <div class="phone-container">
+                        <div class="phone-screen">
+                            <div class="phone-navbar">
+                                <div style="position: absolute; left: 15px;">
+                                    <div style="width: 24px; height: 24px; background-color: white; opacity: 0.7; border-radius: 50%;"></div>
+                                </div>
+                                <div>Assistant IA</div>
+                                <div style="position: absolute; right: 15px;">
+                                    <div style="width: 24px; height: 24px; background-color: white; opacity: 0.7; border-radius: 50%;"></div>
+                                </div>
+                            </div>
+                            <div class="phone-content" style="background-color: #f5f5f5; padding-top: 20px;">
+                                <div style="display: flex; margin-bottom: 20px;">
+                                    <div style="width: 36px; height: 36px; background-color: #B87333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px;">
+                                        <div style="width: 16px; height: 16px; background-color: white; border-radius: 50%;"></div>
+                                    </div>
+                                    <div style="max-width: 80%; background-color: white; padding: 10px 15px; border-radius: 18px 18px 18px 0;">
+                                        <div style="font-size: 13px;">Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui ?</div>
+                                        <div style="font-size: 10px; color: #999; margin-top: 5px;">09:30</div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                                    <div style="max-width: 80%; background-color: #B87333; color: white; padding: 10px 15px; border-radius: 18px 18px 0 18px;">
+                                        <div style="font-size: 13px;">Comment optimiser la gestion de ma trésorerie ?</div>
+                                        <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 5px;">09:31</div>
+                                    </div>
+                                    <div style="width: 36px; height: 36px; background-color: #666; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-left: 10px;">
+                                        <div>JD</div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; margin-bottom: 20px;">
+                                    <div style="width: 36px; height: 36px; background-color: #B87333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px;">
+                                        <div style="width: 16px; height: 16px; background-color: white; border-radius: 50%;"></div>
+                                    </div>
+                                    <div style="max-width: 80%; background-color: white; padding: 10px 15px; border-radius: 18px 18px 18px 0;">
+                                        <div style="font-size: 13px;">Pour optimiser votre trésorerie, je vous conseille de :</div>
+                                        <div style="font-size: 13px; margin-top: 8px;">1. Établir un prévisionnel de trésorerie sur 3-6 mois</div>
+                                        <div style="font-size: 13px; margin-top: 5px;">2. Négocier les délais de paiement (clients/fournisseurs)</div>
+                                        <div style="font-size: 13px; margin-top: 5px;">3. Automatiser les relances de factures</div>
+                                        <div style="font-size: 13px; margin-top: 5px;">4. Mettre en place une réserve de sécurité</div>
+                                        <div style="font-size: 10px; color: #999; margin-top: 5px;">09:32</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="position: absolute; bottom: 70px; width: 100%; background-color: white; padding: 10px; border-top: 1px solid #eee; display: flex; gap: 10px;">
+                                <div style="width: 24px; height: 24px; background-color: #ddd; border-radius: 50%;"></div>
+                                <input type="text" placeholder="Posez votre question..." style="border: none; flex: 1; font-size: 14px; outline: none;">
+                                <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                            </div>
+                            <div class="phone-bottombar">
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Accueil</div>
+                                </div>
+                                <div class="nav-item active">
+                                    <div class="nav-icon"></div>
+                                    <div>Chat IA</div>
+                                </div>
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Planning</div>
+                                </div>
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Finances</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-description">
+                        Interface de conversation avec l'assistant IA.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>4. Module Finances</h2>
+        <div class="mockup-section">
+            <p>Le module Finances permet de suivre les revenus, dépenses et de visualiser les données financières.</p>
+            <div class="mockup-grid">
+                <div class="mockup-item">
+                    <div class="mockup-title">Aperçu financier</div>
+                    <div class="phone-container">
+                        <div class="phone-screen">
+                            <div class="phone-navbar">
+                                <div style="position: absolute; left: 15px;">
+                                    <div style="width: 24px; height: 24px; background-color: white; opacity: 0.7; border-radius: 50%;"></div>
+                                </div>
+                                <div>Finances</div>
+                            </div>
+                            <div style="background-color: #B87333; padding: 10px 15px;">
+                                <div class="tabs">
+                                    <div class="tab active">Aperçu</div>
+                                    <div class="tab">Transactions</div>
+                                    <div class="tab">Rapports</div>
+                                </div>
+                            </div>
+                            <div class="phone-content" style="padding-top: 15px;">
+                                <div style="background-color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center;">
+                                    <div style="flex: 1;">Cette année</div>
+                                    <div style="width: 20px; height: 20px; background-color: #B87333; border-radius: 50%;"></div>
+                                </div>
+
+                                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                                    <div class="card" style="flex: 1; padding: 10px;">
+                                        <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                                            <div style="width: 16px; height: 16px; background-color: green; border-radius: 50%;"></div>
+                                            <div style="font-size: 11px;">Revenus</div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 12px;">74.800 €</div>
+                                    </div>
+                                    <div class="card" style="flex: 1; padding: 10px;">
+                                        <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                                            <div style="width: 16px; height: 16px; background-color: red; border-radius: 50%;"></div>
+                                            <div style="font-size: 11px;">Dépenses</div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 12px;">48.500 €</div>
+                                    </div>
+                                    <div class="card" style="flex: 1; padding: 10px;">
+                                        <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                                            <div style="width: 16px; height: 16px; background-color: #B87333; border-radius: 50%;"></div>
+                                            <div style="font-size: 11px;">Net</div>
+                                        </div>
+                                        <div style="font-weight: bold; font-size: 12px;">26.300 €</div>
+                                    </div>
+                                </div>
+
+                                <div class="card" style="margin-bottom: 20px;">
+                                    <div style="font-weight: bold; font-size: 14px; margin-bottom: 10px;">Revenus et dépenses</div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 15px;">Évolution mensuelle</div>
+                                    <div style="height: 140px; background-color: #f9f9f9; border-radius: 8px; display: flex; align-items: flex-end; gap: 5px; padding: 10px; margin-bottom: 10px;">
+                                        <div style="flex: 1; height: 60%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 70%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 65%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 80%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 75%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 90%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 85%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 100%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 95%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 110%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 120%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                        <div style="flex: 1; height: 130%; background-color: green; border-radius: 4px 4px 0 0;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: center; gap: 20px;">
+                                        <div style="display: flex; align-items: center; gap: 5px;">
+                                            <div style="width: 16px; height: 8px; background-color: green; border-radius: 4px;"></div>
+                                            <div style="font-size: 12px;">Revenus</div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 5px;">
+                                            <div style="width: 16px; height: 8px; background-color: red; border-radius: 4px;"></div>
+                                            <div style="font-size: 12px;">Dépenses</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <div style="font-weight: bold; font-size: 14px;">Transactions récentes</div>
+                                        <div style="color: #B87333; font-size: 12px;">Voir tout</div>
+                                    </div>
+                                    <div class="card" style="padding: 10px;">
+                                        <div style="display: flex; gap: 10px;">
+                                            <div style="width: 36px; height: 36px; background-color: #99ee9922; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                <div style="width: 18px; height: 18px; background-color: green; border-radius: 50%;"></div>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <div style="font-size: 13px; font-weight: bold;">Facture #2023-042</div>
+                                                <div style="font-size: 11px; color: #666;">Ventes • 02/04/2023</div>
+                                            </div>
+                                            <div style="font-size: 13px; font-weight: bold; color: green;">+1.250 €</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="phone-bottombar">
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Accueil</div>
+                                </div>
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Chat IA</div>
+                                </div>
+                                <div class="nav-item">
+                                    <div class="nav-icon"></div>
+                                    <div>Planning</div>
+                                </div>
+                                <div class="nav-item active">
+                                    <div class="nav-icon"></div>
+                                    <div>Finances</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-description">
+                        Vue d'ensemble des finances avec graphiques et transactions récentes.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>5. Paramètres</h2>
+        <div class="mockup-section">
+            <p>L'écran des paramètres permet de configurer l'application selon les préférences de l'utilisateur.</p>
+            <div class="mockup-grid">
+                <div class="mockup-item">
+                    <div class="mockup-title">Paramètres généraux</div>
+                    <div class="phone-container">
+                        <div class="phone-screen">
+                            <div class="phone-navbar">
+                                <div>Paramètres</div>
+                            </div>
+                            <div class="phone-content">
+                                <div style="font-weight: bold; color: #B87333; margin-bottom: 10px;">Compte</div>
+                                <div class="card" style="margin-bottom: 20px;">
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">Profil</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                    <div style="height: 1px; background-color: #eee; margin: 5px 0;"></div>
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">Thème et apparence</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+
+                                <div style="font-weight: bold; color: #B87333; margin-bottom: 10px;">Préférences</div>
+                                <div class="card" style="margin-bottom: 20px;">
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">Notifications</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                    <div style="height: 1px; background-color: #eee; margin: 5px 0;"></div>
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">Clés API</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                    <div style="height: 1px; background-color: #eee; margin: 5px 0;"></div>
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">Langue</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+
+                                <div style="font-weight: bold; color: #B87333; margin-bottom: 10px;">Assistance</div>
+                                <div class="card">
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">Tutoriel</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                    <div style="height: 1px; background-color: #eee; margin: 5px 0;"></div>
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">Confidentialité</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                    <div style="height: 1px; background-color: #eee; margin: 5px 0;"></div>
+                                    <div style="display: flex; gap: 15px; align-items: center; padding: 8px 0;">
+                                        <div style="width: 24px; height: 24px; background-color: #B87333; border-radius: 50%;"></div>
+                                        <div style="flex: 1;">À propos</div>
+                                        <div style="width: 16px; height: 16px; background-color: #ddd; border-radius: 50%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="feature-description">
+                        Écran de paramètres pour personnaliser l'application.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <p style="font-weight: bold; color: #B87333; font-size: 18px;">Architecture de l'application</p>
+            <p>L'application est construite selon une architecture feature-first avec des modules bien séparés pour chaque fonctionnalité.</p>
+            <pre>
+lib/
+├── app.dart                   # Point d'entrée de l'application
+├── config/                    # Configuration globale
+│   ├── di/                    # Injection de dépendances
+│   ├── router/                # Configuration des routes
+│   └── theme/                 # Thèmes de l'application
+├── features/                  # Modules fonctionnels
+│   ├── dashboard/             # Tableau de bord
+│   ├── chatbot/               # Assistant IA
+│   ├── planner/               # Planification
+│   ├── finance/               # Gestion financière
+│   ├── documents/             # Génération de documents
+│   ├── storage/               # Stockage de fichiers
+│   ├── settings/              # Paramètres
+│   └── onboarding/            # Tutoriel d'introduction
+│       ├── data/              # Couche de données
+│       ├── domain/            # Logique métier
+│       └── presentation/      # Interface utilisateur
+│           ├── bloc/          # Gestion d'état
+│           ├── pages/         # Écrans
+│           └── widgets/       # Composants UI
+└── main.dart                  # Point d'entrée
+            </pre>
+        </div>
     </div>
-    
-    <!-- Dashboard -->
-    <div class="mockup">
-      <h2>Tableau de bord</h2>
-      <p>Vue d'ensemble des tâches, revenus et accès aux principales fonctionnalités</p>
-      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
-        <!-- Fond -->
-        <rect width="360" height="640" fill="#f8f9fa"/>
-        
-        <!-- En-tête -->
-        <rect y="0" width="360" height="80" fill="white"/>
-        <line x1="0" y1="80" x2="360" y2="80" stroke="#eee" stroke-width="1"/>
-        <text x="20" y="30" font-family="Arial" font-size="16" fill="#333">Bonjour,</text>
-        <text x="20" y="55" font-family="Arial" font-size="20" font-weight="bold" fill="#333">Jean Dupont</text>
-        
-        <!-- Avatar -->
-        <circle cx="320" cy="40" r="25" fill="#4a6feb"/>
-        <text x="320" y="48" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">JD</text>
-        
-        <!-- Statistiques -->
-        <rect x="20" y="100" width="155" height="80" rx="10" fill="#f5f5f5"/>
-        <text x="40" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#333">5</text>
-        <text x="40" y="160" font-family="Arial" font-size="14" fill="#666">Tâches</text>
-        
-        <rect x="185" y="100" width="155" height="80" rx="10" fill="#f5f5f5"/>
-        <text x="205" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#333">€2,500</text>
-        <text x="205" y="160" font-family="Arial" font-size="14" fill="#666">Revenus</text>
-        
-        <!-- Actions -->
-        <rect x="20" y="200" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
-        <circle cx="98" cy="235" r="15" fill="#4a6feb20"/>
-        <text x="98" y="240" font-family="Arial" font-size="20" text-anchor="middle">📝</text>
-        <text x="98" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Tâches</text>
-        
-        <rect x="185" y="200" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
-        <circle cx="262" cy="235" r="15" fill="#4a6feb20"/>
-        <text x="262" y="240" font-family="Arial" font-size="20" text-anchor="middle">💬</text>
-        <text x="262" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Assistant</text>
-        
-        <rect x="20" y="310" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
-        <circle cx="98" cy="345" r="15" fill="#4a6feb20"/>
-        <text x="98" y="350" font-family="Arial" font-size="20" text-anchor="middle">📊</text>
-        <text x="98" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Finances</text>
-        
-        <rect x="185" y="310" width="155" height="100" rx="10" fill="white" stroke="#eee"/>
-        <circle cx="262" cy="345" r="15" fill="#4a6feb20"/>
-        <text x="262" y="350" font-family="Arial" font-size="20" text-anchor="middle">📄</text>
-        <text x="262" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#333" text-anchor="middle">Documents</text>
-        
-        <!-- Navigation -->
-        <rect y="580" width="360" height="60" fill="white"/>
-        <line x1="0" y1="580" x2="360" y2="580" stroke="#eee" stroke-width="1"/>
-        
-        <text x="45" y="610" font-family="Arial" font-size="20" text-anchor="middle">🏠</text>
-        <text x="45" y="630" font-family="Arial" font-size="12" fill="#4a6feb" text-anchor="middle">Accueil</text>
-        
-        <text x="135" y="610" font-family="Arial" font-size="20" text-anchor="middle">📅</text>
-        <text x="135" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Planner</text>
-        
-        <text x="225" y="610" font-family="Arial" font-size="20" text-anchor="middle">💬</text>
-        <text x="225" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Chat</text>
-        
-        <text x="315" y="610" font-family="Arial" font-size="20" text-anchor="middle">👤</text>
-        <text x="315" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Profil</text>
-      </svg>
-    </div>
-    
-    <!-- Assistant IA -->
-    <div class="mockup">
-      <h2>Assistant IA</h2>
-      <p>Interface de conversation avec l'IA pour obtenir conseils et assistance</p>
-      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
-        <!-- Fond -->
-        <rect width="360" height="640" fill="#f8f9fa"/>
-        
-        <!-- En-tête -->
-        <rect y="0" width="360" height="60" fill="white"/>
-        <line x1="0" y1="60" x2="360" y2="60" stroke="#eee" stroke-width="1"/>
-        <text x="20" y="38" font-family="Arial" font-size="20" fill="#333">←</text>
-        <text x="60" y="38" font-family="Arial" font-size="18" font-weight="600" fill="#333">Assistant IA</text>
-        
-        <!-- Messages -->
-        <rect x="20" y="80" width="240" height="80" rx="16" fill="#f0f0f0"/>
-        <rect x="20" y="80" width="20" height="20" rx="4" fill="#f0f0f0"/>
-        <text x="30" y="100" font-family="Arial" font-size="14" fill="#333">Bonjour! Je suis votre assistant CoachIA.</text>
-        <text x="30" y="120" font-family="Arial" font-size="14" fill="#333">Comment puis-je vous aider aujourd'hui?</text>
-        
-        <rect x="100" y="180" width="240" height="60" rx="16" fill="#4a6feb"/>
-        <rect x="340" y="180" width="20" height="20" rx="4" fill="#4a6feb"/>
-        <text x="110" y="200" font-family="Arial" font-size="14" fill="white">J'aimerais des conseils pour optimiser</text>
-        <text x="110" y="220" font-family="Arial" font-size="14" fill="white">mon planning hebdomadaire.</text>
-        
-        <rect x="20" y="260" width="240" height="140" rx="16" fill="#f0f0f0"/>
-        <rect x="20" y="260" width="20" height="20" rx="4" fill="#f0f0f0"/>
-        <text x="30" y="280" font-family="Arial" font-size="14" fill="#333">Bien sûr! Pour optimiser votre planning,</text>
-        <text x="30" y="300" font-family="Arial" font-size="14" fill="#333">je vous suggère de:</text>
-        <text x="30" y="330" font-family="Arial" font-size="14" fill="#333">1. Réserver des blocs de temps pour</text>
-        <text x="30" y="350" font-family="Arial" font-size="14" fill="#333">   les tâches importantes</text>
-        <text x="30" y="370" font-family="Arial" font-size="14" fill="#333">2. Prévoir des pauses régulières</text>
-        <text x="30" y="390" font-family="Arial" font-size="14" fill="#333">3. Regrouper les tâches similaires</text>
-        
-        <rect x="100" y="420" width="240" height="60" rx="16" fill="#4a6feb"/>
-        <rect x="340" y="420" width="20" height="20" rx="4" fill="#4a6feb"/>
-        <text x="110" y="440" font-family="Arial" font-size="14" fill="white">Merci pour ces conseils. Peux-tu me</text>
-        <text x="110" y="460" font-family="Arial" font-size="14" fill="white">suggérer un modèle de planning?</text>
-        
-        <!-- Barre de saisie -->
-        <rect y="580" width="360" height="60" fill="white"/>
-        <line x1="0" y1="580" x2="360" y2="580" stroke="#eee" stroke-width="1"/>
-        <rect x="20" y="590" width="280" height="40" rx="20" fill="#f5f5f5"/>
-        <text x="40" y="615" font-family="Arial" font-size="14" fill="#888">Tapez votre message...</text>
-        
-        <circle cx="325" cy="610" r="20" fill="#4a6feb"/>
-        <text x="325" y="615" font-family="Arial" font-size="16" fill="white" text-anchor="middle">→</text>
-      </svg>
-    </div>
-    
-    <!-- Finances -->
-    <div class="mockup">
-      <h2>Gestion financière</h2>
-      <p>Suivi des revenus, dépenses et transactions pour optimiser les finances</p>
-      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="mockup-image">
-        <!-- Fond -->
-        <rect width="360" height="640" fill="#f8f9fa"/>
-        
-        <!-- Carte balance -->
-        <rect x="20" y="20" width="320" height="150" rx="12" fill="url(#finance_gradient)"/>
-        
-        <text x="40" y="50" font-family="Arial" font-size="14" fill="white" opacity="0.9">Solde Total</text>
-        <text x="40" y="85" font-family="Arial" font-size="28" font-weight="bold" fill="white">€12,450.00</text>
-        
-        <line x1="40" y1="105" x2="320" y2="105" stroke="white" stroke-width="1" opacity="0.2"/>
-        
-        <text x="80" y="130" font-family="Arial" font-size="12" fill="white" opacity="0.8" text-anchor="middle">Revenus</text>
-        <text x="80" y="150" font-family="Arial" font-size="16" font-weight="600" fill="white" text-anchor="middle">€8,250.00</text>
-        
-        <text x="260" y="130" font-family="Arial" font-size="12" fill="white" opacity="0.8" text-anchor="middle">Dépenses</text>
-        <text x="260" y="150" font-family="Arial" font-size="16" font-weight="600" fill="white" text-anchor="middle">€3,800.00</text>
-        
-        <!-- En-tête Transactions -->
-        <text x="20" y="200" font-family="Arial" font-size="18" font-weight="600" fill="#333">Transactions Récentes</text>
-        <text x="320" y="200" font-family="Arial" font-size="14" fill="#4a6feb" text-anchor="end">Filtrer</text>
-        
-        <!-- Transactions -->
-        <line x1="20" y1="230" x2="340" y2="230" stroke="#eee" stroke-width="1"/>
-        <circle cx="45" cy="260" r="20" fill="#f0f0f0"/>
-        <text x="45" y="265" font-family="Arial" font-size="14" text-anchor="middle">💼</text>
-        <text x="80" y="255" font-family="Arial" font-size="16" font-weight="500" fill="#333">Design de site web</text>
-        <text x="80" y="275" font-family="Arial" font-size="12" fill="#888">2 Avril 2025</text>
-        <text x="320" y="265" font-family="Arial" font-size="14" font-weight="600" fill="#2ecc71" text-anchor="end">+€1,500.00</text>
-        
-        <line x1="20" y1="290" x2="340" y2="290" stroke="#eee" stroke-width="1"/>
-        <circle cx="45" cy="320" r="20" fill="#f0f0f0"/>
-        <text x="45" y="325" font-family="Arial" font-size="14" text-anchor="middle">🖥️</text>
-        <text x="80" y="315" font-family="Arial" font-size="16" font-weight="500" fill="#333">Achat matériel</text>
-        <text x="80" y="335" font-family="Arial" font-size="12" fill="#888">1 Avril 2025</text>
-        <text x="320" y="325" font-family="Arial" font-size="14" font-weight="600" fill="#e74c3c" text-anchor="end">-€800.00</text>
-        
-        <line x1="20" y1="350" x2="340" y2="350" stroke="#eee" stroke-width="1"/>
-        <circle cx="45" cy="380" r="20" fill="#f0f0f0"/>
-        <text x="45" y="385" font-family="Arial" font-size="14" text-anchor="middle">📊</text>
-        <text x="80" y="375" font-family="Arial" font-size="16" font-weight="500" fill="#333">Consultation marketing</text>
-        <text x="80" y="395" font-family="Arial" font-size="12" fill="#888">28 Mars 2025</text>
-        <text x="320" y="385" font-family="Arial" font-size="14" font-weight="600" fill="#2ecc71" text-anchor="end">+€750.00</text>
-        
-        <line x1="20" y1="410" x2="340" y2="410" stroke="#eee" stroke-width="1"/>
-        <circle cx="45" cy="440" r="20" fill="#f0f0f0"/>
-        <text x="45" y="445" font-family="Arial" font-size="14" text-anchor="middle">🏢</text>
-        <text x="80" y="435" font-family="Arial" font-size="16" font-weight="500" fill="#333">Loyer bureau</text>
-        <text x="80" y="455" font-family="Arial" font-size="12" fill="#888">27 Mars 2025</text>
-        <text x="320" y="445" font-family="Arial" font-size="14" font-weight="600" fill="#e74c3c" text-anchor="end">-€450.00</text>
-        
-        <!-- Navigation -->
-        <rect y="580" width="360" height="60" fill="white"/>
-        <line x1="0" y1="580" x2="360" y2="580" stroke="#eee" stroke-width="1"/>
-        
-        <text x="45" y="610" font-family="Arial" font-size="20" text-anchor="middle">🏠</text>
-        <text x="45" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Accueil</text>
-        
-        <text x="135" y="610" font-family="Arial" font-size="20" text-anchor="middle">📅</text>
-        <text x="135" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Planner</text>
-        
-        <text x="225" y="610" font-family="Arial" font-size="20" text-anchor="middle">💬</text>
-        <text x="225" y="630" font-family="Arial" font-size="12" fill="#888" text-anchor="middle">Chat</text>
-        
-        <text x="315" y="610" font-family="Arial" font-size="20" text-anchor="middle">👤</text>
-        <text x="315" y="630" font-family="Arial" font-size="12" fill="#4a6feb" text-anchor="middle">Profil</text>
-        
-        <!-- Définition du dégradé -->
-        <defs>
-          <linearGradient id="finance_gradient" x1="20" y1="20" x2="340" y2="170" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#4a6feb"/>
-            <stop offset="1" stop-color="#7d56c5"/>
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
-    
-    <!-- Mode Sombre -->
-    <div class="mockup">
-      <h2>Mode sombre</h2>
-      <p>Interface adaptée pour une utilisation nocturne avec thème sombre</p>
-      <svg width="360" height="640" viewBox="0 0 360 640" fill="none" xmlns="http://www.w3.org/2000/svg" class="dark-mockup-image">
-        <!-- Fond -->
-        <rect width="360" height="640" fill="#121212"/>
-        
-        <!-- En-tête -->
-        <rect y="0" width="360" height="80" fill="#1e1e1e"/>
-        <line x1="0" y1="80" x2="360" y2="80" stroke="#333" stroke-width="1"/>
-        <text x="20" y="30" font-family="Arial" font-size="16" fill="#eee">Bonjour,</text>
-        <text x="20" y="55" font-family="Arial" font-size="20" font-weight="bold" fill="#fff">Jean Dupont</text>
-        
-        <!-- Avatar -->
-        <circle cx="320" cy="40" r="25" fill="#7d56c5"/>
-        <text x="320" y="48" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">JD</text>
-        
-        <!-- Statistiques -->
-        <rect x="20" y="100" width="155" height="80" rx="10" fill="#2a2a2a"/>
-        <text x="40" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#fff">5</text>
-        <text x="40" y="160" font-family="Arial" font-size="14" fill="#aaa">Tâches</text>
-        
-        <rect x="185" y="100" width="155" height="80" rx="10" fill="#2a2a2a"/>
-        <text x="205" y="140" font-family="Arial" font-size="24" font-weight="bold" fill="#fff">€2,500</text>
-        <text x="205" y="160" font-family="Arial" font-size="14" fill="#aaa">Revenus</text>
-        
-        <!-- Actions -->
-        <rect x="20" y="200" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
-        <circle cx="98" cy="235" r="15" fill="#7d56c520"/>
-        <text x="98" y="240" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📝</text>
-        <text x="98" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Tâches</text>
-        
-        <rect x="185" y="200" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
-        <circle cx="262" cy="235" r="15" fill="#7d56c520"/>
-        <text x="262" y="240" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">💬</text>
-        <text x="262" y="275" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Assistant</text>
-        
-        <rect x="20" y="310" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
-        <circle cx="98" cy="345" r="15" fill="#7d56c520"/>
-        <text x="98" y="350" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📊</text>
-        <text x="98" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Finances</text>
-        
-        <rect x="185" y="310" width="155" height="100" rx="10" fill="#2a2a2a" stroke="#333"/>
-        <circle cx="262" cy="345" r="15" fill="#7d56c520"/>
-        <text x="262" y="350" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📄</text>
-        <text x="262" y="385" font-family="Arial" font-size="16" font-weight="500" fill="#eee" text-anchor="middle">Documents</text>
-        
-        <!-- Mode sombre indicateur -->
-        <text x="180" y="460" font-family="Arial" font-size="16" font-weight="bold" fill="#7d56c5" text-anchor="middle">Mode sombre activé</text>
-        <circle cx="180" cy="490" r="20" fill="#7d56c5"/>
-        <text x="180" y="496" font-family="Arial" font-size="16" fill="white" text-anchor="middle">🌙</text>
-        
-        <!-- Navigation -->
-        <rect y="580" width="360" height="60" fill="#1e1e1e"/>
-        <line x1="0" y1="580" x2="360" y2="580" stroke="#333" stroke-width="1"/>
-        
-        <text x="45" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">🏠</text>
-        <text x="45" y="630" font-family="Arial" font-size="12" fill="#7d56c5" text-anchor="middle">Accueil</text>
-        
-        <text x="135" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">📅</text>
-        <text x="135" y="630" font-family="Arial" font-size="12" fill="#777" text-anchor="middle">Planner</text>
-        
-        <text x="225" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">💬</text>
-        <text x="225" y="630" font-family="Arial" font-size="12" fill="#777" text-anchor="middle">Chat</text>
-        
-        <text x="315" y="610" font-family="Arial" font-size="20" text-anchor="middle" fill="#eee">👤</text>
-        <text x="315" y="630" font-family="Arial" font-size="12" fill="#777" text-anchor="middle">Profil</text>
-      </svg>
-    </div>
-  </div>
 </body>
 </html>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <rect x="40" y="40" width="160" height="160" rx="8" fill="#B87333" opacity="0.1"/>
+  <path d="M192 40H48c-4.4 0-8 3.6-8 8v144c0 4.4 3.6 8 8 8h144c4.4 0 8-3.6 8-8V48c0-4.4-3.6-8-8-8zm0 152H48V48h144v144z" fill="#B87333"/>
+  <path d="M180 60H60v20h120V60z" fill="#B87333"/>
+  <path d="M70 70a5 5 0 100-10 5 5 0 000 10zm0-8a3 3 0 110 6 3 3 0 010-6zM170 70a5 5 0 100-10 5 5 0 000 10zm0-8a3 3 0 110 6 3 3 0 010-6z" fill="#FFD700"/>
+  <path d="M160 90H80v20h80V90z" fill="#FFD700" opacity="0.5"/>
+  <path d="M70 100a5 5 0 100-10 5 5 0 000 10zm0-8a3 3 0 110 6 3 3 0 010-6z" fill="#B87333"/>
+  <path d="M110 120H80v20h30v-20z" fill="#FFD700" opacity="0.5"/>
+  <path d="M70 130a5 5 0 100-10 5 5 0 000 10zm0-8a3 3 0 110 6 3 3 0 010-6z" fill="#B87333"/>
+  <path d="M140 120h-20v20h20v-20z" fill="#FFD700" opacity="0.5"/>
+  <path d="M90 150H80v20h10v-20z" fill="#FFD700" opacity="0.5"/>
+  <path d="M70 160a5 5 0 100-10 5 5 0 000 10zm0-8a3 3 0 110 6 3 3 0 010-6z" fill="#B87333"/>
+  <path d="M170 150h-70v20h70v-20z" fill="#FFD700" opacity="0.5"/>
+</svg>

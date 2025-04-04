@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../bloc/chatbot_bloc.dart';
+import '../../domain/entities/message.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({Key? key}) : super(key: key);
@@ -10,21 +14,6 @@ class ChatbotPage extends StatefulWidget {
 class _ChatbotPageState extends State<ChatbotPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<ChatMessage> _messages = [];
-  bool _isTyping = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Ajouter un message de bienvenue initial
-    _messages.add(
-      ChatMessage(
-        text: 'Bonjour ! Je suis votre assistant IA GBC CoachIA. Comment puis-je vous aider aujourd\'hui ?',
-        isUser: false,
-        timestamp: DateTime.now(),
-      ),
-    );
-  }
 
   @override
   void dispose() {
@@ -36,65 +25,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
   void _sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
 
-    final message = _messageController.text.trim();
-    setState(() {
-      _messages.add(
-        ChatMessage(
-          text: message,
-          isUser: true,
-          timestamp: DateTime.now(),
-        ),
-      );
-      _isTyping = true;
-      _messageController.clear();
-    });
+    // Utiliser le bloc pour envoyer le message
+    context.read<ChatbotBloc>().add(
+      ChatbotMessageSent(content: _messageController.text.trim()),
+    );
+    
+    _messageController.clear();
 
     // Faire défiler automatiquement vers le bas
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollToBottom();
-    });
-
-    // Simuler une réponse de l'IA (dans une application réelle, cela viendrait d'une API)
-    Future.delayed(const Duration(seconds: 1), () {
-      _simulateAIResponse(message);
-    });
-  }
-
-  void _simulateAIResponse(String userMessage) {
-    String response = '';
-    
-    // Simuler différentes réponses basées sur le message de l'utilisateur
-    if (userMessage.toLowerCase().contains('bonjour') || 
-        userMessage.toLowerCase().contains('salut') || 
-        userMessage.toLowerCase().contains('hello')) {
-      response = 'Bonjour ! Comment puis-je vous aider avec votre entreprise aujourd\'hui ?';
-    } else if (userMessage.toLowerCase().contains('facture') || 
-               userMessage.toLowerCase().contains('facturation')) {
-      response = 'Pour créer une nouvelle facture, allez dans la section Finance et cliquez sur "Nouvelle facture". Vous pouvez y ajouter vos services, définir les conditions de paiement et l\'envoyer directement à votre client.';
-    } else if (userMessage.toLowerCase().contains('client') || 
-               userMessage.toLowerCase().contains('prospect')) {
-      response = 'La gestion de la relation client est essentielle. Je vous suggère de maintenir un contact régulier avec vos clients et de noter leurs préférences dans la section Clients.';
-    } else if (userMessage.toLowerCase().contains('conseil') || 
-               userMessage.toLowerCase().contains('astuce')) {
-      response = 'Voici un conseil pour les entrepreneurs : bloquez du temps dans votre calendrier pour les tâches importantes mais non urgentes comme la planification stratégique et le développement personnel.';
-    } else if (userMessage.toLowerCase().contains('merci')) {
-      response = 'Je vous en prie ! N\'hésitez pas si vous avez d\'autres questions.';
-    } else {
-      response = 'Je comprends. Pour vous aider plus efficacement, pourriez-vous me donner plus de détails sur votre question concernant votre activité professionnelle ?';
-    }
-    
-    setState(() {
-      _isTyping = false;
-      _messages.add(
-        ChatMessage(
-          text: response,
-          isUser: false,
-          timestamp: DateTime.now(),
-        ),
-      );
-    });
-    
-    // Faire défiler automatiquement vers le bas après la réponse
     Future.delayed(const Duration(milliseconds: 100), () {
       _scrollToBottom();
     });
@@ -123,54 +61,119 @@ class _ChatbotPageState extends State<ChatbotPage> {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.delete_sweep),
+            onPressed: () {
+              // Effacer la conversation
+              context.read<ChatbotBloc>().add(
+                const ChatbotConversationCleared(),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.more_vert),
             onPressed: () {
               // Afficher les options
+              _showOptionsMenu(context);
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final message = _messages[index];
-                  return _buildMessageBubble(message, primaryColor, goldColor);
-                },
-              ),
-            ),
-          ),
-          if (_isTyping)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              alignment: Alignment.centerLeft,
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12),
+      body: BlocConsumer<ChatbotBloc, ChatbotState>(
+        listenWhen: (previous, current) {
+          // Écouter les changements qui nécessitent de faire défiler vers le bas
+          return current is ChatbotLoaded && previous is ChatbotLoaded && 
+                 current.messages.length > previous.messages.length;
+        },
+        listener: (context, state) {
+          // Faire défiler vers le bas lorsque de nouveaux messages sont ajoutés
+          Future.delayed(const Duration(milliseconds: 100), () {
+            _scrollToBottom();
+          });
+        },
+        builder: (context, state) {
+          if (state is ChatbotInitial || state is ChatbotLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (state is ChatbotLoaded) {
+            return Column(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: state.messages.length,
+                      itemBuilder: (context, index) {
+                        final message = state.messages[index];
+                        return _buildMessageBubble(message, primaryColor, goldColor);
+                      },
                     ),
+                  ),
+                ),
+                if (state.isWaitingForResponse)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    alignment: Alignment.centerLeft,
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildDot(delay: 100),
-                        _buildDot(delay: 300),
-                        _buildDot(delay: 500),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildDot(delay: 100),
+                              _buildDot(delay: 300),
+                              _buildDot(delay: 500),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
+                _buildMessageInputField(primaryColor),
+              ],
+            );
+          } else if (state is ChatbotError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red[300],
+                    size: 60,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Erreur: ${state.message}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<ChatbotBloc>().add(const ChatbotInitialized());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Réessayer'),
+                  ),
                 ],
               ),
-            ),
-          _buildMessageInputField(primaryColor),
-        ],
+            );
+          }
+          
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -191,8 +194,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage message, Color primaryColor, Color goldColor) {
-    final isUser = message.isUser;
+  Widget _buildMessageBubble(Message message, Color primaryColor, Color goldColor) {
+    final isUser = message.isUserMessage;
+    final formattedTime = _formatTime(message.timestamp);
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -217,7 +222,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   Text(
-                    message.text,
+                    message.content,
                     style: TextStyle(
                       color: isUser ? Colors.white : Colors.black87,
                       fontSize: 16,
@@ -225,7 +230,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatTime(message.timestamp),
+                    formattedTime,
                     style: TextStyle(
                       color: isUser ? Colors.white70 : Colors.black54,
                       fontSize: 12,
@@ -301,6 +306,12 @@ class _ChatbotPageState extends State<ChatbotPage> {
             ),
             onPressed: () {
               // Fonctionnalité pour joindre des fichiers
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Fonctionnalité à venir : joindre des fichiers'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
             },
           ),
           Expanded(
@@ -342,16 +353,71 @@ class _ChatbotPageState extends State<ChatbotPage> {
       ),
     );
   }
-}
 
-class ChatMessage {
-  final String text;
-  final bool isUser;
-  final DateTime timestamp;
+  void _showOptionsMenu(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
 
-  ChatMessage({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
-  });
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(
+                  Icons.delete_sweep,
+                  color: primaryColor,
+                ),
+                title: const Text('Effacer la conversation'),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.read<ChatbotBloc>().add(
+                    const ChatbotConversationCleared(),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.settings,
+                  color: primaryColor,
+                ),
+                title: const Text('Paramètres de l\'assistant'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Fonctionnalité à venir : paramètres de l\'assistant'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.help_outline,
+                  color: primaryColor,
+                ),
+                title: const Text('Aide et suggestions'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Fonctionnalité à venir : aide et suggestions'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

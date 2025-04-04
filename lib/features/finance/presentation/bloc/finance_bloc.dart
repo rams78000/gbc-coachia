@@ -1,147 +1,98 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:uuid/uuid.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
-import '../../domain/entities/account.dart';
-import '../../domain/entities/financial_summary.dart';
 import '../../domain/entities/transaction.dart';
-import '../../domain/repositories/finance_repository.dart';
 
-// Événements
+// Events
 abstract class FinanceEvent extends Equatable {
   const FinanceEvent();
-  
+
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class LoadTransactions extends FinanceEvent {
-  const LoadTransactions();
+class FinanceInitialized extends FinanceEvent {
+  const FinanceInitialized();
 }
 
-class FilterTransactions extends FinanceEvent {
-  final TransactionType? type;
-  final TransactionCategory? category;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final String? accountId;
-  final String? searchQuery;
-  
-  const FilterTransactions({
-    this.type,
-    this.category,
-    this.startDate,
-    this.endDate,
-    this.accountId,
-    this.searchQuery,
+class FinanceTransactionAdded extends FinanceEvent {
+  final String title;
+  final String description;
+  final double amount;
+  final DateTime date;
+  final TransactionType type;
+  final String category;
+  final String? clientId;
+
+  const FinanceTransactionAdded({
+    required this.title,
+    required this.description,
+    required this.amount,
+    required this.date,
+    required this.type,
+    required this.category,
+    this.clientId,
   });
-  
+
   @override
-  List<Object?> get props => [type, category, startDate, endDate, accountId, searchQuery];
+  List<Object?> get props => [
+    title, 
+    description, 
+    amount, 
+    date, 
+    type, 
+    category, 
+    clientId,
+  ];
 }
 
-class AddTransaction extends FinanceEvent {
-  final Transaction transaction;
-  
-  const AddTransaction(this.transaction);
-  
-  @override
-  List<Object> get props => [transaction];
-}
+class FinanceInvoiceAdded extends FinanceEvent {
+  final String invoiceNumber;
+  final String clientName;
+  final DateTime issueDate;
+  final DateTime dueDate;
+  final List<InvoiceItem> items;
 
-class UpdateTransaction extends FinanceEvent {
-  final Transaction transaction;
-  
-  const UpdateTransaction(this.transaction);
-  
-  @override
-  List<Object> get props => [transaction];
-}
-
-class DeleteTransaction extends FinanceEvent {
-  final String id;
-  
-  const DeleteTransaction(this.id);
-  
-  @override
-  List<Object> get props => [id];
-}
-
-class LoadAccounts extends FinanceEvent {
-  const LoadAccounts();
-}
-
-class AddAccount extends FinanceEvent {
-  final Account account;
-  
-  const AddAccount(this.account);
-  
-  @override
-  List<Object> get props => [account];
-}
-
-class UpdateAccount extends FinanceEvent {
-  final Account account;
-  
-  const UpdateAccount(this.account);
-  
-  @override
-  List<Object> get props => [account];
-}
-
-class DeleteAccount extends FinanceEvent {
-  final String id;
-  
-  const DeleteAccount(this.id);
-  
-  @override
-  List<Object> get props => [id];
-}
-
-class LoadFinancialSummary extends FinanceEvent {
-  final DateTime startDate;
-  final DateTime endDate;
-  final double? budgetAmount;
-  
-  const LoadFinancialSummary({
-    required this.startDate,
-    required this.endDate,
-    this.budgetAmount,
+  const FinanceInvoiceAdded({
+    required this.invoiceNumber,
+    required this.clientName,
+    required this.issueDate,
+    required this.dueDate,
+    required this.items,
   });
-  
+
   @override
-  List<Object?> get props => [startDate, endDate, budgetAmount];
+  List<Object> get props => [
+    invoiceNumber, 
+    clientName, 
+    issueDate, 
+    dueDate, 
+    items,
+  ];
 }
 
-class LoadFinancialTrends extends FinanceEvent {
-  final FinancialPeriod period;
-  final int count;
-  final DateTime? endDate;
-  
-  const LoadFinancialTrends({
-    required this.period,
-    required this.count,
-    this.endDate,
+class FinanceInvoiceStatusUpdated extends FinanceEvent {
+  final String invoiceId;
+  final InvoiceStatus newStatus;
+
+  const FinanceInvoiceStatusUpdated({
+    required this.invoiceId,
+    required this.newStatus,
   });
-  
+
   @override
-  List<Object?> get props => [period, count, endDate];
+  List<Object> get props => [invoiceId, newStatus];
 }
 
-class ChangePeriod extends FinanceEvent {
-  final FinancialPeriod period;
-  
-  const ChangePeriod(this.period);
-  
-  @override
-  List<Object> get props => [period];
-}
-
-// États
+// States
 abstract class FinanceState extends Equatable {
   const FinanceState();
   
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
 class FinanceInitial extends FinanceState {
@@ -152,353 +103,445 @@ class FinanceLoading extends FinanceState {
   const FinanceLoading();
 }
 
-class TransactionsLoaded extends FinanceState {
+class FinanceLoaded extends FinanceState {
   final List<Transaction> transactions;
-  final TransactionType? typeFilter;
-  final TransactionCategory? categoryFilter;
-  final DateTime? startDateFilter;
-  final DateTime? endDateFilter;
-  final String? accountIdFilter;
-  final String? searchQueryFilter;
-  
-  const TransactionsLoaded({
+  final List<Invoice> invoices;
+
+  const FinanceLoaded({
     required this.transactions,
-    this.typeFilter,
-    this.categoryFilter,
-    this.startDateFilter,
-    this.endDateFilter,
-    this.accountIdFilter,
-    this.searchQueryFilter,
+    required this.invoices,
   });
-  
-  @override
-  List<Object?> get props => [
-    transactions, 
-    typeFilter, 
-    categoryFilter, 
-    startDateFilter, 
-    endDateFilter, 
-    accountIdFilter,
-    searchQueryFilter,
-  ];
-  
-  TransactionsLoaded copyWith({
+
+  FinanceLoaded copyWith({
     List<Transaction>? transactions,
-    TransactionType? typeFilter,
-    TransactionCategory? categoryFilter,
-    DateTime? startDateFilter,
-    DateTime? endDateFilter,
-    String? accountIdFilter,
-    String? searchQueryFilter,
-    bool clearTypeFilter = false,
-    bool clearCategoryFilter = false,
-    bool clearStartDateFilter = false,
-    bool clearEndDateFilter = false,
-    bool clearAccountIdFilter = false,
-    bool clearSearchQueryFilter = false,
+    List<Invoice>? invoices,
   }) {
-    return TransactionsLoaded(
+    return FinanceLoaded(
       transactions: transactions ?? this.transactions,
-      typeFilter: clearTypeFilter ? null : (typeFilter ?? this.typeFilter),
-      categoryFilter: clearCategoryFilter ? null : (categoryFilter ?? this.categoryFilter),
-      startDateFilter: clearStartDateFilter ? null : (startDateFilter ?? this.startDateFilter),
-      endDateFilter: clearEndDateFilter ? null : (endDateFilter ?? this.endDateFilter),
-      accountIdFilter: clearAccountIdFilter ? null : (accountIdFilter ?? this.accountIdFilter),
-      searchQueryFilter: clearSearchQueryFilter ? null : (searchQueryFilter ?? this.searchQueryFilter),
+      invoices: invoices ?? this.invoices,
     );
   }
-}
 
-class AccountsLoaded extends FinanceState {
-  final List<Account> accounts;
-  
-  const AccountsLoaded(this.accounts);
-  
   @override
-  List<Object> get props => [accounts];
-}
-
-class FinancialSummaryLoaded extends FinanceState {
-  final FinancialSummary summary;
-  
-  const FinancialSummaryLoaded(this.summary);
-  
-  @override
-  List<Object> get props => [summary];
-}
-
-class FinancialTrendsLoaded extends FinanceState {
-  final List<FinancialSummary> trends;
-  final FinancialPeriod period;
-  
-  const FinancialTrendsLoaded({
-    required this.trends,
-    required this.period,
-  });
-  
-  @override
-  List<Object> get props => [trends, period];
+  List<Object> get props => [transactions, invoices];
 }
 
 class FinanceError extends FinanceState {
   final String message;
-  
-  const FinanceError(this.message);
-  
+
+  const FinanceError({required this.message});
+
   @override
   List<Object> get props => [message];
 }
 
-// Bloc
+// BLoC
 class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
-  final FinanceRepository repository;
-  
-  FinanceBloc({required this.repository}) : super(const FinanceInitial()) {
-    on<LoadTransactions>(_onLoadTransactions);
-    on<FilterTransactions>(_onFilterTransactions);
-    on<AddTransaction>(_onAddTransaction);
-    on<UpdateTransaction>(_onUpdateTransaction);
-    on<DeleteTransaction>(_onDeleteTransaction);
-    on<LoadAccounts>(_onLoadAccounts);
-    on<AddAccount>(_onAddAccount);
-    on<UpdateAccount>(_onUpdateAccount);
-    on<DeleteAccount>(_onDeleteAccount);
-    on<LoadFinancialSummary>(_onLoadFinancialSummary);
-    on<LoadFinancialTrends>(_onLoadFinancialTrends);
-    on<ChangePeriod>(_onChangePeriod);
+  final SharedPreferences _preferences;
+  static const String _transactionsKey = 'finance_transactions';
+  static const String _invoicesKey = 'finance_invoices';
+  final Uuid _uuid = const Uuid();
+
+  FinanceBloc({required SharedPreferences preferences}) 
+      : _preferences = preferences,
+        super(const FinanceInitial()) {
+    on<FinanceInitialized>(_onInitialized);
+    on<FinanceTransactionAdded>(_onTransactionAdded);
+    on<FinanceInvoiceAdded>(_onInvoiceAdded);
+    on<FinanceInvoiceStatusUpdated>(_onInvoiceStatusUpdated);
   }
-  
-  Future<void> _onLoadTransactions(
-    LoadTransactions event,
+
+  Future<void> _onInitialized(
+    FinanceInitialized event,
     Emitter<FinanceState> emit,
   ) async {
     emit(const FinanceLoading());
-    
+
     try {
-      final transactions = await repository.getTransactions();
-      emit(TransactionsLoaded(transactions: transactions));
+      final transactions = _loadTransactions();
+      final invoices = _loadInvoices();
+      
+      // Si aucune donnée n'existe, créer des données de démonstration
+      if (transactions.isEmpty && invoices.isEmpty) {
+        _createDemoData();
+        emit(const FinanceLoading());
+        final newTransactions = _loadTransactions();
+        final newInvoices = _loadInvoices();
+        emit(FinanceLoaded(
+          transactions: newTransactions,
+          invoices: newInvoices,
+        ));
+      } else {
+        emit(FinanceLoaded(
+          transactions: transactions,
+          invoices: invoices,
+        ));
+      }
     } catch (e) {
-      emit(FinanceError(e.toString()));
+      emit(FinanceError(message: 'Erreur lors du chargement des données financières: $e'));
     }
   }
-  
-  Future<void> _onFilterTransactions(
-    FilterTransactions event,
+
+  Future<void> _onTransactionAdded(
+    FinanceTransactionAdded event,
     Emitter<FinanceState> emit,
   ) async {
-    emit(const FinanceLoading());
-    
-    try {
-      final transactions = await repository.getFilteredTransactions(
+    if (state is FinanceLoaded) {
+      final currentState = state as FinanceLoaded;
+      
+      // Créer la nouvelle transaction
+      final newTransaction = Transaction(
+        id: _uuid.v4(),
+        title: event.title,
+        description: event.description,
+        amount: event.amount,
+        date: event.date,
         type: event.type,
         category: event.category,
-        startDate: event.startDate,
-        endDate: event.endDate,
-        accountId: event.accountId,
-        searchQuery: event.searchQuery,
+        clientId: event.clientId,
       );
       
-      emit(TransactionsLoaded(
-        transactions: transactions,
-        typeFilter: event.type,
-        categoryFilter: event.category,
-        startDateFilter: event.startDate,
-        endDateFilter: event.endDate,
-        accountIdFilter: event.accountId,
-        searchQueryFilter: event.searchQuery,
-      ));
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onAddTransaction(
-    AddTransaction event,
-    Emitter<FinanceState> emit,
-  ) async {
-    try {
-      await repository.addTransaction(event.transaction);
+      // Ajouter à la liste existante
+      final updatedTransactions = List<Transaction>.from(currentState.transactions)..add(newTransaction);
       
-      // Recharger les transactions
-      final currentState = state;
-      if (currentState is TransactionsLoaded) {
-        add(FilterTransactions(
-          type: currentState.typeFilter,
-          category: currentState.categoryFilter,
-          startDate: currentState.startDateFilter,
-          endDate: currentState.endDateFilter,
-          accountId: currentState.accountIdFilter,
-          searchQuery: currentState.searchQueryFilter,
-        ));
-      } else {
-        add(const LoadTransactions());
-      }
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onUpdateTransaction(
-    UpdateTransaction event,
-    Emitter<FinanceState> emit,
-  ) async {
-    try {
-      await repository.updateTransaction(event.transaction);
+      // Mettre à jour l'état
+      emit(currentState.copyWith(transactions: updatedTransactions));
       
-      // Recharger les transactions
-      final currentState = state;
-      if (currentState is TransactionsLoaded) {
-        add(FilterTransactions(
-          type: currentState.typeFilter,
-          category: currentState.categoryFilter,
-          startDate: currentState.startDateFilter,
-          endDate: currentState.endDateFilter,
-          accountId: currentState.accountIdFilter,
-          searchQuery: currentState.searchQueryFilter,
-        ));
-      } else {
-        add(const LoadTransactions());
-      }
-    } catch (e) {
-      emit(FinanceError(e.toString()));
+      // Sauvegarder les transactions
+      _saveTransactions(updatedTransactions);
     }
   }
-  
-  Future<void> _onDeleteTransaction(
-    DeleteTransaction event,
+
+  Future<void> _onInvoiceAdded(
+    FinanceInvoiceAdded event,
     Emitter<FinanceState> emit,
   ) async {
-    try {
-      await repository.deleteTransaction(event.id);
+    if (state is FinanceLoaded) {
+      final currentState = state as FinanceLoaded;
       
-      // Recharger les transactions
-      final currentState = state;
-      if (currentState is TransactionsLoaded) {
-        add(FilterTransactions(
-          type: currentState.typeFilter,
-          category: currentState.categoryFilter,
-          startDate: currentState.startDateFilter,
-          endDate: currentState.endDateFilter,
-          accountId: currentState.accountIdFilter,
-          searchQuery: currentState.searchQueryFilter,
-        ));
-      } else {
-        add(const LoadTransactions());
-      }
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onLoadAccounts(
-    LoadAccounts event,
-    Emitter<FinanceState> emit,
-  ) async {
-    emit(const FinanceLoading());
-    
-    try {
-      final accounts = await repository.getAccounts();
-      emit(AccountsLoaded(accounts));
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onAddAccount(
-    AddAccount event,
-    Emitter<FinanceState> emit,
-  ) async {
-    try {
-      await repository.addAccount(event.account);
-      add(const LoadAccounts());
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onUpdateAccount(
-    UpdateAccount event,
-    Emitter<FinanceState> emit,
-  ) async {
-    try {
-      await repository.updateAccount(event.account);
-      add(const LoadAccounts());
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onDeleteAccount(
-    DeleteAccount event,
-    Emitter<FinanceState> emit,
-  ) async {
-    try {
-      await repository.deleteAccount(event.id);
-      add(const LoadAccounts());
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onLoadFinancialSummary(
-    LoadFinancialSummary event,
-    Emitter<FinanceState> emit,
-  ) async {
-    emit(const FinanceLoading());
-    
-    try {
-      final summary = await repository.getFinancialSummary(
-        startDate: event.startDate,
-        endDate: event.endDate,
-        budgetAmount: event.budgetAmount,
+      // Calculer le montant total de la facture
+      final totalAmount = event.items.fold<double>(
+        0, 
+        (sum, item) => sum + (item.quantity * item.unitPrice)
       );
       
-      emit(FinancialSummaryLoaded(summary));
-    } catch (e) {
-      emit(FinanceError(e.toString()));
-    }
-  }
-  
-  Future<void> _onLoadFinancialTrends(
-    LoadFinancialTrends event,
-    Emitter<FinanceState> emit,
-  ) async {
-    emit(const FinanceLoading());
-    
-    try {
-      final trends = await repository.getFinancialTrends(
-        period: event.period,
-        count: event.count,
-        endDate: event.endDate,
+      // Créer la nouvelle facture
+      final newInvoice = Invoice(
+        id: _uuid.v4(),
+        invoiceNumber: event.invoiceNumber,
+        clientName: event.clientName,
+        amount: totalAmount,
+        issueDate: event.issueDate,
+        dueDate: event.dueDate,
+        status: InvoiceStatus.draft,
+        items: event.items,
       );
       
-      emit(FinancialTrendsLoaded(
-        trends: trends,
-        period: event.period,
-      ));
-    } catch (e) {
-      emit(FinanceError(e.toString()));
+      // Ajouter à la liste existante
+      final updatedInvoices = List<Invoice>.from(currentState.invoices)..add(newInvoice);
+      
+      // Mettre à jour l'état
+      emit(currentState.copyWith(invoices: updatedInvoices));
+      
+      // Sauvegarder les factures
+      _saveInvoices(updatedInvoices);
     }
   }
-  
-  Future<void> _onChangePeriod(
-    ChangePeriod event,
+
+  Future<void> _onInvoiceStatusUpdated(
+    FinanceInvoiceStatusUpdated event,
     Emitter<FinanceState> emit,
   ) async {
-    try {
-      final dateRange = event.period.getDateRange();
+    if (state is FinanceLoaded) {
+      final currentState = state as FinanceLoaded;
       
-      add(LoadFinancialSummary(
-        startDate: dateRange.$1,
-        endDate: dateRange.$2,
-      ));
+      // Trouver la facture à mettre à jour
+      final invoiceIndex = currentState.invoices.indexWhere((invoice) => invoice.id == event.invoiceId);
       
-      add(LoadFinancialTrends(
-        period: event.period,
-        count: 6, // 6 périodes précédentes
-      ));
-    } catch (e) {
-      emit(FinanceError(e.toString()));
+      if (invoiceIndex >= 0) {
+        // Créer la liste mise à jour
+        final updatedInvoices = List<Invoice>.from(currentState.invoices);
+        
+        // Mettre à jour la facture
+        final invoice = updatedInvoices[invoiceIndex];
+        updatedInvoices[invoiceIndex] = invoice.copyWith(status: event.newStatus);
+        
+        // Si la facture est marquée comme payée, créer une transaction de revenu
+        if (event.newStatus == InvoiceStatus.paid) {
+          final paymentTransaction = Transaction(
+            id: _uuid.v4(),
+            title: 'Paiement facture ${invoice.invoiceNumber}',
+            description: 'Paiement reçu pour facture ${invoice.invoiceNumber} de ${invoice.clientName}',
+            amount: invoice.amount,
+            date: DateTime.now(),
+            type: TransactionType.income,
+            category: 'Paiement de facture',
+            clientId: null,
+          );
+          
+          final updatedTransactions = List<Transaction>.from(currentState.transactions)
+            ..add(paymentTransaction);
+          
+          // Mettre à jour l'état avec les factures et transactions
+          emit(currentState.copyWith(
+            invoices: updatedInvoices,
+            transactions: updatedTransactions,
+          ));
+          
+          // Sauvegarder les transactions et factures
+          _saveTransactions(updatedTransactions);
+          _saveInvoices(updatedInvoices);
+        } else {
+          // Mettre à jour l'état avec les factures uniquement
+          emit(currentState.copyWith(invoices: updatedInvoices));
+          
+          // Sauvegarder les factures
+          _saveInvoices(updatedInvoices);
+        }
+      }
     }
+  }
+
+  List<Transaction> _loadTransactions() {
+    final transactionsJson = _preferences.getStringList(_transactionsKey) ?? [];
+    
+    if (transactionsJson.isEmpty) {
+      return [];
+    }
+    
+    return transactionsJson.map((transactionStr) {
+      final transactionMap = jsonDecode(transactionStr) as Map<String, dynamic>;
+      return Transaction(
+        id: transactionMap['id'] as String,
+        title: transactionMap['title'] as String,
+        description: transactionMap['description'] as String,
+        amount: transactionMap['amount'] as double,
+        date: DateTime.parse(transactionMap['date'] as String),
+        type: TransactionType.values[transactionMap['type'] as int],
+        category: transactionMap['category'] as String,
+        clientId: transactionMap['clientId'] as String?,
+      );
+    }).toList();
+  }
+
+  void _saveTransactions(List<Transaction> transactions) {
+    final transactionsJson = transactions.map((transaction) {
+      return jsonEncode({
+        'id': transaction.id,
+        'title': transaction.title,
+        'description': transaction.description,
+        'amount': transaction.amount,
+        'date': transaction.date.toIso8601String(),
+        'type': transaction.type.index,
+        'category': transaction.category,
+        'clientId': transaction.clientId,
+      });
+    }).toList();
+    
+    _preferences.setStringList(_transactionsKey, transactionsJson);
+  }
+
+  List<Invoice> _loadInvoices() {
+    final invoicesJson = _preferences.getStringList(_invoicesKey) ?? [];
+    
+    if (invoicesJson.isEmpty) {
+      return [];
+    }
+    
+    return invoicesJson.map((invoiceStr) {
+      final invoiceMap = jsonDecode(invoiceStr) as Map<String, dynamic>;
+      
+      final itemsJson = invoiceMap['items'] as List<dynamic>;
+      final items = itemsJson.map((itemJson) {
+        final itemMap = itemJson as Map<String, dynamic>;
+        return InvoiceItem(
+          id: itemMap['id'] as String,
+          description: itemMap['description'] as String,
+          quantity: itemMap['quantity'] as double,
+          unitPrice: itemMap['unitPrice'] as double,
+          taxRate: itemMap['taxRate'] as double?,
+        );
+      }).toList();
+      
+      return Invoice(
+        id: invoiceMap['id'] as String,
+        invoiceNumber: invoiceMap['invoiceNumber'] as String,
+        clientName: invoiceMap['clientName'] as String,
+        amount: invoiceMap['amount'] as double,
+        issueDate: DateTime.parse(invoiceMap['issueDate'] as String),
+        dueDate: DateTime.parse(invoiceMap['dueDate'] as String),
+        status: InvoiceStatus.values[invoiceMap['status'] as int],
+        items: items,
+      );
+    }).toList();
+  }
+
+  void _saveInvoices(List<Invoice> invoices) {
+    final invoicesJson = invoices.map((invoice) {
+      final itemsJson = invoice.items.map((item) {
+        return {
+          'id': item.id,
+          'description': item.description,
+          'quantity': item.quantity,
+          'unitPrice': item.unitPrice,
+          'taxRate': item.taxRate,
+        };
+      }).toList();
+      
+      return jsonEncode({
+        'id': invoice.id,
+        'invoiceNumber': invoice.invoiceNumber,
+        'clientName': invoice.clientName,
+        'amount': invoice.amount,
+        'issueDate': invoice.issueDate.toIso8601String(),
+        'dueDate': invoice.dueDate.toIso8601String(),
+        'status': invoice.status.index,
+        'items': itemsJson,
+      });
+    }).toList();
+    
+    _preferences.setStringList(_invoicesKey, invoicesJson);
+  }
+
+  void _createDemoData() {
+    // Créer des transactions de démonstration
+    final now = DateTime.now();
+    final transactions = [
+      Transaction(
+        id: _uuid.v4(),
+        title: 'Paiement Client XYZ',
+        description: 'Paiement pour services de conseil',
+        amount: 1200.00,
+        date: DateTime(now.year, now.month, now.day - 15),
+        type: TransactionType.income,
+        category: 'Services',
+      ),
+      Transaction(
+        id: _uuid.v4(),
+        title: 'Abonnement Logiciel',
+        description: 'Abonnement mensuel suite bureautique',
+        amount: 49.99,
+        date: DateTime(now.year, now.month, now.day - 12),
+        type: TransactionType.expense,
+        category: 'Abonnements',
+      ),
+      Transaction(
+        id: _uuid.v4(),
+        title: 'Paiement Client ABC',
+        description: 'Paiement pour projet de développement',
+        amount: 850.00,
+        date: DateTime(now.year, now.month, now.day - 8),
+        type: TransactionType.income,
+        category: 'Développement',
+      ),
+      Transaction(
+        id: _uuid.v4(),
+        title: 'Fournitures Bureau',
+        description: 'Achat de matériel de bureau',
+        amount: 120.50,
+        date: DateTime(now.year, now.month, now.day - 5),
+        type: TransactionType.expense,
+        category: 'Fournitures',
+      ),
+    ];
+    
+    // Créer des factures de démonstration
+    final invoices = [
+      Invoice(
+        id: _uuid.v4(),
+        invoiceNumber: 'INV-001',
+        clientName: 'Entreprise XYZ',
+        amount: 1200.00,
+        issueDate: DateTime(now.year, now.month, now.day - 15),
+        dueDate: DateTime(now.year, now.month, now.day + 15),
+        status: InvoiceStatus.paid,
+        items: [
+          InvoiceItem(
+            id: _uuid.v4(),
+            description: 'Service de conseil',
+            quantity: 8,
+            unitPrice: 150.00,
+          ),
+        ],
+      ),
+      Invoice(
+        id: _uuid.v4(),
+        invoiceNumber: 'INV-002',
+        clientName: 'Client ABC',
+        amount: 850.00,
+        issueDate: DateTime(now.year, now.month, now.day - 8),
+        dueDate: DateTime(now.year, now.month, now.day + 22),
+        status: InvoiceStatus.paid,
+        items: [
+          InvoiceItem(
+            id: _uuid.v4(),
+            description: 'Développement de fonctionnalité',
+            quantity: 1,
+            unitPrice: 850.00,
+          ),
+        ],
+      ),
+      Invoice(
+        id: _uuid.v4(),
+        invoiceNumber: 'INV-003',
+        clientName: 'Société DEF',
+        amount: 1500.00,
+        issueDate: DateTime(now.year, now.month, now.day - 3),
+        dueDate: DateTime(now.year, now.month, now.day + 27),
+        status: InvoiceStatus.sent,
+        items: [
+          InvoiceItem(
+            id: _uuid.v4(),
+            description: 'Audit et recommandations',
+            quantity: 1,
+            unitPrice: 1000.00,
+          ),
+          InvoiceItem(
+            id: _uuid.v4(),
+            description: 'Formation équipe',
+            quantity: 2,
+            unitPrice: 250.00,
+          ),
+        ],
+      ),
+      Invoice(
+        id: _uuid.v4(),
+        invoiceNumber: 'INV-004',
+        clientName: 'Client GHI',
+        amount: 750.00,
+        issueDate: DateTime(now.year, now.month, now.day - 1),
+        dueDate: DateTime(now.year, now.month, now.day + 29),
+        status: InvoiceStatus.sent,
+        items: [
+          InvoiceItem(
+            id: _uuid.v4(),
+            description: 'Consultation stratégique',
+            quantity: 5,
+            unitPrice: 150.00,
+          ),
+        ],
+      ),
+      Invoice(
+        id: _uuid.v4(),
+        invoiceNumber: 'INV-005',
+        clientName: 'Entreprise JKL',
+        amount: 1800.00,
+        issueDate: DateTime(now.year, now.month, now.day + 2),
+        dueDate: DateTime(now.year, now.month, now.day + 32),
+        status: InvoiceStatus.draft,
+        items: [
+          InvoiceItem(
+            id: _uuid.v4(),
+            description: 'Développement de site web',
+            quantity: 1,
+            unitPrice: 1800.00,
+          ),
+        ],
+      ),
+    ];
+    
+    // Sauvegarder les données
+    _saveTransactions(transactions);
+    _saveInvoices(invoices);
   }
 }

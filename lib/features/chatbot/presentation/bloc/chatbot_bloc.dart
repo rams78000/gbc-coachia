@@ -1,7 +1,8 @@
-import 'dart:async';
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:uuid/uuid.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 import '../../domain/entities/message.dart';
 
@@ -10,51 +11,24 @@ abstract class ChatbotEvent extends Equatable {
   const ChatbotEvent();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-/// Événement déclenché pour initialiser le chatbot
-class InitializeChatbot extends ChatbotEvent {
-  const InitializeChatbot();
+class ChatbotInitialized extends ChatbotEvent {
+  const ChatbotInitialized();
 }
 
-/// Événement déclenché quand l'utilisateur envoie un message
-class SendMessage extends ChatbotEvent {
+class ChatbotMessageSent extends ChatbotEvent {
   final String content;
-  final MessageType type;
 
-  const SendMessage({
-    required this.content,
-    this.type = MessageType.text,
-  });
+  const ChatbotMessageSent({required this.content});
 
   @override
-  List<Object?> get props => [content, type];
+  List<Object> get props => [content];
 }
 
-/// Événement déclenché pour charger l'historique des conversations
-class LoadConversations extends ChatbotEvent {
-  const LoadConversations();
-}
-
-/// Événement déclenché pour sélectionner une conversation
-class SelectConversation extends ChatbotEvent {
-  final String conversationId;
-
-  const SelectConversation(this.conversationId);
-
-  @override
-  List<Object?> get props => [conversationId];
-}
-
-/// Événement déclenché pour créer une nouvelle conversation
-class CreateConversation extends ChatbotEvent {
-  final String title;
-
-  const CreateConversation(this.title);
-
-  @override
-  List<Object?> get props => [title];
+class ChatbotConversationCleared extends ChatbotEvent {
+  const ChatbotConversationCleared();
 }
 
 // States
@@ -62,314 +36,217 @@ abstract class ChatbotState extends Equatable {
   const ChatbotState();
   
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-/// État initial du chatbot
 class ChatbotInitial extends ChatbotState {
   const ChatbotInitial();
 }
 
-/// État de chargement du chatbot
 class ChatbotLoading extends ChatbotState {
   const ChatbotLoading();
 }
 
-/// État quand les conversations sont chargées
-class ConversationsLoaded extends ChatbotState {
-  final List<Conversation> conversations;
-  final Conversation? currentConversation;
+class ChatbotLoaded extends ChatbotState {
+  final List<Message> messages;
+  final bool isWaitingForResponse;
 
-  const ConversationsLoaded({
-    required this.conversations,
-    this.currentConversation,
+  const ChatbotLoaded({
+    required this.messages,
+    this.isWaitingForResponse = false,
   });
 
-  @override
-  List<Object?> get props => [conversations, currentConversation];
-
-  /// Crée une copie de cet état avec les valeurs spécifiées
-  ConversationsLoaded copyWith({
-    List<Conversation>? conversations,
-    Conversation? currentConversation,
+  ChatbotLoaded copyWith({
+    List<Message>? messages,
+    bool? isWaitingForResponse,
   }) {
-    return ConversationsLoaded(
-      conversations: conversations ?? this.conversations,
-      currentConversation: currentConversation ?? this.currentConversation,
+    return ChatbotLoaded(
+      messages: messages ?? this.messages,
+      isWaitingForResponse: isWaitingForResponse ?? this.isWaitingForResponse,
     );
   }
-}
-
-/// État quand l'envoi d'un message est en cours
-class SendingMessage extends ChatbotState {
-  final Conversation conversation;
-
-  const SendingMessage(this.conversation);
 
   @override
-  List<Object?> get props => [conversation];
+  List<Object> get props => [messages, isWaitingForResponse];
 }
 
-/// État d'erreur du chatbot
 class ChatbotError extends ChatbotState {
   final String message;
 
-  const ChatbotError(this.message);
+  const ChatbotError({required this.message});
 
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message];
 }
 
-// Bloc
+// BLoC
 class ChatbotBloc extends Bloc<ChatbotEvent, ChatbotState> {
-  // Dépendances (à injecter plus tard par un système DI)
-  // final ChatRepository repository;
-  // final OpenAIService openAIService;
-  
-  final _uuid = const Uuid();
-  
-  ChatbotBloc() : super(const ChatbotInitial()) {
-    on<InitializeChatbot>(_onInitializeChatbot);
-    on<SendMessage>(_onSendMessage);
-    on<LoadConversations>(_onLoadConversations);
-    on<SelectConversation>(_onSelectConversation);
-    on<CreateConversation>(_onCreateConversation);
+  final SharedPreferences _preferences;
+  static const String _messagesKey = 'chatbot_messages';
+  final Uuid _uuid = const Uuid();
+
+  ChatbotBloc({required SharedPreferences preferences}) 
+      : _preferences = preferences,
+        super(const ChatbotInitial()) {
+    on<ChatbotInitialized>(_onInitialized);
+    on<ChatbotMessageSent>(_onMessageSent);
+    on<ChatbotConversationCleared>(_onConversationCleared);
   }
 
-  Future<void> _onInitializeChatbot(
-    InitializeChatbot event,
+  Future<void> _onInitialized(
+    ChatbotInitialized event,
     Emitter<ChatbotState> emit,
   ) async {
     emit(const ChatbotLoading());
+
     try {
-      // Dans une implémentation réelle, charger les conversations depuis un repository
-      await _onLoadConversations(const LoadConversations(), emit);
+      final messages = _loadMessages();
+      
+      if (messages.isEmpty) {
+        // Ajouter un message de bienvenue initial
+        final welcomeMessage = Message(
+          id: _uuid.v4(),
+          content: 'Bonjour ! Je suis votre assistant IA GBC CoachIA. Comment puis-je vous aider aujourd\'hui ?',
+          isUserMessage: false,
+          timestamp: DateTime.now(),
+        );
+        
+        messages.add(welcomeMessage);
+        _saveMessages(messages);
+      }
+      
+      emit(ChatbotLoaded(messages: messages));
     } catch (e) {
-      emit(ChatbotError(e.toString()));
+      emit(ChatbotError(message: 'Erreur lors du chargement des messages: $e'));
     }
   }
 
-  Future<void> _onSendMessage(
-    SendMessage event,
+  Future<void> _onMessageSent(
+    ChatbotMessageSent event,
     Emitter<ChatbotState> emit,
   ) async {
-    // Vérifier qu'il y a une conversation active
-    if (state is! ConversationsLoaded) {
-      emit(const ChatbotError('Aucune conversation active'));
-      return;
-    }
-    
-    final currentState = state as ConversationsLoaded;
-    final currentConversation = currentState.currentConversation;
-    
-    if (currentConversation == null) {
-      emit(const ChatbotError('Aucune conversation active'));
-      return;
-    }
-    
-    try {
-      // Créer le message utilisateur
-      final userMessage = Message.user(
+    if (state is ChatbotLoaded) {
+      final currentState = state as ChatbotLoaded;
+      
+      // Ajouter le message de l'utilisateur
+      final userMessage = Message(
         id: _uuid.v4(),
         content: event.content,
-        type: event.type,
+        isUserMessage: true,
+        timestamp: DateTime.now(),
       );
       
-      // Mettre à jour la conversation avec le message utilisateur
-      var updatedConversation = currentConversation.addMessage(userMessage);
+      final updatedMessages = List<Message>.from(currentState.messages)..add(userMessage);
       
-      // Mettre à jour l'état pour montrer le message de l'utilisateur
-      emit(SendingMessage(updatedConversation));
+      // Mettre à jour l'état pour montrer l'indicateur de chargement
+      emit(currentState.copyWith(
+        messages: updatedMessages,
+        isWaitingForResponse: true,
+      ));
       
-      // Simuler une réponse de l'IA (à remplacer par un appel API réel)
+      // Sauvegarder les messages
+      _saveMessages(updatedMessages);
+      
+      // Simuler une réponse du chatbot (à remplacer par une API réelle)
       await Future.delayed(const Duration(seconds: 1));
       
-      // Créer le message assistant (IA)
-      final assistantMessage = await _generateAIResponse(event.content, event.type);
+      final botResponse = _generateBotResponse(event.content);
+      final botMessage = Message(
+        id: _uuid.v4(),
+        content: botResponse,
+        isUserMessage: false,
+        timestamp: DateTime.now(),
+      );
       
-      // Mettre à jour la conversation avec le message assistant
-      updatedConversation = updatedConversation.addMessage(assistantMessage);
+      final messagesWithBotResponse = List<Message>.from(updatedMessages)..add(botMessage);
       
-      // Mettre à jour la liste des conversations
-      final updatedConversations = currentState.conversations.map((conversation) {
-        if (conversation.id == updatedConversation.id) {
-          return updatedConversation;
-        }
-        return conversation;
-      }).toList();
-      
-      // Mettre à jour l'état avec la nouvelle conversation
+      // Mettre à jour l'état avec la réponse du bot
       emit(currentState.copyWith(
-        conversations: updatedConversations,
-        currentConversation: updatedConversation,
+        messages: messagesWithBotResponse,
+        isWaitingForResponse: false,
       ));
-    } catch (e) {
-      emit(ChatbotError(e.toString()));
+      
+      // Sauvegarder les messages incluant la réponse du bot
+      _saveMessages(messagesWithBotResponse);
     }
   }
 
-  Future<void> _onLoadConversations(
-    LoadConversations event,
+  Future<void> _onConversationCleared(
+    ChatbotConversationCleared event,
     Emitter<ChatbotState> emit,
   ) async {
     emit(const ChatbotLoading());
-    try {
-      // Dans une implémentation réelle, charger les conversations depuis un repository
-      // Simulation de données pour le moment
-      final conversations = _generateSampleConversations();
-      
-      emit(ConversationsLoaded(
-        conversations: conversations,
-        currentConversation: conversations.isNotEmpty ? conversations.first : null,
-      ));
-    } catch (e) {
-      emit(ChatbotError(e.toString()));
-    }
-  }
-
-  Future<void> _onSelectConversation(
-    SelectConversation event,
-    Emitter<ChatbotState> emit,
-  ) async {
-    if (state is! ConversationsLoaded) {
-      emit(const ChatbotError('Impossible de sélectionner une conversation'));
-      return;
-    }
     
-    final currentState = state as ConversationsLoaded;
     try {
-      final selectedConversation = currentState.conversations
-          .firstWhere((conversation) => conversation.id == event.conversationId);
-      
-      emit(currentState.copyWith(
-        currentConversation: selectedConversation,
-      ));
-    } catch (e) {
-      emit(ChatbotError('Conversation introuvable: ${e.toString()}'));
-    }
-  }
-
-  Future<void> _onCreateConversation(
-    CreateConversation event,
-    Emitter<ChatbotState> emit,
-  ) async {
-    if (state is! ConversationsLoaded) {
-      await _onLoadConversations(const LoadConversations(), emit);
-    }
-    
-    if (state is! ConversationsLoaded) {
-      emit(const ChatbotError('Impossible de créer une conversation'));
-      return;
-    }
-    
-    final currentState = state as ConversationsLoaded;
-    try {
-      final newConversation = Conversation.create(
+      // Supprimer tous les messages sauf le message de bienvenue
+      final welcomeMessage = Message(
         id: _uuid.v4(),
-        title: event.title,
+        content: 'Bonjour ! Je suis votre assistant IA GBC CoachIA. Comment puis-je vous aider aujourd\'hui ?',
+        isUserMessage: false,
+        timestamp: DateTime.now(),
       );
       
-      // Ajouter un message système de bienvenue
-      final updatedConversation = newConversation.addMessage(Message.system(
-        id: _uuid.v4(),
-        content: 'Bonjour, je suis votre coach IA. Comment puis-je vous aider aujourd\'hui ?',
-      ));
+      final messages = [welcomeMessage];
+      _saveMessages(messages);
       
-      emit(currentState.copyWith(
-        conversations: [updatedConversation, ...currentState.conversations],
-        currentConversation: updatedConversation,
-      ));
+      emit(ChatbotLoaded(messages: messages));
     } catch (e) {
-      emit(ChatbotError(e.toString()));
+      emit(ChatbotError(message: 'Erreur lors de la suppression des messages: $e'));
     }
   }
 
-  // Méthode pour générer une réponse IA simulée
-  // À remplacer par un appel à l'API OpenAI dans une implémentation réelle
-  Future<Message> _generateAIResponse(String userMessage, MessageType type) async {
-    // Simulation de réponse pour le moment
-    String response;
-    MessageType responseType;
+  List<Message> _loadMessages() {
+    final messagesJson = _preferences.getStringList(_messagesKey) ?? [];
     
-    switch (type) {
-      case MessageType.text:
-        if (userMessage.toLowerCase().contains('productivité')) {
-          response = 'Pour améliorer votre productivité, je vous recommande d\'essayer la technique Pomodoro : 25 minutes de travail concentré suivies de 5 minutes de pause. Voulez-vous que je crée un planning basé sur cette technique ?';
-          responseType = MessageType.suggestion;
-        } else if (userMessage.toLowerCase().contains('finance') || 
-                  userMessage.toLowerCase().contains('revenu') ||
-                  userMessage.toLowerCase().contains('dépense')) {
-          response = 'Je peux analyser vos revenus et dépenses pour vous aider à optimiser votre gestion financière. Souhaitez-vous une analyse détaillée ?';
-          responseType = MessageType.financialAnalysis;
-        } else if (userMessage.toLowerCase().contains('document') ||
-                  userMessage.toLowerCase().contains('facture') ||
-                  userMessage.toLowerCase().contains('contrat')) {
-          response = 'Je peux vous aider à générer des documents professionnels. Quel type de document souhaitez-vous créer ?';
-          responseType = MessageType.documentGeneration;
-        } else if (userMessage.toLowerCase().contains('tâche') ||
-                  userMessage.toLowerCase().contains('rappel') ||
-                  userMessage.toLowerCase().contains('calendrier')) {
-          response = 'Je peux créer une tâche ou un événement dans votre calendrier. Quand souhaitez-vous planifier cette activité ?';
-          responseType = MessageType.taskCreation;
-        } else {
-          response = 'Je comprends votre demande. Comment puis-je vous assister davantage dans votre activité professionnelle ?';
-          responseType = MessageType.text;
-        }
-        break;
-      case MessageType.suggestion:
-        response = 'Voici quelques suggestions pour améliorer votre activité : \n\n1. Définir des objectifs SMART\n2. Déléguer les tâches moins importantes\n3. Automatiser les processus répétitifs\n\nVoulez-vous plus de détails sur l\'une de ces suggestions ?';
-        responseType = MessageType.suggestion;
-        break;
-      case MessageType.analysis:
-        response = 'D\'après l\'analyse de vos données, votre productivité est meilleure entre 9h et 11h. Je vous recommande de planifier vos tâches les plus importantes pendant cette plage horaire.';
-        responseType = MessageType.analysis;
-        break;
-      default:
-        response = 'Je suis là pour vous aider dans la gestion de votre activité professionnelle. N\'hésitez pas à me poser des questions.';
-        responseType = MessageType.text;
+    if (messagesJson.isEmpty) {
+      return [];
     }
     
-    return Message.assistant(
-      id: _uuid.v4(),
-      content: response,
-      type: responseType,
-    );
+    return messagesJson.map((messageStr) {
+      final messageMap = jsonDecode(messageStr) as Map<String, dynamic>;
+      return Message(
+        id: messageMap['id'] as String,
+        content: messageMap['content'] as String,
+        isUserMessage: messageMap['isUserMessage'] as bool,
+        timestamp: DateTime.parse(messageMap['timestamp'] as String),
+      );
+    }).toList();
   }
 
-  // Méthode pour générer des conversations d'exemple
-  List<Conversation> _generateSampleConversations() {
-    // Conversation 1
-    final conversation1 = Conversation.create(
-      id: _uuid.v4(),
-      title: 'Amélioration de la productivité',
-    ).addMessage(Message.system(
-      id: _uuid.v4(),
-      content: 'Bonjour, je suis votre coach IA. Comment puis-je vous aider aujourd\'hui ?',
-    )).addMessage(Message.user(
-      id: _uuid.v4(),
-      content: 'Comment puis-je améliorer ma productivité ?',
-    )).addMessage(Message.assistant(
-      id: _uuid.v4(),
-      content: 'Pour améliorer votre productivité, je vous recommande d\'essayer la technique Pomodoro : 25 minutes de travail concentré suivies de 5 minutes de pause. Voulez-vous que je crée un planning basé sur cette technique ?',
-      type: MessageType.suggestion,
-    ));
+  void _saveMessages(List<Message> messages) {
+    final messagesJson = messages.map((message) {
+      return jsonEncode({
+        'id': message.id,
+        'content': message.content,
+        'isUserMessage': message.isUserMessage,
+        'timestamp': message.timestamp.toIso8601String(),
+      });
+    }).toList();
     
-    // Conversation 2
-    final conversation2 = Conversation.create(
-      id: _uuid.v4(),
-      title: 'Analyse financière',
-    ).addMessage(Message.system(
-      id: _uuid.v4(),
-      content: 'Bonjour, je suis votre coach IA. Comment puis-je vous aider aujourd\'hui ?',
-    )).addMessage(Message.user(
-      id: _uuid.v4(),
-      content: 'Pouvez-vous analyser mes revenus du dernier trimestre ?',
-    )).addMessage(Message.assistant(
-      id: _uuid.v4(),
-      content: 'D\'après l\'analyse de vos données financières, vos revenus ont augmenté de 15% par rapport au trimestre précédent. Votre plus grande source de revenus provient des prestations de conseil (65%). Souhaitez-vous une analyse plus détaillée ?',
-      type: MessageType.financialAnalysis,
-    ));
+    _preferences.setStringList(_messagesKey, messagesJson);
+  }
+
+  String _generateBotResponse(String userMessage) {
+    // Simuler différentes réponses basées sur le message de l'utilisateur
+    final lowerCaseMessage = userMessage.toLowerCase();
     
-    return [conversation1, conversation2];
+    if (lowerCaseMessage.contains('bonjour') || 
+        lowerCaseMessage.contains('salut') || 
+        lowerCaseMessage.contains('hello')) {
+      return 'Bonjour ! Comment puis-je vous aider avec votre entreprise aujourd\'hui ?';
+    } else if (lowerCaseMessage.contains('facture') || 
+               lowerCaseMessage.contains('facturation')) {
+      return 'Pour créer une nouvelle facture, allez dans la section Finance et cliquez sur "Nouvelle facture". Vous pouvez y ajouter vos services, définir les conditions de paiement et l\'envoyer directement à votre client.';
+    } else if (lowerCaseMessage.contains('client') || 
+               lowerCaseMessage.contains('prospect')) {
+      return 'La gestion de la relation client est essentielle. Je vous suggère de maintenir un contact régulier avec vos clients et de noter leurs préférences dans la section Clients.';
+    } else if (lowerCaseMessage.contains('conseil') || 
+               lowerCaseMessage.contains('astuce')) {
+      return 'Voici un conseil pour les entrepreneurs : bloquez du temps dans votre calendrier pour les tâches importantes mais non urgentes comme la planification stratégique et le développement personnel.';
+    } else if (lowerCaseMessage.contains('merci')) {
+      return 'Je vous en prie ! N\'hésitez pas si vous avez d\'autres questions.';
+    } else {
+      return 'Je comprends. Pour vous aider plus efficacement, pourriez-vous me donner plus de détails sur votre question concernant votre activité professionnelle ?';
+    }
   }
 }

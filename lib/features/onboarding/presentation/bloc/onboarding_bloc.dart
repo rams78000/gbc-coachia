@@ -1,144 +1,91 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../domain/entities/onboarding_status.dart';
-import '../../domain/repositories/onboarding_repository.dart';
+// Events
+abstract class OnboardingEvent extends Equatable {
+  const OnboardingEvent();
 
-part 'onboarding_event.dart';
-part 'onboarding_state.dart';
+  @override
+  List<Object> get props => [];
+}
 
+class OnboardingCompleted extends OnboardingEvent {
+  const OnboardingCompleted();
+}
+
+class OnboardingCheckStatus extends OnboardingEvent {
+  const OnboardingCheckStatus();
+}
+
+// States
+abstract class OnboardingState extends Equatable {
+  const OnboardingState();
+  
+  @override
+  List<Object> get props => [];
+}
+
+class OnboardingInitial extends OnboardingState {
+  const OnboardingInitial();
+}
+
+class OnboardingLoading extends OnboardingState {
+  const OnboardingLoading();
+}
+
+class OnboardingRequired extends OnboardingState {
+  const OnboardingRequired();
+}
+
+class OnboardingNotRequired extends OnboardingState {
+  const OnboardingNotRequired();
+}
+
+// BLoC
 class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
-  final OnboardingRepository repository;
-
-  OnboardingBloc({required this.repository}) : super(OnboardingInitial()) {
-    on<InitializeOnboarding>(_onInitializeOnboarding);
-    on<NextStep>(_onNextStep);
-    on<PreviousStep>(_onPreviousStep);
-    on<SkipOnboarding>(_onSkipOnboarding);
-    on<CompleteOnboarding>(_onCompleteOnboarding);
-    on<ResetOnboarding>(_onResetOnboarding);
-    on<SavePreference>(_onSavePreference);
+  OnboardingBloc() : super(const OnboardingInitial()) {
+    on<OnboardingCheckStatus>(_onCheckStatus);
+    on<OnboardingCompleted>(_onOnboardingCompleted);
   }
 
-  Future<void> _onInitializeOnboarding(
-    InitializeOnboarding event,
+  static const String _onboardingCompletedKey = 'onboarding_completed';
+
+  Future<void> _onCheckStatus(
+    OnboardingCheckStatus event,
     Emitter<OnboardingState> emit,
   ) async {
-    emit(OnboardingLoading());
+    emit(const OnboardingLoading());
+    
     try {
-      final status = await repository.getOnboardingStatus();
-      if (status.isCompleted && !event.fromSettings) {
-        emit(OnboardingCompleted(status));
+      final prefs = await SharedPreferences.getInstance();
+      final isCompleted = prefs.getBool(_onboardingCompletedKey) ?? false;
+      
+      if (isCompleted) {
+        emit(const OnboardingNotRequired());
       } else {
-        emit(OnboardingInProgress(status, currentStep: status.lastStep));
+        emit(const OnboardingRequired());
       }
     } catch (e) {
-      emit(OnboardingError('Erreur lors de l\'initialisation: $e'));
+      // En cas d'erreur, toujours montrer l'onboarding pour éviter les problèmes
+      emit(const OnboardingRequired());
     }
   }
 
-  Future<void> _onNextStep(
-    NextStep event,
+  Future<void> _onOnboardingCompleted(
+    OnboardingCompleted event,
     Emitter<OnboardingState> emit,
   ) async {
-    if (state is OnboardingInProgress) {
-      final currentState = state as OnboardingInProgress;
-      final nextStep = currentState.currentStep + 1;
-      
-      // Limiter le nombre d'étapes à 5 (de 0 à 4)
-      if (nextStep > 4) {
-        return;
-      }
-      
-      try {
-        await repository.updateLastStep(nextStep);
-        final updatedStatus = currentState.status.copyWith(lastStep: nextStep);
-        emit(OnboardingInProgress(updatedStatus, currentStep: nextStep));
-      } catch (e) {
-        emit(OnboardingError('Erreur lors du passage à l\'étape suivante: $e'));
-      }
-    }
-  }
-
-  Future<void> _onPreviousStep(
-    PreviousStep event,
-    Emitter<OnboardingState> emit,
-  ) async {
-    if (state is OnboardingInProgress) {
-      final currentState = state as OnboardingInProgress;
-      final previousStep = currentState.currentStep - 1;
-      
-      // Ne pas aller en-dessous de l'étape 0
-      if (previousStep < 0) {
-        return;
-      }
-      
-      try {
-        await repository.updateLastStep(previousStep);
-        final updatedStatus = currentState.status.copyWith(lastStep: previousStep);
-        emit(OnboardingInProgress(updatedStatus, currentStep: previousStep));
-      } catch (e) {
-        emit(OnboardingError('Erreur lors du passage à l\'étape précédente: $e'));
-      }
-    }
-  }
-
-  Future<void> _onSkipOnboarding(
-    SkipOnboarding event,
-    Emitter<OnboardingState> emit,
-  ) async {
+    emit(const OnboardingLoading());
+    
     try {
-      await repository.markOnboardingComplete();
-      final status = await repository.getOnboardingStatus();
-      emit(OnboardingCompleted(status));
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_onboardingCompletedKey, true);
+      
+      emit(const OnboardingNotRequired());
     } catch (e) {
-      emit(OnboardingError('Erreur lors du saut de l\'onboarding: $e'));
-    }
-  }
-
-  Future<void> _onCompleteOnboarding(
-    CompleteOnboarding event,
-    Emitter<OnboardingState> emit,
-  ) async {
-    try {
-      await repository.markOnboardingComplete();
-      final status = await repository.getOnboardingStatus();
-      emit(OnboardingCompleted(status));
-    } catch (e) {
-      emit(OnboardingError('Erreur lors de la complétion de l\'onboarding: $e'));
-    }
-  }
-
-  Future<void> _onResetOnboarding(
-    ResetOnboarding event,
-    Emitter<OnboardingState> emit,
-  ) async {
-    try {
-      await repository.resetOnboarding();
-      final status = await repository.getOnboardingStatus();
-      emit(OnboardingInProgress(status, currentStep: 0));
-    } catch (e) {
-      emit(OnboardingError('Erreur lors de la réinitialisation: $e'));
-    }
-  }
-
-  Future<void> _onSavePreference(
-    SavePreference event,
-    Emitter<OnboardingState> emit,
-  ) async {
-    if (state is OnboardingInProgress) {
-      try {
-        await repository.saveUserPreferences(event.preferences);
-        final updatedStatus = await repository.getOnboardingStatus();
-        emit(
-          OnboardingInProgress(
-            updatedStatus,
-            currentStep: (state as OnboardingInProgress).currentStep,
-          ),
-        );
-      } catch (e) {
-        emit(OnboardingError('Erreur lors de l\'enregistrement des préférences: $e'));
-      }
+      // En cas d'erreur, on considère quand même l'onboarding comme terminé pour cette session
+      emit(const OnboardingNotRequired());
     }
   }
 }

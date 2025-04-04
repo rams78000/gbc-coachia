@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({Key? key}) : super(key: key);
@@ -11,51 +10,36 @@ class PlannerPage extends StatefulWidget {
 
 class _PlannerPageState extends State<PlannerPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  DateTime _selectedDate = DateTime.now();
-  
-  final List<Task> _tasks = [
-    Task(
-      id: '1',
-      title: 'Réunion client Dupont',
-      description: 'Présentation du nouveau projet',
-      date: DateTime.now(),
-      startTime: const TimeOfDay(hour: 10, minute: 0),
-      endTime: const TimeOfDay(hour: 11, minute: 30),
-      isCompleted: false,
-    ),
-    Task(
-      id: '2',
-      title: 'Préparation de la facture',
-      description: 'Facture mensuelle pour Martin SARL',
-      date: DateTime.now(),
-      startTime: const TimeOfDay(hour: 14, minute: 0),
-      endTime: const TimeOfDay(hour: 15, minute: 0),
-      isCompleted: true,
-    ),
-    Task(
-      id: '3',
-      title: 'Envoi des devis',
-      description: 'Finaliser et envoyer les devis en attente',
-      date: DateTime.now().add(const Duration(days: 1)),
-      startTime: const TimeOfDay(hour: 9, minute: 0),
-      endTime: const TimeOfDay(hour: 10, minute: 30),
-      isCompleted: false,
-    ),
-    Task(
-      id: '4',
-      title: 'Mise à jour du site web',
-      description: 'Ajouter les nouveaux projets et témoignages',
-      date: DateTime.now().add(const Duration(days: 2)),
-      startTime: const TimeOfDay(hour: 13, minute: 0),
-      endTime: const TimeOfDay(hour: 17, minute: 0),
-      isCompleted: false,
-    ),
-  ];
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
+  final Map<DateTime, List<Event>> _events = {};
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
+    _selectedDay = _focusedDay;
+    
+    // Initialiser des événements de test
+    final today = DateTime.now();
+    final tomorrow = DateTime(today.year, today.month, today.day + 1);
+    final dayAfterTomorrow = DateTime(today.year, today.month, today.day + 2);
+    
+    _events[today] = [
+      Event('Réunion client Entreprise ABC', '14:00 - 15:00', 'Zoom', Colors.blue),
+      Event('Finaliser proposition commerciale', '16:30 - 17:30', 'Bureau', Colors.orange),
+    ];
+    
+    _events[tomorrow] = [
+      Event('Appel fournisseur', '10:00 - 10:30', 'Téléphone', Colors.green),
+      Event('Atelier planification stratégique', '14:00 - 16:00', 'Salle de conférence', Colors.purple),
+    ];
+    
+    _events[dayAfterTomorrow] = [
+      Event('Présentation projet', '09:00 - 10:30', 'Bureaux client', Colors.red),
+    ];
   }
 
   @override
@@ -64,566 +48,779 @@ class _PlannerPageState extends State<PlannerPage> with SingleTickerProviderStat
     super.dispose();
   }
 
-  List<Task> _getTasksForSelectedDate() {
-    return _tasks.where((task) {
-      return task.date.year == _selectedDate.year &&
-          task.date.month == _selectedDate.month &&
-          task.date.day == _selectedDate.day;
-    }).toList();
-  }
-
-  void _toggleTaskCompletion(String taskId) {
-    setState(() {
-      final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
-      if (taskIndex != -1) {
-        _tasks[taskIndex] = _tasks[taskIndex].copyWith(
-          isCompleted: !_tasks[taskIndex].isCompleted,
-        );
-      }
-    });
+  List<Event> _getEventsForDay(DateTime day) {
+    final normalizedDay = DateTime(day.year, day.month, day.day);
+    return _events[normalizedDay] ?? [];
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+    final goldColor = const Color(0xFFFFD700);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Planning'),
-        backgroundColor: const Color(0xFFB87333),
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/dashboard'),
-        ),
+        title: const Text('Planification'),
+        backgroundColor: primaryColor,
+        elevation: 0,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           tabs: const [
-            Tab(text: 'Agenda'),
+            Tab(text: 'Calendrier'),
             Tab(text: 'Tâches'),
+            Tab(text: 'Objectifs'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _buildCalendarTab(),
-          _buildTasksTab(),
+          _buildCalendarTab(primaryColor, goldColor),
+          _buildTasksTab(primaryColor, goldColor),
+          _buildGoalsTab(primaryColor, goldColor),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _showAddTaskDialog();
-        },
-        backgroundColor: const Color(0xFFB87333),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        selectedItemColor: const Color(0xFFB87333),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat IA',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Planning',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insights),
-            label: 'Finances',
-          ),
-        ],
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go('/dashboard');
-              break;
-            case 1:
-              context.go('/chatbot');
-              break;
-            case 2:
-              context.go('/planner');
-              break;
-            case 3:
-              context.go('/finance');
-              break;
+          if (_tabController.index == 0) {
+            _showAddEventDialog();
+          } else if (_tabController.index == 1) {
+            _showAddTaskDialog();
+          } else {
+            _showAddGoalDialog();
           }
         },
+        backgroundColor: primaryColor,
+        child: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildCalendarTab() {
+  Widget _buildCalendarTab(Color primaryColor, Color goldColor) {
     return Column(
       children: [
-        _buildCalendarHeader(),
-        _buildCalendarGrid(),
-        _buildDailySchedule(),
+        TableCalendar(
+          firstDay: DateTime.utc(2021, 1, 1),
+          lastDay: DateTime.utc(2030, 12, 31),
+          focusedDay: _focusedDay,
+          calendarFormat: _calendarFormat,
+          selectedDayPredicate: (day) {
+            return isSameDay(_selectedDay, day);
+          },
+          eventLoader: _getEventsForDay,
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          calendarStyle: CalendarStyle(
+            markersMaxCount: 3,
+            markerDecoration: BoxDecoration(
+              color: goldColor,
+              shape: BoxShape.circle,
+            ),
+            selectedDecoration: BoxDecoration(
+              color: primaryColor,
+              shape: BoxShape.circle,
+            ),
+            todayDecoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.5),
+              shape: BoxShape.circle,
+            ),
+          ),
+          headerStyle: HeaderStyle(
+            formatButtonVisible: true,
+            titleCentered: true,
+            formatButtonDecoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            formatButtonTextStyle: TextStyle(
+              color: primaryColor,
+            ),
+          ),
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          },
+          onFormatChanged: (format) {
+            setState(() {
+              _calendarFormat = format;
+            });
+          },
+          onPageChanged: (focusedDay) {
+            _focusedDay = focusedDay;
+          },
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: _buildEventsList(_selectedDay ?? _focusedDay, primaryColor, goldColor),
+        ),
       ],
     );
   }
 
-  Widget _buildCalendarHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              setState(() {
-                _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1, 1);
-              });
-            },
-          ),
-          Text(
-            DateFormat('MMMM yyyy').format(_selectedDate),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              setState(() {
-                _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 1);
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarGrid() {
-    final daysInMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
-    final firstDayOfMonth = DateTime(_selectedDate.year, _selectedDate.month, 1);
-    final firstWeekdayOfMonth = firstDayOfMonth.weekday;
+  Widget _buildEventsList(DateTime day, Color primaryColor, Color goldColor) {
+    final events = _getEventsForDay(day);
     
-    // Adjustment for Sunday as first day of week (optional)
-    final adjustedFirstWeekday = firstWeekdayOfMonth % 7;
-    
-    final List<Widget> days = [];
-    
-    // Days of the week headers
-    const weekdays = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
-    for (var i = 0; i < 7; i++) {
-      days.add(
-        Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            weekdays[i],
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      );
-    }
-    
-    // Empty spaces for days before the first day of month
-    for (var i = 0; i < adjustedFirstWeekday; i++) {
-      days.add(Container());
-    }
-    
-    // Days of the month
-    for (var i = 1; i <= daysInMonth; i++) {
-      final dayDate = DateTime(_selectedDate.year, _selectedDate.month, i);
-      final isSelected = dayDate.year == _selectedDate.year &&
-          dayDate.month == _selectedDate.month &&
-          dayDate.day == _selectedDate.day;
-      
-      final isToday = dayDate.year == DateTime.now().year &&
-          dayDate.month == DateTime.now().month &&
-          dayDate.day == DateTime.now().day;
-      
-      final hasTasks = _tasks.any((task) {
-        return task.date.year == dayDate.year &&
-            task.date.month == dayDate.month &&
-            task.date.day == dayDate.day;
-      });
-      
-      days.add(
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedDate = dayDate;
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFB87333) : isToday ? Colors.amber.shade100 : null,
-              borderRadius: BorderRadius.circular(8),
-              border: hasTasks && !isSelected
-                  ? Border.all(color: const Color(0xFFB87333), width: 1)
-                  : null,
-            ),
-            alignment: Alignment.center,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  i.toString(),
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : null,
-                    fontWeight: isSelected || isToday ? FontWeight.bold : null,
-                  ),
-                ),
-                if (hasTasks)
-                  Container(
-                    width: 6,
-                    height: 6,
-                    margin: const EdgeInsets.only(top: 2),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : const Color(0xFFB87333),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-    
-    return Container(
-      height: 320,
-      padding: const EdgeInsets.all(8.0),
-      child: GridView.count(
-        crossAxisCount: 7,
-        physics: const NeverScrollableScrollPhysics(),
-        children: days,
-      ),
-    );
-  }
-
-  Widget _buildDailySchedule() {
-    final tasksForDay = _getTasksForSelectedDate();
-    
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
+    if (events.isEmpty) {
+      return Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Icon(
+              Icons.event_available,
+              size: 64,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 16),
             Text(
-              'Agenda pour le ${DateFormat('dd MMMM yyyy').format(_selectedDate)}',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+              'Aucun événement pour ${_formatDate(day)}',
+              style: TextStyle(
                 fontSize: 16,
+                color: Colors.grey[600],
               ),
             ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: tasksForDay.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Aucune tâche prévue pour ce jour',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: tasksForDay.length,
-                      itemBuilder: (context, index) {
-                        final task = tasksForDay[index];
-                        return _buildTaskCard(task);
-                      },
-                    ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _showAddEventDialog,
+              icon: const Icon(Icons.add),
+              label: const Text('Ajouter un événement'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
             ),
           ],
         ),
+      );
+    }
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Événements pour ${_formatDate(day)}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView.builder(
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                final event = events[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: event.color.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: event.color,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              event.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.access_time,
+                                  size: 14,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  event.time,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                const Icon(
+                                  Icons.location_on,
+                                  size: 14,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  event.location,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.more_vert),
+                        onPressed: () {
+                          // Afficher les options pour cet événement
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTasksTab() {
-    final completedTasks = _tasks.where((task) => task.isCompleted).toList();
-    final pendingTasks = _tasks.where((task) => !task.isCompleted).toList();
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+  Widget _buildTasksTab(Color primaryColor, Color goldColor) {
+    final tasks = [
+      Task(
+        'Finaliser proposition commerciale',
+        'À remettre au client Entreprise ABC',
+        DateTime(2025, 4, 15),
+        TaskPriority.high,
+        false,
+      ),
+      Task(
+        'Préparer présentation projet',
+        'Pour la réunion de mercredi',
+        DateTime(2025, 4, 10),
+        TaskPriority.medium,
+        false,
+      ),
+      Task(
+        'Appeler le fournisseur de matériel',
+        'Négocier les tarifs 2025',
+        DateTime(2025, 4, 8),
+        TaskPriority.medium,
+        true,
+      ),
+      Task(
+        'Mettre à jour site web',
+        'Ajouter les nouveaux témoignages clients',
+        DateTime(2025, 4, 20),
+        TaskPriority.low,
+        false,
+      ),
+      Task(
+        'Réviser plan marketing Q2',
+        'Inclure nouvelles cibles et canaux',
+        DateTime(2025, 4, 25),
+        TaskPriority.high,
+        false,
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildTaskStatusCard(
+                  title: 'Total',
+                  count: '5',
+                  color: primaryColor,
+                ),
+                _buildTaskStatusCard(
+                  title: 'À faire',
+                  count: '4',
+                  color: Colors.orange,
+                ),
+                _buildTaskStatusCard(
+                  title: 'Terminées',
+                  count: '1',
+                  color: Colors.green,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Tâches à faire',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView.builder(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                final task = tasks[index];
+                
+                Color priorityColor;
+                switch (task.priority) {
+                  case TaskPriority.high:
+                    priorityColor = Colors.red;
+                    break;
+                  case TaskPriority.medium:
+                    priorityColor = Colors.orange;
+                    break;
+                  case TaskPriority.low:
+                    priorityColor = Colors.green;
+                    break;
+                }
+                
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: CheckboxListTile(
+                    value: task.isCompleted,
+                    onChanged: (value) {
+                      // Mettre à jour le statut de la tâche
+                    },
+                    title: Text(
+                      task.title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                        color: task.isCompleted ? Colors.grey : Colors.black,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text(
+                          task.description,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 14,
+                              color: _isTaskOverdue(task) ? Colors.red : Colors.grey,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _formatDate(task.dueDate),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _isTaskOverdue(task) ? Colors.red : Colors.grey[600],
+                                fontWeight: _isTaskOverdue(task) ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: priorityColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                _getPriorityText(task.priority),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: priorityColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    secondary: IconButton(
+                      icon: const Icon(Icons.more_vert),
+                      onPressed: () {
+                        // Afficher les options pour cette tâche
+                      },
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    checkboxShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    activeColor: goldColor,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTaskStatusCard({
+    required String title,
+    required String count,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          count,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGoalsTab(Color primaryColor, Color goldColor) {
+    final goals = [
+      Goal(
+        'Augmenter chiffre d\'affaires',
+        'Objectif: €30,000 ce trimestre',
+        0.65,
+        DateTime(2025, 6, 30),
+      ),
+      Goal(
+        'Acquérir 5 nouveaux clients',
+        'Objectif: 5 clients dans le secteur technologique',
+        0.4,
+        DateTime(2025, 6, 30),
+      ),
+      Goal(
+        'Lancer nouveau service',
+        'Développer et commercialiser l\'offre de coaching',
+        0.25,
+        DateTime(2025, 5, 15),
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'À faire',
+            'Objectifs trimestriels',
             style: TextStyle(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 8),
-          pendingTasks.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: Text(
-                      'Aucune tâche en attente',
-                      style: TextStyle(color: Colors.grey),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView.builder(
+              itemCount: goals.length,
+              itemBuilder: (context, index) {
+                final goal = goals[index];
+                
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: primaryColor.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: pendingTasks.length,
-                  itemBuilder: (context, index) {
-                    return _buildTaskItem(pendingTasks[index]);
-                  },
-                ),
-          const SizedBox(height: 24),
-          const Text(
-            'Terminé',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              goal.title,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.more_vert),
+                            onPressed: () {
+                              // Afficher les options pour cet objectif
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        goal.description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Échéance: ${_formatDate(goal.dueDate)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Progression',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    Text(
+                                      '${(goal.progress * 100).toInt()}%',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: _getProgressColor(goal.progress),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: goal.progress,
+                                    backgroundColor: Colors.grey[200],
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      _getProgressColor(goal.progress),
+                                    ),
+                                    minHeight: 8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          OutlinedButton(
+                            onPressed: () {
+                              // Mettre à jour la progression
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: primaryColor,
+                              side: BorderSide(color: primaryColor),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                            child: const Text('Mettre à jour'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Voir les détails et les sous-tâches
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                            child: const Text('Détails'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
-          const SizedBox(height: 8),
-          completedTasks.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  child: Center(
-                    child: Text(
-                      'Aucune tâche terminée',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: completedTasks.length,
-                  itemBuilder: (context, index) {
-                    return _buildTaskItem(completedTasks[index]);
-                  },
-                ),
         ],
       ),
     );
   }
 
-  Widget _buildTaskCard(Task task) {
-    final timeFormat = DateFormat('HH:mm');
-    final startTime = task.startTime;
-    final endTime = task.endTime;
-    
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: Container(
-          width: 12,
-          decoration: BoxDecoration(
-            color: task.isCompleted ? Colors.green : const Color(0xFFB87333),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        title: Text(
-          task.title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(task.description),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')} - ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ],
-        ),
-        trailing: Checkbox(
-          value: task.isCompleted,
-          activeColor: const Color(0xFFB87333),
-          onChanged: (value) {
-            _toggleTaskCompletion(task.id);
-          },
-        ),
-      ),
-    );
+  Color _getProgressColor(double progress) {
+    if (progress < 0.3) {
+      return Colors.red;
+    } else if (progress < 0.7) {
+      return Colors.orange;
+    } else {
+      return Colors.green;
+    }
   }
 
-  Widget _buildTaskItem(Task task) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: CheckboxListTile(
-        value: task.isCompleted,
-        activeColor: const Color(0xFFB87333),
-        checkColor: Colors.white,
-        title: Text(
-          task.title,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              task.description,
-              style: TextStyle(
-                color: Colors.grey[600],
-                decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  DateFormat('dd/MM/yyyy').format(task.date),
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(width: 16),
-                const Icon(
-                  Icons.access_time,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${task.startTime.hour.toString().padLeft(2, '0')}:${task.startTime.minute.toString().padLeft(2, '0')}',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ],
-        ),
-        onChanged: (value) {
-          _toggleTaskCompletion(task.id);
-        },
-        secondary: IconButton(
-          icon: const Icon(Icons.delete_outline),
-          onPressed: () {
-            setState(() {
-              _tasks.removeWhere((t) => t.id == task.id);
-            });
-          },
-        ),
-        controlAffinity: ListTileControlAffinity.leading,
-      ),
-    );
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _getPriorityText(TaskPriority priority) {
+    switch (priority) {
+      case TaskPriority.high:
+        return 'Élevée';
+      case TaskPriority.medium:
+        return 'Moyenne';
+      case TaskPriority.low:
+        return 'Basse';
+    }
+  }
+
+  bool _isTaskOverdue(Task task) {
+    return !task.isCompleted && task.dueDate.isBefore(DateTime.now());
+  }
+
+  void _showAddEventDialog() {
+    // Implémenter le dialogue pour ajouter un événement
   }
 
   void _showAddTaskDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Nouvelle tâche'),
-          content: const Text('Fonctionnalité à implémenter'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Fermer'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFB87333),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    // Implémenter le dialogue pour ajouter une tâche
+  }
+
+  void _showAddGoalDialog() {
+    // Implémenter le dialogue pour ajouter un objectif
   }
 }
 
+class Event {
+  final String title;
+  final String time;
+  final String location;
+  final Color color;
+
+  Event(this.title, this.time, this.location, this.color);
+}
+
 class Task {
-  final String id;
   final String title;
   final String description;
-  final DateTime date;
-  final TimeOfDay startTime;
-  final TimeOfDay endTime;
+  final DateTime dueDate;
+  final TaskPriority priority;
   final bool isCompleted;
 
-  Task({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.date,
-    required this.startTime,
-    required this.endTime,
-    required this.isCompleted,
-  });
+  Task(this.title, this.description, this.dueDate, this.priority, this.isCompleted);
+}
 
-  Task copyWith({
-    String? id,
-    String? title,
-    String? description,
-    DateTime? date,
-    TimeOfDay? startTime,
-    TimeOfDay? endTime,
-    bool? isCompleted,
-  }) {
-    return Task(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      date: date ?? this.date,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      isCompleted: isCompleted ?? this.isCompleted,
-    );
-  }
+enum TaskPriority {
+  high,
+  medium,
+  low,
+}
+
+class Goal {
+  final String title;
+  final String description;
+  final double progress;
+  final DateTime dueDate;
+
+  Goal(this.title, this.description, this.progress, this.dueDate);
 }

@@ -52,6 +52,10 @@ class FinancialSummaryLoaded extends FinanceState {
   final double balance;
   final DateTime? startDate;
   final DateTime? endDate;
+  final List<FinancialSummary>? summaries;
+  final Map<TransactionCategory, double>? expensesByCategory;
+  final Map<TransactionCategory, double>? incomesByCategory;
+  final FinancialPeriod selectedPeriod;
 
   const FinancialSummaryLoaded({
     required this.totalIncome,
@@ -59,6 +63,10 @@ class FinancialSummaryLoaded extends FinanceState {
     required this.balance,
     this.startDate,
     this.endDate,
+    this.summaries,
+    this.expensesByCategory,
+    this.incomesByCategory,
+    this.selectedPeriod = FinancialPeriod.monthly,
   });
 
   @override
@@ -68,7 +76,36 @@ class FinancialSummaryLoaded extends FinanceState {
     balance,
     startDate,
     endDate,
+    summaries,
+    expensesByCategory,
+    incomesByCategory,
+    selectedPeriod,
   ];
+  
+  /// Crée une copie de l'état avec des propriétés modifiées
+  FinancialSummaryLoaded copyWith({
+    double? totalIncome,
+    double? totalExpenses,
+    double? balance,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<FinancialSummary>? summaries,
+    Map<TransactionCategory, double>? expensesByCategory,
+    Map<TransactionCategory, double>? incomesByCategory,
+    FinancialPeriod? selectedPeriod,
+  }) {
+    return FinancialSummaryLoaded(
+      totalIncome: totalIncome ?? this.totalIncome,
+      totalExpenses: totalExpenses ?? this.totalExpenses,
+      balance: balance ?? this.balance,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      summaries: summaries ?? this.summaries,
+      expensesByCategory: expensesByCategory ?? this.expensesByCategory,
+      incomesByCategory: incomesByCategory ?? this.incomesByCategory,
+      selectedPeriod: selectedPeriod ?? this.selectedPeriod,
+    );
+  }
 }
 
 class FinancialSummaryError extends FinanceState {

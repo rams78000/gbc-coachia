@@ -61,12 +61,38 @@ class DeleteTransaction extends FinanceEvent {
 class CalculateFinancialSummary extends FinanceEvent {
   final DateTime? startDate;
   final DateTime? endDate;
+  final FinancialPeriod period;
+  final bool generateHistoricalData;
 
   const CalculateFinancialSummary({
     this.startDate,
     this.endDate,
+    this.period = FinancialPeriod.monthly,
+    this.generateHistoricalData = true,
   });
 
   @override
-  List<Object?> get props => [startDate, endDate];
+  List<Object?> get props => [startDate, endDate, period, generateHistoricalData];
+}
+
+class ChangePeriodView extends FinanceEvent {
+  final FinancialPeriod period;
+  
+  const ChangePeriodView(this.period);
+  
+  @override
+  List<Object> get props => [period];
+}
+
+class FilterTransactionsByCategory extends FinanceEvent {
+  final TransactionCategory category;
+  final TransactionType? type;
+  
+  const FilterTransactionsByCategory({
+    required this.category,
+    this.type,
+  });
+  
+  @override
+  List<Object?> get props => [category, type];
 }
